@@ -56,6 +56,9 @@ class CucumberTest(CliTestCase):
             del c['created_at']
 
         expected = self.load_json_from_file(self.test_files_dir.joinpath('record_test_json_result.json'))
+        f = open('sample.json', 'a')
+        f.write(gzip.decompress(responses.calls[2].request.body).decode())
+        f.close()
         self.assert_json_orderless_equal(expected, payload)
 
     def test_create_file_candidate_list(self):
