@@ -172,8 +172,5 @@
     }
   ],
   "testRunner": "go-test",
-  "group": "",
-  "noBuild": false,
-  "testSuite": "",
-  "flavors": {}
+  "group": ""
 }
