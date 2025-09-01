@@ -547,7 +547,7 @@ def subset(
                     "Your model is currently in training", err=True)
 
             typer.echo(
-                f"Launchable created subset {subset_id} for build {build_name} "
+                f"Smart Tests created subset {subset_id} for build {build_name} "
                 f"(test session {test_session_id}) in workspace {org}/{workspace}",
                 err=True,
             )
@@ -560,7 +560,7 @@ def subset(
             typer.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"), err=True)
 
             typer.echo(
-                f"\nRun `launchable inspect subset --subset-id {subset_id}` to view full subset details",
+                f"\nRun `smart-tests inspect subset --subset-id {subset_id}` to view full subset details",
                 err=True)
 
     ctx.obj = Optimize(app=app)
