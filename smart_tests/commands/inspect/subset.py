@@ -7,7 +7,7 @@ from typing import Annotated, List
 import typer
 from tabulate import tabulate
 
-from ...utils.launchable_client import LaunchableClient
+from ...utils.smart_tests_client import SmartTestsClient
 
 
 class SubsetResult (object):
@@ -112,7 +112,7 @@ def subset(
 
     subset = []
     rest = []
-    client = LaunchableClient(app=app)
+    client = SmartTestsClient(app=app)
     try:
         res = client.request("get", f"subset/{subset_id}")
 

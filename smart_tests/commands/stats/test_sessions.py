@@ -2,7 +2,7 @@ from typing import Annotated, Any, Dict, List
 
 import typer
 
-from ...utils.launchable_client import LaunchableClient
+from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_key_value
 
 app = typer.Typer(name="test-sessions", help="View test session statistics")
@@ -34,7 +34,7 @@ def test_sessions(
     else:
         params.pop('flavor', None)
 
-    client = LaunchableClient(app=app)
+    client = SmartTestsClient(app=app)
     try:
         res = client.request('get', '/stats/test-sessions', params=params)
         res.raise_for_status()

@@ -12,7 +12,7 @@ from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ..utils.authentication import get_org_workspace
 from ..utils.java import get_java_command
-from ..utils.launchable_client import LaunchableClient
+from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import emoji
 from ..version import __version__ as version
 
@@ -70,7 +70,7 @@ def verify(ctx: typer.Context):
 
     org, workspace = get_org_workspace()
     tracking_client = TrackingClient(Command.VERIFY, app=app_instance)
-    client = LaunchableClient(tracking_client=tracking_client, app=app_instance)
+    client = SmartTestsClient(tracking_client=tracking_client, app=app_instance)
     java = get_java_command()
 
     # Print the system information first so that we can get them even if there's

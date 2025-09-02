@@ -11,7 +11,7 @@ from smart_tests.utils.fail_fast_mode import set_fail_fast_mode
 from smart_tests.utils.link import LinkKind, capture_link
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
-from ...utils.launchable_client import LaunchableClient
+from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.no_build import NO_BUILD_BUILD_NAME
 from ...utils.typer_types import validate_datetime_with_tz
 
@@ -117,7 +117,7 @@ def session(
     assert build_name is not None
 
     tracking_client = TrackingClient(Command.RECORD_SESSION, app=app)
-    client = LaunchableClient(app=app, tracking_client=tracking_client)
+    client = SmartTestsClient(app=app, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     sub_path = f"builds/{build_name}/test_session_names/{session}"
@@ -202,7 +202,7 @@ def session(
 
 
 def add_session_name(
-    client: LaunchableClient,
+    client: SmartTestsClient,
     build_name: str,
     session_id: str,
     session_name: str,

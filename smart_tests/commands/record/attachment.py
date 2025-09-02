@@ -2,7 +2,7 @@ from typing import Annotated, List
 
 import typer
 
-from ...utils.launchable_client import LaunchableClient
+from ...utils.smart_tests_client import SmartTestsClient
 from ..helper import get_session_id
 
 app = typer.Typer(name="attachment", help="Record attachment information")
@@ -28,7 +28,7 @@ def attachment(
     )] = False,
 ):
     app = ctx.obj
-    client = LaunchableClient(app=app)
+    client = SmartTestsClient(app=app)
     try:
         session_id = get_session_id(session, build, no_build, client)
 
