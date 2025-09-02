@@ -6,7 +6,7 @@ name: Test
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, smart-tests ]
     paths-ignore:
       - 'WORKSPACE'
       - 'src/**'
