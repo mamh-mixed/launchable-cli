@@ -141,6 +141,7 @@ def subset(
 
     try:
         test_session = get_session(session, client)
+        build_name = test_session.build_name
         session_id = test_session.id
         is_observation = test_session.observation_mode
     except ValueError as e:
@@ -151,7 +152,7 @@ def subset(
         else:
             # not to block pipeline, parse session and use it
             client.print_exception_and_recover(e, "Warning: failed to check test session")
-            _, session_id = parse_session(session)
+            build_name, session_id = parse_session(session)
 
     if is_get_tests_from_guess and is_get_tests_from_previous_sessions:
         print_error_and_die(
@@ -461,7 +462,6 @@ def subset(
             if "subset" not in summary.keys() or "rest" not in summary.keys():
                 return
 
-            build_name, test_session_id = parse_session(session_id)
             org, workspace = get_org_workspace()
 
             header = ["", "Candidates",
@@ -496,7 +496,7 @@ def subset(
                 "Smart Tests created subset {} for build {} (test session {}) in workspace {}/{}".format(
                     subset_result.subset_id,
                     build_name,
-                    test_session_id,
+                    session_id,
                     org, workspace,
                 ), err=True,
             )
