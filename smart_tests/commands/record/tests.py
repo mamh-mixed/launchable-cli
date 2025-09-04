@@ -23,7 +23,7 @@ from ...utils.commands import Command
 from ...utils.exceptions import InvalidJUnitXMLException
 from ...utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                      set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
-from ...utils.launchable_client import LaunchableClient
+from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.logger import Logger
 from ...utils.no_build import NO_BUILD_BUILD_NAME, NO_BUILD_TEST_SESSION_ID
 from ..helper import get_session_id, parse_session
@@ -109,7 +109,7 @@ def tests_main(
     test_runner = getattr(ctx, 'test_runner', None)
 
     tracking_client = TrackingClient(Command.RECORD_TESTS, app=ctx.obj)
-    client = LaunchableClient(test_runner=test_runner, app=ctx.obj, tracking_client=tracking_client)
+    client = SmartTestsClient(test_runner=test_runner, app=ctx.obj, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     fail_fast_mode_validate(FailFastModeValidateParams(
@@ -127,7 +127,7 @@ def tests_main(
 
     app_instance = ctx.obj
     tracking_client = TrackingClient(Command.RECORD_TESTS, app=app_instance)
-    client = LaunchableClient(test_runner=test_runner, app=app_instance, tracking_client=tracking_client)
+    client = SmartTestsClient(test_runner=test_runner, app=app_instance, tracking_client=tracking_client)
 
     file_path_normalizer = FilePathNormalizer(
         str(base_path) if base_path else None,
@@ -533,7 +533,7 @@ def tests_main(
 INVALID_TIMESTAMP = datetime.datetime.fromtimestamp(0)
 
 
-def get_record_start_at(session: str, client: LaunchableClient):
+def get_record_start_at(session: str, client: SmartTestsClient):
     """
     Determine the baseline timestamp to be used for up-to-date checks of report files.
     Only files newer than this timestamp will be collected.
@@ -572,7 +572,7 @@ def parse_launchable_timeformat(t: str) -> datetime.datetime:
         return INVALID_TIMESTAMP
 
 
-def get_env_values(client: LaunchableClient) -> Dict[str, str]:
+def get_env_values(client: SmartTestsClient) -> Dict[str, str]:
     sub_path = "slack/notification/key/list"
     res = client.request("get", sub_path=sub_path)
 

@@ -13,7 +13,7 @@ from ...utils import subprocess
 from ...utils.authentication import get_org_workspace
 from ...utils.commands import Command
 from ...utils.fail_fast_mode import set_fail_fast_mode, warn_and_exit_if_fail_fast_mode
-from ...utils.launchable_client import LaunchableClient
+from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_datetime_with_tz, validate_key_value, validate_past_datetime
 from .commit import commit
 
@@ -83,7 +83,7 @@ def build(
         parsed_timestamp = validate_past_datetime(validate_datetime_with_tz(timestamp))
 
     tracking_client = TrackingClient(Command.RECORD_BUILD, app=app)
-    client = LaunchableClient(app=app, tracking_client=tracking_client)
+    client = SmartTestsClient(app=app, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     if "/" in build_name or "%2f" in build_name.lower():

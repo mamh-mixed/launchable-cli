@@ -22,7 +22,7 @@ from ..utils.dynamic_commands import DynamicCommandBuilder, extract_callback_opt
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
-from ..utils.launchable_client import LaunchableClient
+from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import Duration, Percentage, ignorable_error, parse_duration, parse_percentage
 from .helper import get_session_id, parse_session
 from .test_path_writer import TestPathWriter
@@ -135,7 +135,7 @@ def subset(
     prioritized_tests_mapping_file = prioritized_tests_mapping
 
     tracking_client = TrackingClient(Command.SUBSET, app=app)
-    client = LaunchableClient(app=app, tracking_client=tracking_client)
+    client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
     set_fail_fast_mode(client.is_fail_fast_mode())
     fail_fast_mode_validate(FailFastModeValidateParams(
@@ -182,7 +182,7 @@ def subset(
     session_id = None
 
     try:
-        client = LaunchableClient(test_runner=getattr(ctx, 'test_runner', None), app=app, tracking_client=tracking_client)
+        client = SmartTestsClient(test_runner=getattr(ctx, 'test_runner', None), app=app, tracking_client=tracking_client)
         session_id = get_session_id(session, build_name, is_no_build, client)
     except typer.BadParameter as e:
         print_error_and_die(str(e), Tracking.ErrorEvent.USER_ERROR)
@@ -200,7 +200,7 @@ def subset(
     if is_non_blocking:
         if (not is_observation) and session_id:
             try:
-                client = LaunchableClient(
+                client = SmartTestsClient(
                     app=app,
                     tracking_client=tracking_client)
                 res = client.request("get", session_id)
@@ -557,7 +557,7 @@ def subset(
     ctx.obj = Optimize(app=app)
 
 
-def subset_request(client: LaunchableClient, timeout: tuple[int, int], payload: dict[str, Any]):
+def subset_request(client: SmartTestsClient, timeout: tuple[int, int], payload: dict[str, Any]):
     return client.request("post", "subset", timeout=timeout, payload=payload, compress=True)
 
 

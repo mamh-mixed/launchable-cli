@@ -6,10 +6,10 @@ from smart_tests.utils.no_build import NO_BUILD_BUILD_NAME
 from smart_tests.utils.tracking import TrackingClient
 
 from ..app import Application
-from ..utils.launchable_client import LaunchableClient
+from ..utils.smart_tests_client import SmartTestsClient
 
 
-def get_session_id(session: str, build_name: str | None, is_no_build: bool, client: LaunchableClient) -> str:
+def get_session_id(session: str, build_name: str | None, is_no_build: bool, client: SmartTestsClient) -> str:
     """Get session ID using session name and build configuration.
 
     Args:
@@ -64,7 +64,7 @@ def _check_observation_mode_status(session: str, is_observation: bool,
     if not is_observation:
         return
 
-    client = LaunchableClient(tracking_client=tracking_client, app=app)
+    client = SmartTestsClient(tracking_client=tracking_client, app=app)
     res = client.request("get", session)
 
     # only check when the status code is 200 not to stop the command

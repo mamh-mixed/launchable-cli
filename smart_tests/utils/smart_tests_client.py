@@ -13,7 +13,7 @@ from .authentication import get_org_workspace
 from .env_keys import REPORT_ERROR_KEY
 
 
-class LaunchableClient:
+class SmartTestsClient:
     def __init__(self, tracking_client: TrackingClient | None = None, base_url: str = "", session: Session | None = None,
                  test_runner: str | None = "", app: Application | None = None):
         self.http_client = _HttpClient(

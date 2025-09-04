@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 import typer
 
-from smart_tests.utils.launchable_client import LaunchableClient
+from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ...app import Application
@@ -52,7 +52,7 @@ def commit(
         raise typer.Exit(1)
 
     tracking_client = TrackingClient(Command.COMMIT, app=ctx.obj)
-    client = LaunchableClient(tracking_client=tracking_client, app=ctx.obj)
+    client = SmartTestsClient(tracking_client=tracking_client, app=ctx.obj)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     if import_git_log_output:

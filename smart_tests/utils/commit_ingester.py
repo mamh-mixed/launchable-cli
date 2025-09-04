@@ -4,7 +4,7 @@ from typing import Dict, List
 
 from ..app import Application
 from .git_log_parser import GitCommit
-from .launchable_client import LaunchableClient
+from .smart_tests_client import SmartTestsClient
 
 
 def _sha256(s: str) -> str:
@@ -54,6 +54,6 @@ def upload_commits(commits: List[GitCommit], app: Application):
         'commits': [_convert_git_commit(commit) for commit in commits]
     }
 
-    client = LaunchableClient(app=app)
+    client = SmartTestsClient(app=app)
     res = client.request("post", "commits/collect", payload=payload)
     res.raise_for_status()
