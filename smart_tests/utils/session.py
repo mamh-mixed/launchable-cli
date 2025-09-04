@@ -1,10 +1,15 @@
 # Utilities for TestSession.
 # Named `session.py` to avoid confusion with test files.
 
+import sys
 from dataclasses import dataclass
 from typing import Tuple
 
+import typer
+from requests import HTTPError
+
 from smart_tests.utils.smart_tests_client import SmartTestsClient
+from smart_tests.utils.tracking import Tracking
 
 
 @dataclass
@@ -21,7 +26,18 @@ def get_session(session: str, client: SmartTestsClient) -> TestSession:
 
     subpath = f"builds/{build_name}/test_sessions/{test_session_id}"
     res = client.request("get", subpath)
-    res.raise_for_status()
+
+    try:
+        res.raise_for_status()
+    except HTTPError as e:
+        if e.response.status_code == 404:
+            # TODO(Konboi): move subset.print_error_and_die to util and use it
+            msg = f"Session {session} was not found. Make sure to run `smart-tests record session --build {build_name}` before you run this command"  # noqa E501
+            typer.secho(msg, fg=typer.colors.RED, err=True)
+            if client.tracking_client:
+                client.tracking_client.send_error_event(event_name=Tracking.ErrorEvent.USER_ERROR, stack_trace=msg)
+            sys.exit(1)
+        raise
 
     test_session = res.json()
 
