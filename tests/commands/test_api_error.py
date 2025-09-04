@@ -182,12 +182,6 @@ class APIErrorTest(CliTestCase):
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_session(self):
         build = "internal_server_error"
-        # Mock session name check
-        responses.add(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{build}/test_session_names/{self.session_name}",
-            status=404)
         responses.add(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/builds/{build}/test_sessions",
@@ -197,18 +191,11 @@ class APIErrorTest(CliTestCase):
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
 
-        result = self.cli("record", "session", "--build", build, "--session", self.session_name, "--test-suite", "test-suite")
+        result = self.cli("record", "session", "--build", build, "--test-suite", "test-suite")
         self.assert_success(result)
-        # Since HTTPError is occurred outside of LaunchableClient, the count is 2 (one for GET check, one for POST).
-        self.assert_tracking_count(tracking=tracking, count=2)
+        self.assert_tracking_count(tracking=tracking, count=1)
 
         build = "not_found"
-        # Mock session name check
-        responses.add(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{build}/test_session_names/{self.session_name}",
-            status=404)
         responses.add(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/builds/{build}/test_sessions",
@@ -218,34 +205,21 @@ class APIErrorTest(CliTestCase):
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
 
-        result = self.cli("record", "session", "--build", build, "--session", self.session_name, "--test-suite", "test-suite")
+        result = self.cli("record", "session", "--build", build, "--test-suite", "test-suite")
         self.assert_exit_code(result, 1)
         self.assert_tracking_count(tracking=tracking, count=1)
 
-        # Mock session name check with ReadTimeout error
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            body=ReadTimeout("error")
-        )
         tracking = responses.add(
             responses.POST,
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
 
         result = self.cli(
-            "record",
-            "session",
-            "--build",
-            self.build_name,
-            "--session",
-            self.session_name,
-            "--test-suite",
-            "test-suite")
+            "record", "session", "--build", self.build_name,
+            "--test-suite", "test-suite")
         self.assert_success(result)
         # Since Timeout error is caught inside of LaunchableClient, the tracking event is sent twice.
-        self.assert_tracking_count(tracking=tracking, count=2)
+        self.assert_tracking_count(tracking=tracking, count=0)
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})

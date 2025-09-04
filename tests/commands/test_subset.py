@@ -646,7 +646,6 @@ class SubsetTest(CliTestCase):
                 'isObservation': False,
             },
             status=200)
-
         responses.replace(
             responses.GET,
             "{}/intake/organizations/{}/workspaces/{}/state".format(
@@ -673,17 +672,13 @@ class SubsetTest(CliTestCase):
         )
 
         result = self.cli(
-            "subset",
-            "file",
-            "--session",
-            self.session_name,
+            "subset", "file", "--session", self.session_name,
             "--build",
             self.build_name,
             "--get-tests-from-guess",
         )
 
         self.assert_success(result)
-
         """
         1. request to  /state
         2. request to /subset with test paths that are collected from auto collection
