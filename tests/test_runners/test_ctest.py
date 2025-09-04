@@ -13,17 +13,6 @@ class CTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_multiple_files(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -47,7 +36,7 @@ class CTestTest(CliTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             # Use a non-existing dir to check it creates a dir.
             output_dir = os.path.join(tempdir, 'subdir')
-            result = self.cli('subset', 'ctest', '--session', self.session_name, '--build', self.build_name, '--target', '10%',
+            result = self.cli('subset', 'ctest', '--session', self.session, '--target', '10%',
                               '--output-regex-files',
                               '--output-regex-files-dir=' + output_dir,
                               '--output-regex-files-size=32',
@@ -81,18 +70,7 @@ class CTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_without_session(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
-        result = self.cli('subset', 'ctest', '--session', self.session_name, '--build', self.build_name, '--target', '10%',
+        result = self.cli('subset', 'ctest', '--session', self.session, '--target', '10%',
                           str(self.test_files_dir.joinpath("ctest_list.json")))
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')
@@ -100,18 +78,6 @@ class CTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
-        result = self.cli('record', 'test', 'ctest', '--session', self.session_name, '--build',
-                          self.build_name, str(self.test_files_dir) + "/Testing/**/Test.xml")
+        result = self.cli('record', 'test', 'ctest', '--session', self.session, str(self.test_files_dir) + "/Testing/**/Test.xml")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')

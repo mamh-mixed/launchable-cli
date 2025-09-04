@@ -48,7 +48,7 @@ class PluginTest(CliTestCase):
         """
         plugin_dir = Path(__file__).parent.joinpath('plugins').resolve()
         result = self.cli('--plugins', str(plugin_dir), 'record', 'test', 'foo',
-                          '--session', '123', '--build', 'dummy', 'alpha', 'bravo', 'charlie')
+                          '--session', self.session, 'alpha', 'bravo', 'charlie')
         self.assertTrue("foo:alpha" in result.stdout, result.stdout)
         self.assertTrue("foo:bravo" in result.stdout, result.stdout)
         self.assertTrue("foo:charlie" in result.stdout, result.stdout)

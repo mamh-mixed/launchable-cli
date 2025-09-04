@@ -130,7 +130,7 @@ def tests_main(
         test_session_id = test_session.id
         build_name = test_session.build_name
     except ValueError as e:
-        print_error_and_die(msg=str(e), event=Tracking.ErrorEvent.USER_ERROR)
+        print_error_and_die(msg=str(e), event=Tracking.ErrorEvent.USER_ERROR, tracking_client=tracking_client)
     except Exception as e:
         if os.getenv(REPORT_ERROR_KEY):
             raise e
