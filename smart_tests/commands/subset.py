@@ -61,16 +61,18 @@ def subset(
     goal_spec: Annotated[str | None, typer.Option(
         help="subsetting by programmatic goal definition"
     )] = None,
-    base: Annotated[str | None, typer.Option(
+    base_path: Annotated[str | None, typer.Option(
+        '--base',
         help="(Advanced) base directory to make test names portable",
         metavar="DIR"
     )] = None,
     rest: Annotated[str | None, typer.Option(
         help="Output the subset remainder to a file, e.g. `--rest=remainder.txt`"
     )] = None,
-    split: Annotated[bool, typer.Option(
-        help="split"
-    )] = False,
+    # TODO(Konboi): omit from the smart-tests command initial release
+    # split: Annotated[bool, typer.Option(
+    #        help="split"
+    # )] = False,
     no_base_path_inference: Annotated[bool, typer.Option(
         "--no-base-path-inference",
         help="Do not guess the base path to relativize the test file paths. "
@@ -84,18 +86,19 @@ def subset(
         "--ignore-new-tests",
         help="Ignore tests that were added recently. NOTICE: this option will ignore tests that you added just now as well"
     )] = False,
-    observation: Annotated[bool, typer.Option(
+    is_observation: Annotated[bool, typer.Option(
+        '--observation',
         help="enable observation mode"
     )] = False,
-    get_tests_from_previous_sessions: Annotated[bool, typer.Option(
+    is_get_tests_from_previous_sessions: Annotated[bool, typer.Option(
         "--get-tests-from-previous-sessions",
         help="get subset list from previous full tests"
     )] = False,
-    output_exclusion_rules: Annotated[bool, typer.Option(
+    is_output_exclusion_rules: Annotated[bool, typer.Option(
         "--output-exclusion-rules",
         help="outputs the exclude test list. Switch the subset and rest."
     )] = False,
-    non_blocking: Annotated[bool, typer.Option(
+    is_non_blocking: Annotated[bool, typer.Option(
         "--non-blocking",
         help="Do not wait for subset requests in observation mode.",
         hidden=True
@@ -104,15 +107,11 @@ def subset(
         help="Ignore flaky tests above the value set by this option. You can confirm flaky scores in WebApp",
         min=0.0, max=1.0
     )] = None,
-    no_build: Annotated[bool, typer.Option(
-        "--no-build",
-        help="If you want to only send test reports, please use this option"
-    )] = False,
     prioritize_tests_failed_within_hours: Annotated[int | None, typer.Option(
         help="Prioritize tests that failed within the specified hours; maximum 720 hours (= 24 hours * 30 days)",
         min=0, max=24 * 30
     )] = None,
-    prioritized_tests_mapping: Annotated[typer.FileText | None, typer.Option(
+    prioritized_tests_mapping_file: Annotated[typer.FileText | None, typer.Option(
         "--prioritized-tests-mapping",
         help="Prioritize tests based on test mapping file",
         mode="r"
@@ -123,17 +122,6 @@ def subset(
     )] = False
 ):
     app = ctx.obj
-
-    # Map parameter names to match original function
-    base_path = base
-    build_name = build
-    is_observation = observation
-    is_get_tests_from_previous_sessions = get_tests_from_previous_sessions
-    is_output_exclusion_rules = output_exclusion_rules
-    is_non_blocking = non_blocking
-    is_no_build = no_build
-    prioritized_tests_mapping_file = prioritized_tests_mapping
-
     tracking_client = TrackingClient(Command.SUBSET, app=app)
     client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
