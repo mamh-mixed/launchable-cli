@@ -67,6 +67,8 @@ def session(
     )] = None,
 ):
 
+    # TODO(Konboi): adopt v1's util.click.KEY_VALUE way
+
     # Convert default values for lists
     if flavor is None:
         flavor = []
