@@ -34,7 +34,7 @@ def get_session(session: str, client: SmartTestsClient) -> TestSession:
     )
 
 
-def parse_session(session: str) -> Tuple[str, str]:
+def parse_session(session: str) -> Tuple[str, int]:
     """Parse session to extract build name and test session id.
 
     Args:
@@ -49,7 +49,7 @@ def parse_session(session: str) -> Tuple[str, str]:
     import re
     match = re.match(r"builds/([^/]+)/test_sessions/(.+)", session)
     if match:
-        return match.group(1), match.group(2)
+        return match.group(1), int(match.group(2))
     else:
         raise ValueError(
             f"Invalid session ID format: {session}. Expected format: builds/{{build_name}}/test_sessions/{{test_session_id}}")

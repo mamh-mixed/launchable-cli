@@ -2,8 +2,9 @@ from typing import Annotated, List
 
 import typer
 
+from smart_tests.utils.session import get_session
+
 from ...utils.smart_tests_client import SmartTestsClient
-from ..helper import get_session_id
 
 app = typer.Typer(name="attachment", help="Record attachment information")
 
@@ -30,7 +31,8 @@ def attachment(
     app = ctx.obj
     client = SmartTestsClient(app=app)
     try:
-        session_id = get_session_id(session, build, no_build, client)
+        test_session = get_session(session, client)
+        session_id = test_session.id
 
         for a in attachments:
             typer.echo(f"Sending {a}")

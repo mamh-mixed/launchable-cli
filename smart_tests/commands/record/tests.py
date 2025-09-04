@@ -16,6 +16,7 @@ from tabulate import tabulate
 
 from smart_tests.utils.authentication import ensure_org_workspace
 from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
+from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ...testpath import FilePathNormalizer, TestPathComponent, unparse_test_path
@@ -23,10 +24,9 @@ from ...utils.commands import Command
 from ...utils.exceptions import InvalidJUnitXMLException
 from ...utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                      set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
-from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.logger import Logger
 from ...utils.no_build import NO_BUILD_BUILD_NAME, NO_BUILD_TEST_SESSION_ID
-from ..helper import get_session_id, parse_session
+from ...utils.smart_tests_client import SmartTestsClient
 from .case_event import CaseEvent, CaseEventType
 
 GROUP_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
@@ -140,11 +140,11 @@ def tests_main(
         is_no_build = False
 
     try:
-        session_id = get_session_id(session, build_name, is_no_build, client)
-        record_start_at = get_record_start_at(session_id, client)
+        test_session = get_session(session, client)
+        record_start_at = get_record_start_at(test_session.id, client)
 
         # session_id is now a unique string ID
-        test_session_id = session_id
+        test_session_id = test_session.id
     except Exception as e:
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
@@ -296,7 +296,7 @@ def tests_main(
             self.is_allow_test_before_build = is_allow_test_before_build
             self.build_name = build_name
             self.test_session_id = test_session_id
-            self.session = session_id
+            self.session = session
             self.is_no_build = is_no_build
             self.metadata_builder = CaseEvent.default_data_builder()
 
