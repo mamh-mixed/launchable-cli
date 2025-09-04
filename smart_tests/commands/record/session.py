@@ -148,7 +148,7 @@ def session(
             build_name = res.json().get("buildNumber", "")
             assert build_name is not None
 
-        typer.echo(f"{sub_path}/{session_id}")
+        typer.echo(f"{sub_path}/{session_id}", nl=False)
 
     except Exception as e:
         tracking_client.send_error_event(
