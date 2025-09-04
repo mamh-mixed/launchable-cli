@@ -1,6 +1,7 @@
 # Utilities for TestSession.
 # Named `session.py` to avoid confusion with test files.
 
+import re
 import sys
 from dataclasses import dataclass
 from typing import Tuple
@@ -62,8 +63,8 @@ def parse_session(session: str) -> Tuple[str, int]:
     Raises:
         ValueError: If session_id format is invalid
     """
-    import re
     match = re.match(r"builds/([^/]+)/test_sessions/(.+)", session)
+
     if match:
         return match.group(1), int(match.group(2))
     else:
