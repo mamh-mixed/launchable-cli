@@ -113,7 +113,7 @@ class TestsTest(CliTestCase):
     @mock.patch.dict(os.environ, {
         "LAUNCHABLE_TOKEN": CliTestCase.launchable_token,
         "GITHUB_PULL_REQUEST_URL": "https://github.com/launchableinc/cli/pull/1",
-    })
+    }, clear=True)
     def test_with_links(self):
         # Endpoint to assert
         endpoint = "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions".format(
