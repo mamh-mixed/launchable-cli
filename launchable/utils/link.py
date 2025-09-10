@@ -93,9 +93,11 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
     """
     links = []
     for k, url in link_options:
+        url = url.strip()
+
         # if k,v in format "kind|title=url"
         if '|' in k:
-            kind, title = k.split('|', 1)
+            kind, title = (part.strip() for part in k.split('|', 1))
             if kind not in _valid_kinds():
                 msg = ("Invalid kind '{}' passed to --link option.\n"
                        "Supported kinds are: {}".format(kind, _valid_kinds()))
@@ -109,7 +111,7 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
         # if k,v in format "title=url"
         else:
             kind = _infer_kind(url)
-            title = k
+            title = k.strip()
 
         links.append({
             "title": title,
