@@ -96,19 +96,19 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
         # if k,v in format "kind|title=url"
         if '|' in k:
             kind, title = k.split('|', 1)
-            if kind not in valid_kinds():
+            if kind not in _valid_kinds():
                 msg = ("Invalid kind '{}' passed to --link option.\n"
-                       "Supported kinds are: {}".format(kind, valid_kinds()))
+                       "Supported kinds are: {}".format(kind, _valid_kinds()))
                 raise click.UsageError(click.style(msg, fg="red"))
 
-            if not url_matches_kind(url, kind):
+            if not _url_matches_kind(url, kind):
                 msg = ("Invalid url '{}' passed to --link option.\n"
                        "URL doesn't match with the specified kind: {}".format(url, kind))
                 raise click.UsageError(click.style(msg, fg="red"))
 
         # if k,v in format "title=url"
         else:
-            kind = infer_kind(url)
+            kind = _infer_kind(url)
             title = k
 
         links.append({
@@ -126,28 +126,28 @@ def capture_links(link_options: Sequence[Tuple[str, str]], env: Mapping[str, str
 
     env_links = capture_link(env)
     for env_link in env_links:
-        if not has_kind(links, env_link['kind']):
+        if not _has_kind(links, env_link['kind']):
             links.append(env_link)
 
     return links
 
 
-def infer_kind(url: str) -> str:
+def _infer_kind(url: str) -> str:
     if GITHUB_PR_REGEX.match(url):
         return LinkKind.GITHUB_PULL_REQUEST.name
 
     return LinkKind.CUSTOM_LINK.name
 
 
-def has_kind(input_links: List[Dict[str, str]], kind: str) -> bool:
+def _has_kind(input_links: List[Dict[str, str]], kind: str) -> bool:
     return any(link for link in input_links if link['kind'] == kind)
 
 
-def valid_kinds() -> List[str]:
+def _valid_kinds() -> List[str]:
     return [kind.name for kind in LinkKind if kind != LinkKind.LINK_KIND_UNSPECIFIED]
 
 
-def url_matches_kind(url: str, kind: str) -> bool:
+def _url_matches_kind(url: str, kind: str) -> bool:
     if kind == LinkKind.GITHUB_PULL_REQUEST.name:
         return bool(GITHUB_PR_REGEX.match(url))
 
