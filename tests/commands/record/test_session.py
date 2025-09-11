@@ -27,7 +27,7 @@ class SessionTest(CliTestCase):
             "--test-suite", "test-suite")
         self.assert_success(result)
 
-        payload = json.loads(responses.calls[2].request.body.decode())
+        payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal({
             "flavors": {},
             "isObservation": False,
@@ -45,7 +45,7 @@ class SessionTest(CliTestCase):
                           "--flavor", "key=value", "--flavor", "k:v", "--flavor", "k e y = v a l u e")
         self.assert_success(result)
 
-        payload = json.loads(responses.calls[2].request.body.decode())
+        payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal({
             "flavors": {
                 "key": "value",
@@ -77,7 +77,7 @@ class SessionTest(CliTestCase):
             "--test-suite", "test-suite", "--observation")
         self.assert_success(result)
 
-        payload = json.loads(responses.calls[2].request.body.decode())
+        payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal({
             "flavors": {},
             "isObservation": True,
@@ -95,7 +95,7 @@ class SessionTest(CliTestCase):
                           "--timestamp", "2023-10-01T12:00:00Z")
         self.assert_success(result)
 
-        payload = json.loads(responses.calls[2].request.body.decode())
+        payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal({
             "flavors": {},
             "isObservation": False,
@@ -113,7 +113,7 @@ class SessionTest(CliTestCase):
                           "--link", "url=https://smart-tests.test")
         self.assert_success(result)
 
-        payload = json.loads(responses.calls[2].request.body.decode())
+        payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal({
             "flavors": {},
             "isObservation": False,

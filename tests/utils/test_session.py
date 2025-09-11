@@ -2,7 +2,6 @@ import os
 from unittest import mock
 
 import responses
-from requests import HTTPError
 
 from smart_tests.utils.http_client import get_base_url
 from smart_tests.utils.session import TestSession, get_session
@@ -15,7 +14,6 @@ class TestTestSession(CliTestCase):
     @responses.activate
     def test_get_session(self):
         client = SmartTestsClient(base_url=get_base_url())
-
         responses.replace(
             responses.GET,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
@@ -45,5 +43,6 @@ class TestTestSession(CliTestCase):
             json={},
             status=404)
 
-        with self.assertRaises(HTTPError):
+        with self.assertRaises(SystemExit) as cm:
             get_session(self.session, client)
+        self.assertEqual(cm.exception.code, 1)
