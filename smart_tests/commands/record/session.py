@@ -10,11 +10,10 @@ from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.fail_fast_mode import set_fail_fast_mode
 from smart_tests.utils.link import LinkKind, capture_link
+from smart_tests.utils.no_build import NO_BUILD_BUILD_NAME
+from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
-
-from ...utils.smart_tests_client import SmartTestsClient
-from ...utils.no_build import NO_BUILD_BUILD_NAME
-from ...utils.typer_types import validate_datetime_with_tz
+from smart_tests.utils.typer_types import parse_key_value, validate_datetime_with_tz
 
 app = typer.Typer(name="session", help="Record session information")
 
@@ -34,10 +33,11 @@ def session(
              "manage data over test sessions and lineages."
     )],
     print_session: bool = True,
-    flavor: Annotated[List[str], typer.Option(
+    flavors: Annotated[List[str], typer.Option(
         "--flavor",
         help="flavors",
-        metavar="KEY=VALUE"
+        metavar="KEY=VALUE",
+        parser=parse_key_value
     )] = [],
     is_observation: Annotated[bool, typer.Option(
         "--observation",
@@ -45,7 +45,8 @@ def session(
     )] = False,
     links: Annotated[List[str], typer.Option(
         "--link",
-        help="Set external link of title and url"
+        help="Set external link of atitle and url",
+        parser=parse_key_value,
     )] = [],
     is_no_build: Annotated[bool, typer.Option(
         "--no-build",
@@ -56,37 +57,6 @@ def session(
              "`YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)"
     )] = None,
 ):
-
-    # TODO(Konboi): adopt v1's util.click.KEY_VALUE way
-
-    # Convert default values for lists
-    if flavor is None:
-        flavor = []
-    if links is None:
-        links = []
-
-    # Convert key-value pairs from validation
-    flavor_tuples = []
-    for kv in flavor:
-        if '=' in kv:
-            parts = kv.split('=', 1)
-            flavor_tuples.append((parts[0].strip(), parts[1].strip()))
-        elif ':' in kv:
-            parts = kv.split(':', 1)
-            flavor_tuples.append((parts[0].strip(), parts[1].strip()))
-        else:
-            raise typer.BadParameter(f"Expected a key-value pair formatted as --option key=value, but got '{kv}'")
-
-    links_tuples = []
-    for kv in links:
-        if '=' in kv:
-            parts = kv.split('=', 1)
-            links_tuples.append((parts[0].strip(), parts[1].strip()))
-        elif ':' in kv:
-            parts = kv.split(':', 1)
-            links_tuples.append((parts[0].strip(), parts[1].strip()))
-        else:
-            raise typer.BadParameter(f"Expected a key-value pair formatted as --option key=value, but got '{kv}'")
 
     # Validate and convert timestamp if provided
     parsed_timestamp = None
@@ -108,10 +78,8 @@ def session(
     if is_no_build:
         build_name = NO_BUILD_BUILD_NAME
 
-    flavor_dict = dict(flavor_tuples)
-
     payload = {
-        "flavors": flavor_dict,
+        "flavors": dict(flavors),
         "isObservation": is_observation,
         "noBuild": is_no_build,
         "testSuite": test_suite,
@@ -119,10 +87,10 @@ def session(
     }
 
     _links = capture_link(os.environ)
-    for link in links_tuples:
+    for link in links:
         _links.append({
-            "title": link[0],
-            "url": link[1],
+            "title": link.key,
+            "url": link.value,
             "kind": LinkKind.CUSTOM_LINK.name,
         })
     payload["links"] = _links
