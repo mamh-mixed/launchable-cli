@@ -15,17 +15,6 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_without_session(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -44,7 +33,7 @@ class GradleTest(CliTestCase):
                 },
                 "isBrainless": False},
             status=200)
-        result = self.cli('subset', 'gradle', '--session', self.session_name, '--build', self.build_name, '--target', '10%',
+        result = self.cli('subset', 'gradle', '--session', self.session, '--target', '10%',
                           str(self.test_files_dir.joinpath('java/app/src/test').resolve()))
         # TODO: we need to assert on the request payload to make sure it found
         # test list all right
@@ -60,17 +49,6 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_rest(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -94,7 +72,7 @@ class GradleTest(CliTestCase):
             status=200)
 
         rest = tempfile.NamedTemporaryFile(delete=False)
-        result = self.cli('subset', 'gradle', '--session', self.session_name, '--build', self.build_name, '--target',
+        result = self.cli('subset', 'gradle', '--session', self.session, '--target',
                           '10%', '--rest', rest.name, str(self.test_files_dir.joinpath('java/app/src/test/java').resolve()))
 
         self.assert_success(result)
@@ -111,17 +89,6 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_zero_input_subsetting(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -144,7 +111,7 @@ class GradleTest(CliTestCase):
                 "isBrainless": False,
             },
             status=200)
-        result = self.cli('subset', 'gradle', '--session', self.session_name, '--build', self.build_name, '--target',
+        result = self.cli('subset', 'gradle', '--session', self.session, '--target',
                           '10%',
                           '--get-tests-from-previous-sessions',
                           '--output-exclusion-rules',
@@ -165,17 +132,6 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_zero_input_subsetting_observation(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -199,7 +155,7 @@ class GradleTest(CliTestCase):
                 "isObservation": True,
             },
             status=200)
-        result = self.cli('subset', 'gradle', '--session', self.session_name, '--build', self.build_name, '--target',
+        result = self.cli('subset', 'gradle', '--session', self.session, '--target',
                           '10%',
                           '--get-tests-from-previous-sessions',
                           '--output-exclusion-rules',
@@ -217,17 +173,6 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_zero_input_subsetting_source_root(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -251,7 +196,7 @@ class GradleTest(CliTestCase):
                 "isObservation": True,
             },
             status=200)
-        result = self.cli('subset', 'gradle', '--session', self.session_name, '--build', self.build_name, '--target',
+        result = self.cli('subset', 'gradle', '--session', self.session, '--target',
                           '10%',
                           '--get-tests-from-previous-sessions',
                           '--output-exclusion-rules',
@@ -267,6 +212,8 @@ class GradleTest(CliTestCase):
         body = gzip.decompress(self.find_request('/subset').request.body).decode('utf8')
         self.assertNotIn("java.com.launchableinc.rocket_car_gradle.App2Test", body)
 
+    # TODO(Konboi): The split subset isn't supported for the smart-tests initial release
+    """
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_split(self):
@@ -310,22 +257,11 @@ class GradleTest(CliTestCase):
         self.assert_success(result)
 
         self.assertIn("subset/123", result.output.rstrip('\n'))
-
+    """
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_gradle(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
-        result = self.cli('record', 'test', 'gradle', '--build', self.build_name, '--session', self.session_name,
+        result = self.cli('record', 'test', 'gradle', '--session', self.session,
                           str(self.test_files_dir) + "/**/reports")
         self.assert_success(result)
         self.assert_record_tests_payload('recursion/expected.json')

@@ -12,17 +12,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         pipe = "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py"
         mock_json_response = {
             "testPaths": [
@@ -49,8 +38,17 @@ class SubsetTest(CliTestCase):
                           status=200)
 
         rest = tempfile.NamedTemporaryFile(delete=False)
-        result = self.cli("subset", "file", "--target", "30%", "--session",
-                          self.session_name, "--build", self.build_name, "--rest", rest.name, mix_stderr=False, input=pipe)
+        result = self.cli(
+            "subset",
+            "file",
+            "--target",
+            "30%",
+            "--session",
+            self.session,
+            "--rest",
+            rest.name,
+            mix_stderr=False,
+            input=pipe)
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\n")
         self.assertEqual(rest.read().decode(), os.linesep.join(["test_3.py", "test_4.py"]))
@@ -80,8 +78,17 @@ class SubsetTest(CliTestCase):
                           status=200)
 
         rest = tempfile.NamedTemporaryFile(delete=False)
-        result = self.cli("subset", "file", "--target", "30%", "--session",
-                          self.session_name, "--build", self.build_name, "--rest", rest.name, mix_stderr=False, input=pipe)
+        result = self.cli(
+            "subset",
+            "file",
+            "--target",
+            "30%",
+            "--session",
+            self.session,
+            "--rest",
+            rest.name,
+            mix_stderr=False,
+            input=pipe)
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
         self.assertEqual(rest.read().decode(), "")
@@ -90,7 +97,7 @@ class SubsetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
-    def test_subset_with_observation_mode(self):
+    def test_subset_with_observation_session(self):
         pipe = "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py"
         mock_json_response = {
             "testPaths": [
@@ -123,12 +130,9 @@ class SubsetTest(CliTestCase):
             "--target",
             "30%",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--rest",
             observation_mode_rest.name,
-            "--observation",
             input=pipe,
             mix_stderr=False)
         self.assert_success(result)
@@ -167,12 +171,9 @@ class SubsetTest(CliTestCase):
             "--target",
             "30%",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--rest",
             rest.name,
-            "--observation",
             mix_stderr=False,
             input=pipe)
         self.assert_success(result)
@@ -184,17 +185,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_targetless(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         pipe = "test_aaa.py\ntest_bbb.py\ntest_ccc.py\ntest_eee.py\ntest_fff.py\ntest_ggg.py"
         responses.replace(
             responses.POST,
@@ -223,9 +213,7 @@ class SubsetTest(CliTestCase):
             "subset",
             "file",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             input=pipe,
             mix_stderr=False)
         self.assert_success(result)
@@ -236,17 +224,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_goalspec(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         # make sure --goal-spec gets translated properly to a JSON request payload
         responses.replace(
             responses.POST,
@@ -264,12 +241,8 @@ class SubsetTest(CliTestCase):
         result = self.cli(
             "subset",
             "file",
-            "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
-            "--goal-spec",
-            "foo(),bar(zot=3%)",
+            "--session", self.session,
+            "--goal-spec", "foo(),bar(zot=3%)",
             input="test_aaa.py")
         self.assert_success(result)
 
@@ -279,17 +252,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_ignore_flaky_tests_above(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         pipe = "test_aaa.py\ntest_bbb.py\ntest_ccc.py\ntest_flaky.py"
         responses.replace(
             responses.POST,
@@ -315,12 +277,8 @@ class SubsetTest(CliTestCase):
         result = self.cli(
             "subset",
             "file",
-            "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
-            "--ignore-flaky-tests-above",
-            0.05,
+            "--session", self.session,
+            "--ignore-flaky-tests-above", 0.05,
             input=pipe,
             mix_stderr=False)
         self.assert_success(result)
@@ -331,19 +289,8 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_get_tests_from_previous_full_runs(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         # check error when input candidates are empty without --get-tests-from-previous-sessions option
-        result = self.cli("subset", "file", "--target", "30%", "--session", self.session_name, "--build", self.build_name)
+        result = self.cli("subset", "file", "--target", "30%", "--session", self.session)
         self.assert_exit_code(result, 1)
         self.assertIn("use the `--get-tests-from-previous-sessions` option", result.stdout)
 
@@ -377,9 +324,7 @@ class SubsetTest(CliTestCase):
             "--target",
             "30%",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--rest",
             rest.name,
             "--get-tests-from-previous-sessions",
@@ -394,17 +339,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_output_exclusion_rules(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         pipe = "test_aaa.py\ntest_111.py\ntest_bbb.py\ntest_222.py\ntest_ccc.py\ntest_333.py\n"
         responses.replace(
             responses.POST,
@@ -435,9 +369,7 @@ class SubsetTest(CliTestCase):
             "--target",
             "70%",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--rest",
             rest.name,
             input=pipe,
@@ -456,9 +388,7 @@ class SubsetTest(CliTestCase):
             "--target",
             "70%",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--rest",
             rest.name,
             "--output-exclusion-rules",
@@ -501,9 +431,7 @@ class SubsetTest(CliTestCase):
             "--target",
             "70%",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--rest",
             rest.name,
             "--output-exclusion-rules",
@@ -512,70 +440,6 @@ class SubsetTest(CliTestCase):
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "")
-
-        self.assertEqual(rest.read().decode(), os.linesep.join(
-            ["test_aaa.py", "test_bbb.py", "test_ccc.py", "test_111.py", "test_222.py", "test_333.py"]))
-        rest.close()
-        os.unlink(rest.name)
-
-    @responses.activate
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
-    def test_subset_with_observation_and_output_exclusion_rules(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
-        pipe = "test_aaa.py\ntest_111.py\ntest_bbb.py\ntest_222.py\ntest_ccc.py\ntest_333.py\n"
-        responses.replace(
-            responses.POST,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
-            json={
-                "testPaths": [
-                    [{"type": "file", "name": "test_aaa.py"}],
-                    [{"type": "file", "name": "test_bbb.py"}],
-                    [{"type": "file", "name": "test_ccc.py"}],
-                ],
-                "testRunner": "file",
-                "rest": [
-                    [{"type": "file", "name": "test_111.py"}],
-                    [{"type": "file", "name": "test_222.py"}],
-                    [{"type": "file", "name": "test_333.py"}],
-                ],
-                "subsettingId": 123,
-                "summary": {
-                    "subset": {"duration": 15, "candidates": 3, "rate": 70},
-                    "rest": {"duration": 6, "candidates": 3, "rate": 30}
-                },
-                "isObservation": True,
-            }, status=200)
-
-        rest = tempfile.NamedTemporaryFile(delete=False)
-        result = self.cli(
-            "subset",
-            "file",
-            "--target",
-            "70%",
-            "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
-            "--rest",
-            rest.name,
-            "--output-exclusion-rules",
-            "--observation",
-            input=pipe,
-            mix_stderr=False)
-
-        self.assert_success(result)
-        self.assertEqual(result.stdout, "")
-        self.assertIn("Warning: --observation and --output-exclusion-rules are set.", result.stderr)
 
         self.assertEqual(rest.read().decode(), os.linesep.join(
             ["test_aaa.py", "test_bbb.py", "test_ccc.py", "test_111.py", "test_222.py", "test_333.py"]))
@@ -585,17 +449,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_prioritize_tests_failed_within_hours(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         pipe = "test_aaa.py\ntest_bbb.py\ntest_ccc.py\ntest_flaky.py"
         responses.replace(
             responses.POST,
@@ -622,13 +475,12 @@ class SubsetTest(CliTestCase):
             "subset",
             "file",
             "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
+            self.session,
             "--prioritize-tests-failed-within-hours",
             24,
             input=pipe,
             mix_stderr=False)
+
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
@@ -637,16 +489,6 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_get_tests_from_guess(self):
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         responses.replace(
             responses.GET,
             "{}/intake/organizations/{}/workspaces/{}/state".format(
@@ -672,18 +514,8 @@ class SubsetTest(CliTestCase):
             status=[200]
         )
 
-        result = self.cli(
-            "subset",
-            "file",
-            "--session",
-            self.session_name,
-            "--build",
-            self.build_name,
-            "--get-tests-from-guess",
-        )
-
+        result = self.cli("subset", "file", "--session", self.session, "--get-tests-from-guess")
         self.assert_success(result)
-
         """
         1. request to  /state
         2. request to /subset with test paths that are collected from auto collection

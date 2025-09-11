@@ -14,6 +14,7 @@ from tabulate import tabulate
 
 from smart_tests.utils.authentication import get_org_workspace
 from smart_tests.utils.commands import Command
+from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ..app import Application
@@ -23,8 +24,7 @@ from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
 from ..utils.smart_tests_client import SmartTestsClient
-from ..utils.typer_types import Duration, Percentage, ignorable_error, parse_duration, parse_percentage
-from .helper import get_session_id, parse_session
+from ..utils.typer_types import Duration, Percentage, parse_duration, parse_percentage
 from .test_path_writer import TestPathWriter
 
 # TODO: rename files and function accordingly once the PR landscape
@@ -38,14 +38,9 @@ def subset(
     ctx: typer.Context,
     session: Annotated[str, typer.Option(
         "--session",
-        help="test session name",
-        metavar="SESSION_NAME"
+        help="In the format builds/<build-name>/test_sessions/<test-session-id>",
+        metavar="SESSION"
     )],
-    build: Annotated[str | None, typer.Option(
-        "--build",
-        help="build name",
-        metavar="BUILD_NAME"
-    )] = None,
     target: Annotated[Percentage | None, typer.Option(
         parser=parse_percentage,
         help="subsetting target from 0% to 100%"
@@ -61,16 +56,18 @@ def subset(
     goal_spec: Annotated[str | None, typer.Option(
         help="subsetting by programmatic goal definition"
     )] = None,
-    base: Annotated[str | None, typer.Option(
+    base_path: Annotated[str | None, typer.Option(
+        '--base',
         help="(Advanced) base directory to make test names portable",
         metavar="DIR"
     )] = None,
     rest: Annotated[str | None, typer.Option(
         help="Output the subset remainder to a file, e.g. `--rest=remainder.txt`"
     )] = None,
-    split: Annotated[bool, typer.Option(
-        help="split"
-    )] = False,
+    # TODO(Konboi): omit from the smart-tests command initial release
+    # split: Annotated[bool, typer.Option(
+    #        help="split"
+    # )] = False,
     no_base_path_inference: Annotated[bool, typer.Option(
         "--no-base-path-inference",
         help="Do not guess the base path to relativize the test file paths. "
@@ -84,18 +81,19 @@ def subset(
         "--ignore-new-tests",
         help="Ignore tests that were added recently. NOTICE: this option will ignore tests that you added just now as well"
     )] = False,
-    observation: Annotated[bool, typer.Option(
+    is_observation: Annotated[bool, typer.Option(
+        '--observation',
         help="enable observation mode"
     )] = False,
-    get_tests_from_previous_sessions: Annotated[bool, typer.Option(
+    is_get_tests_from_previous_sessions: Annotated[bool, typer.Option(
         "--get-tests-from-previous-sessions",
         help="get subset list from previous full tests"
     )] = False,
-    output_exclusion_rules: Annotated[bool, typer.Option(
+    is_output_exclusion_rules: Annotated[bool, typer.Option(
         "--output-exclusion-rules",
         help="outputs the exclude test list. Switch the subset and rest."
     )] = False,
-    non_blocking: Annotated[bool, typer.Option(
+    is_non_blocking: Annotated[bool, typer.Option(
         "--non-blocking",
         help="Do not wait for subset requests in observation mode.",
         hidden=True
@@ -104,15 +102,11 @@ def subset(
         help="Ignore flaky tests above the value set by this option. You can confirm flaky scores in WebApp",
         min=0.0, max=1.0
     )] = None,
-    no_build: Annotated[bool, typer.Option(
-        "--no-build",
-        help="If you want to only send test reports, please use this option"
-    )] = False,
     prioritize_tests_failed_within_hours: Annotated[int | None, typer.Option(
         help="Prioritize tests that failed within the specified hours; maximum 720 hours (= 24 hours * 30 days)",
         min=0, max=24 * 30
     )] = None,
-    prioritized_tests_mapping: Annotated[typer.FileText | None, typer.Option(
+    prioritized_tests_mapping_file: Annotated[typer.FileText | None, typer.Option(
         "--prioritized-tests-mapping",
         help="Prioritize tests based on test mapping file",
         mode="r"
@@ -123,17 +117,6 @@ def subset(
     )] = False
 ):
     app = ctx.obj
-
-    # Map parameter names to match original function
-    base_path = base
-    build_name = build
-    is_observation = observation
-    is_get_tests_from_previous_sessions = get_tests_from_previous_sessions
-    is_output_exclusion_rules = output_exclusion_rules
-    is_non_blocking = non_blocking
-    is_no_build = no_build
-    prioritized_tests_mapping_file = prioritized_tests_mapping
-
     tracking_client = TrackingClient(Command.SUBSET, app=app)
     client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
@@ -141,9 +124,7 @@ def subset(
     fail_fast_mode_validate(FailFastModeValidateParams(
         command=Command.SUBSET,
         session=session,
-        build=build_name,
         is_observation=is_observation,
-        is_no_build=is_no_build,
     ))
 
     def print_error_and_die(msg: str, event: Tracking.ErrorEvent):
@@ -157,6 +138,21 @@ def subset(
             event_name=Tracking.ErrorEvent.WARNING_ERROR,
             stack_trace=msg
         )
+
+    try:
+        test_session = get_session(session, client)
+        build_name = test_session.build_name
+        session_id = test_session.id
+        is_observation = test_session.observation_mode
+    except ValueError as e:
+        print_error_and_die(msg=str(e), event=Tracking.ErrorEvent.USER_ERROR)
+    except Exception as e:
+        if os.getenv(REPORT_ERROR_KEY):
+            raise e
+        else:
+            # not to block pipeline, parse session and use it
+            client.print_exception_and_recover(e, "Warning: failed to check test session")
+            build_name, session_id = parse_session(session)
 
     if is_get_tests_from_guess and is_get_tests_from_previous_sessions:
         print_error_and_die(
@@ -174,47 +170,10 @@ def subset(
                 Tracking.ErrorEvent.INTERNAL_CLI_ERROR
             )
 
-    if is_no_build and session:
-        warn_and_exit_if_fail_fast_mode(
-            "WARNING: `--session` and `--no-build` are set.\nUsing --session option value ({}) and ignoring `--no-build` option".format(session))  # noqa: E501
-        is_no_build = False
-
-    session_id = None
-
-    try:
-        client = SmartTestsClient(test_runner=getattr(ctx, 'test_runner', None), app=app, tracking_client=tracking_client)
-        session_id = get_session_id(session, build_name, is_no_build, client)
-    except typer.BadParameter as e:
-        print_error_and_die(str(e), Tracking.ErrorEvent.USER_ERROR)
-    except Exception as e:
-        tracking_client.send_error_event(
-            event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
-            stack_trace=str(e),
-
-        )
-        if os.getenv(REPORT_ERROR_KEY):
-            raise e
-        else:
-            typer.echo(ignorable_error(e), err=True)
-
-    if is_non_blocking:
-        if (not is_observation) and session_id:
-            try:
-                client = SmartTestsClient(
-                    app=app,
-                    tracking_client=tracking_client)
-                res = client.request("get", session_id)
-                is_observation_in_recorded_session = res.json().get("isObservation", False)
-                if not is_observation_in_recorded_session:
-                    print_error_and_die(
-                        "You have to specify --observation option to use non-blocking mode",
-                        Tracking.ErrorEvent.INTERNAL_CLI_ERROR)
-            except Exception as e:
-                tracking_client.send_error_event(
-                    event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
-                    stack_trace=str(e),
-                )
-                typer.echo(ignorable_error(e), err=True)
+    if is_non_blocking and not is_observation:
+        print_error_and_die(
+            "You have to specify --observation option to use non-blocking mode",
+            Tracking.ErrorEvent.INTERNAL_CLI_ERROR)
 
     file_path_normalizer = FilePathNormalizer(base_path, no_base_path_inference=no_base_path_inference)
 
@@ -481,19 +440,19 @@ def subset(
                 warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
                 return
 
-            if split:
-                typer.echo("subset/{}".format(subset_result.subset_id))
+            # TODO(Konboi): split subset isn't provided for smart-tests initial release
+            # if split:
+            #   typer.echo("subset/{}".format(subset_result.subset_id))
+            output_subset, output_rests = subset_result.subset, subset_result.rest
+
+            if subset_result.is_observation:
+                output_subset = output_subset + output_rests
+                output_rests = []
+
+            if is_output_exclusion_rules:
+                self.exclusion_output_handler(output_subset, output_rests)
             else:
-                output_subset, output_rests = subset_result.subset, subset_result.rest
-
-                if subset_result.is_observation:
-                    output_subset = output_subset + output_rests
-                    output_rests = []
-
-                if is_output_exclusion_rules:
-                    self.exclusion_output_handler(output_subset, output_rests)
-                else:
-                    self.output_handler(output_subset, output_rests)
+                self.output_handler(output_subset, output_rests)
 
             # When Launchable returns an error, the cli skips showing summary
             # report
@@ -503,7 +462,6 @@ def subset(
             if "subset" not in summary.keys() or "rest" not in summary.keys():
                 return
 
-            build_name, test_session_id = parse_session(session_id)
             org, workspace = get_org_workspace()
 
             header = ["", "Candidates",
@@ -538,7 +496,7 @@ def subset(
                 "Smart Tests created subset {} for build {} (test session {}) in workspace {}/{}".format(
                     subset_result.subset_id,
                     build_name,
-                    test_session_id,
+                    session_id,
                     org, workspace,
                 ), err=True,
             )

@@ -1,12 +1,9 @@
 import os
-from pathlib import Path
 from unittest import mock
 
 import responses  # type: ignore
 
-from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
-from tests.helper import ignore_warnings
 
 
 class JestTest(CliTestCase):
@@ -31,24 +28,11 @@ class JestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         result = self.cli(
             'subset',
             'jest',
             '--session',
-            self.session_name,
-            '--build',
-            self.build_name,
+            self.session,
             '--target',
             '10%',
             '--base',
@@ -57,21 +41,12 @@ class JestTest(CliTestCase):
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')
 
+    # TODO(Konboi): The split subset isn't supported for the smart-tests initial release
+    """
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     @ignore_warnings
     def test_subset_split(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
         test_path = Path(f"{os.getcwd()}/components/layouts/modal/snapshot.test.tsx")
         responses.replace(responses.POST,
                           f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
@@ -87,28 +62,18 @@ class JestTest(CliTestCase):
                                 "isBrainless": False,
                                 },
                           status=200)
-        result = self.cli('subset', 'jest', '--session', self.session_name, '--build', self.build_name,
+        result = self.cli('subset', 'jest', '--session', self.session,
                           '--target', '20%', '--base', os.getcwd(), '--split', input=self.subset_input)
 
         self.assert_success(result)
 
         self.assertIn('subset/123', result.output)
+    """
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test(self):
-        # Override session name lookup to allow session resolution
-        responses.replace(
-            responses.GET,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
-            f"{self.workspace}/builds/{self.build_name}/test_session_names/{self.session_name}",
-            json={
-                'id': self.session_id,
-                'isObservation': False,
-            },
-            status=200)
-
-        result = self.cli('record', 'test', 'jest', '--session', self.session_name, '--build', self.build_name,
+        result = self.cli('record', 'test', 'jest', '--session', self.session,
                           str(self.test_files_dir.joinpath('junit.xml')))
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')

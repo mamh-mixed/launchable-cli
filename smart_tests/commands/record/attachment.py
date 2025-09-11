@@ -2,8 +2,9 @@ from typing import Annotated, List
 
 import typer
 
+from smart_tests.utils.session import get_session
+
 from ...utils.smart_tests_client import SmartTestsClient
-from ..helper import get_session_id
 
 app = typer.Typer(name="attachment", help="Record attachment information")
 
@@ -18,25 +19,17 @@ def attachment(
     attachments: Annotated[List[str], typer.Argument(
         help="Attachment files to upload"
     )],
-    build: Annotated[str | None, typer.Option(
-        "--build",
-        help="build name"
-    )] = None,
-    no_build: Annotated[bool, typer.Option(
-        "--no-build",
-        help="If you want to only send test reports, please use this option"
-    )] = False,
 ):
     app = ctx.obj
     client = SmartTestsClient(app=app)
     try:
-        session_id = get_session_id(session, build, no_build, client)
-
+        # Note: Call get_session method to check test session exists
+        _ = get_session(session, client)
         for a in attachments:
             typer.echo(f"Sending {a}")
             with open(a, mode='rb') as f:
                 res = client.request(
-                    "post", f"{session_id}/attachment", compress=True, payload=f,
+                    "post", f"{session}/attachment", compress=True, payload=f,
                     additional_headers={"Content-Disposition": f"attachment;filename=\"{a}\""})
                 res.raise_for_status()
     except Exception as e:

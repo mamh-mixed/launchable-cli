@@ -3,7 +3,6 @@ import glob
 import os
 import re
 import xml.etree.ElementTree as ET
-from http import HTTPStatus
 from pathlib import Path
 from time import time_ns
 from typing import Annotated, Callable, Dict, Generator, List, Tuple, Union
@@ -16,17 +15,17 @@ from tabulate import tabulate
 
 from smart_tests.utils.authentication import ensure_org_workspace
 from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
+from smart_tests.utils.env_keys import REPORT_ERROR_KEY
+from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ...testpath import FilePathNormalizer, TestPathComponent, unparse_test_path
 from ...utils.commands import Command
-from ...utils.exceptions import InvalidJUnitXMLException
+from ...utils.exceptions import InvalidJUnitXMLException, print_error_and_die
 from ...utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                      set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
-from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.logger import Logger
-from ...utils.no_build import NO_BUILD_BUILD_NAME, NO_BUILD_TEST_SESSION_ID
-from ..helper import get_session_id, parse_session
+from ...utils.smart_tests_client import SmartTestsClient
 from .case_event import CaseEvent, CaseEventType
 
 GROUP_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
@@ -56,12 +55,8 @@ def tests_main(
     ctx: typer.Context,
     session: Annotated[str, typer.Option(
         "--session",
-        help="test session name"
+        help="In the format builds/<build-name>/test_sessions/<test-session-id>"
     )],
-    build_name: Annotated[str | None, typer.Option(
-        "--build",
-        help="build name"
-    )] = None,
     base_path: Annotated[Path | None, typer.Option(
         "--base",
         help="(Advanced) base directory to make test names portable",
@@ -96,10 +91,7 @@ def tests_main(
         help="",
         hidden=True
     )] = False,
-    is_no_build: Annotated[bool, typer.Option(
-        "--no-build",
-        help="If you want to only send test reports, please use this option"
-    )] = False,
+    # TODO(Konboi): restore timestamp option
 ):
     logger = Logger()
 
@@ -115,8 +107,6 @@ def tests_main(
     fail_fast_mode_validate(FailFastModeValidateParams(
         command=Command.RECORD_TESTS,
         session=session,
-        build=build_name,
-        is_no_build=is_no_build,
     ))
 
     # Validate group if provided and ensure it's never None
@@ -132,20 +122,19 @@ def tests_main(
     file_path_normalizer = FilePathNormalizer(
         str(base_path) if base_path else None,
         no_base_path_inference=no_base_path_inference)
-    if is_no_build and session:
-        warn_and_exit_if_fail_fast_mode(
-            "WARNING: `--session` and `--no-build` are set.\nUsing --session option value ({}) and ignoring `--no-build` option".format(session),  # noqa: E501
-        )
-
-        is_no_build = False
 
     try:
-        session_id = get_session_id(session, build_name, is_no_build, client)
-        record_start_at = get_record_start_at(session_id, client)
+        test_session = get_session(session, client)
+        record_start_at = get_record_start_at(session, client)
 
-        # session_id is now a unique string ID
-        test_session_id = session_id
+        test_session_id = test_session.id
+        build_name = test_session.build_name
+    except ValueError as e:
+        print_error_and_die(msg=str(e), event=Tracking.ErrorEvent.USER_ERROR, tracking_client=tracking_client)
     except Exception as e:
+        if os.getenv(REPORT_ERROR_KEY):
+            raise e
+
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             stack_trace=str(e),
@@ -153,6 +142,7 @@ def tests_main(
         client.print_exception_and_recover(e)
         # To prevent users from stopping the CI pipeline, the cli exits with a
         # status code of 0, indicating that the program terminated successfully.
+        build_name, test_session_id = parse_session(session)
         exit(0)
 
     # TODO: placed here to minimize invasion in this PR to reduce the likelihood of
@@ -212,14 +202,6 @@ def tests_main(
         @session.setter
         def session(self, session: str):
             self._session = session
-
-        @property
-        def is_no_build(self) -> bool:
-            return self._is_no_build
-
-        @is_no_build.setter
-        def is_no_build(self, is_no_build: bool):
-            self._is_no_build = is_no_build
 
         @property
         def metadata_builder(self) -> CaseEvent.DataBuilder:
@@ -296,8 +278,7 @@ def tests_main(
             self.is_allow_test_before_build = is_allow_test_before_build
             self.build_name = build_name
             self.test_session_id = test_session_id
-            self.session = session_id
-            self.is_no_build = is_no_build
+            self.session = session
             self.metadata_builder = CaseEvent.default_data_builder()
 
         def make_file_path_component(self, filepath) -> TestPathComponent:
@@ -312,7 +293,6 @@ def tests_main(
 
             if (
                     not self.is_allow_test_before_build  # nlqa: W503
-                    and not self.is_no_build  # noqa: W503
                     and self.check_timestamp  # noqa: W503
                     and ctime.timestamp() < record_start_at.timestamp()  # noqa: W503
             ):
@@ -385,7 +365,7 @@ def tests_main(
                     "testRunner": test_runner,
                     "group": group,
                     "metadata": get_env_values(client),
-                    "noBuild": self.is_no_build,
+                    "noBuild": False,  # deprecated to set no-build from the record tests command
                     # NOTE:
                     # testSuite and flavors are applied only when the no-build option is enabled
                     "testSuite": test_suite_name,
@@ -395,28 +375,10 @@ def tests_main(
             def send(payload: Dict[str, Union[str, List]]) -> None:
                 res = client.request(
                     "post", f"{self.session}/events", payload=payload, compress=True)
-
-                if res.status_code == HTTPStatus.NOT_FOUND:
-                    if session:
-                        build, _ = parse_session(session)
-                        warn_and_exit_if_fail_fast_mode(
-                            "Session {} was not found. Make sure to run `launchable record session --build {}` before `launchable record tests`".format(session, build))  # noqa: E501
-
-                    elif build_name:
-                        warn_and_exit_if_fail_fast_mode(
-                            "Build {} was not found. Make sure to run `launchable record build --name {}` before `launchable record tests`".format(build_name, build_name))  # noqa: E501
-
                 res.raise_for_status()
 
                 nonlocal is_observation
                 is_observation = res.json().get("testSession", {}).get("isObservation", False)
-
-                # If don’t override build, test session and session_id, build and test session will be made per chunk request.
-                if is_no_build:
-                    self.build_name = res.json().get("build", {}).get("build", NO_BUILD_BUILD_NAME)
-                    self.test_session_id = res.json().get("testSession", {}).get("id", NO_BUILD_TEST_SESSION_ID)
-                    self.session = f"builds/{self.build_name}/test_sessions/{self.test_session_id}"
-                    self.is_no_build = False
 
             def recorded_result() -> Tuple[int, int, int, float]:
                 test_count = 0
@@ -490,20 +452,20 @@ def tests_main(
                 if len(self.skipped_reports) != 0:
                     warn_and_exit_if_fail_fast_mode(
                         "{} test report(s) were skipped because they were created before this build was recorded.\n"
-                        "Make sure to run your tests after you run `launchable record build`.\n"
+                        "Make sure to run your tests after you run `smart-tests record build`.\n"
                         "Otherwise, if these are really correct test reports, use the `--allow-test-before-build` option.".
                         format(len(self.skipped_reports)))
                     return
                 else:
                     warn_and_exit_if_fail_fast_mode(
-                        "Looks like tests didn't run? If not, make sure the right files/directories were passed into `launchable record tests`")  # noqa: E501
+                        "Looks like tests didn't run? If not, make sure the right files/directories were passed into `smart-tests record tests`")  # noqa: E501
                     return
 
             file_count = len(self.reports)
             test_count, success_count, fail_count, duration = recorded_result()
 
             typer.echo(
-                f"Launchable recorded tests for build {
+                f"Smart Tests recorded tests for build {
                     self.build_name} (test session {
                     self.test_session_id}) to workspace {org}/{workspace} from {file_count} files:")
 
