@@ -210,7 +210,7 @@ from .test_path_writer import TestPathWriter
 @click.option(
     "--use-case",
     "use_case",
-    type=str,
+    type=click.Choice(["one-commit", "feature-branch", "recurring"]),
     hidden=True,  # control PTS v2 test selection behavior. Non-committed, so hidden for now.
 )
 @click.pass_context
