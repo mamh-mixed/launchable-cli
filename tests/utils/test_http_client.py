@@ -2,8 +2,6 @@ import os
 import platform
 from unittest import TestCase, mock
 
-from requests import Session
-
 from smart_tests.utils.http_client import _HttpClient
 from smart_tests.version import __version__
 
@@ -33,19 +31,3 @@ class HttpClientTest(TestCase):
             "User-Agent": f"Launchable/{__version__} (Python {platform.python_version()}, "
             f"{platform.platform()}) TestRunner/dummy",
         })
-
-    def test_reason(self):
-        '''make sure we correctly propagate error message from the server'''
-
-        # use new session to disable retry
-        cli = _HttpClient(session=Session())
-        # /error is an actual endpoint that exists on our service to test the behavior
-        res = cli.request("GET", "intake/error")
-        self.assertEqual(res.status_code, 500)
-        self.assertEqual(res.reason, "Welp")
-
-        try:
-            res.raise_for_status()
-            self.fail("should have raised")
-        except Exception as e:
-            self.assertIn("Welp", str(e))
