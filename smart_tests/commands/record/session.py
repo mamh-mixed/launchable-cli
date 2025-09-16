@@ -13,7 +13,7 @@ from smart_tests.utils.link import LinkKind, capture_link
 from smart_tests.utils.no_build import NO_BUILD_BUILD_NAME
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
-from smart_tests.utils.typer_types import parse_key_value, validate_datetime_with_tz
+from smart_tests.utils.typer_types import KeyValue, parse_key_value, validate_datetime_with_tz
 
 app = typer.Typer(name="session", help="Record session information")
 
@@ -33,7 +33,7 @@ def session(
              "manage data over test sessions and lineages."
     )],
     print_session: bool = True,
-    flavors: Annotated[List[str], typer.Option(
+    flavors: Annotated[List[KeyValue], typer.Option(
         "--flavor",
         help="flavors",
         metavar="KEY=VALUE",
@@ -43,7 +43,7 @@ def session(
         "--observation",
         help="enable observation mode"
     )] = False,
-    links: Annotated[List[str], typer.Option(
+    links: Annotated[List[KeyValue], typer.Option(
         "--link",
         help="Set external link of atitle and url",
         parser=parse_key_value,
@@ -79,7 +79,7 @@ def session(
         build_name = NO_BUILD_BUILD_NAME
 
     payload = {
-        "flavors": dict(flavors),
+        "flavors": dict([(f.key, f.value) for f in flavors]),
         "isObservation": is_observation,
         "noBuild": is_no_build,
         "testSuite": test_suite,
