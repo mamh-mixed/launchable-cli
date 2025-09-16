@@ -7,10 +7,7 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from launchable.commands.record.tests import INVALID_TIMESTAMP, parse_launchable_timeformat
-from launchable.utils.http_client import get_base_url
-from launchable.utils.no_build import NO_BUILD_BUILD_NAME, NO_BUILD_TEST_SESSION_ID
-from launchable.utils.session import write_build, write_session
+from smart_tests.commands.record.tests import INVALID_TIMESTAMP, parse_launchable_timeformat
 from tests.cli_test_case import CliTestCase
 
 
@@ -19,28 +16,30 @@ class TestsTest(CliTestCase):
         '../../data/maven/').resolve()
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_with_group_name(self):
-        # emulate launchable record build & session
-        write_session(self.build_name, self.session_id)
-
-        result = self.cli('record', 'tests', '--session',
-                          self.session, '--group', 'hoge', 'maven', str(
-                              self.report_files_dir) + "**/reports/")
+        result = self.cli('record', 'test', 'maven', '--session', self.session, '--group', 'hoge',
+                          str(self.report_files_dir) + "**/reports/")
 
         self.assert_success(result)
         request = json.loads(gzip.decompress(self.find_request('/events').request.body).decode())
         self.assertCountEqual(request.get("group", []), "hoge")
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_filename_in_error_message(self):
-        # emulate launchable record build
-        write_build(self.build_name)
+        # emulate smart-tests record build
 
         normal_xml = str(Path(__file__).parent.joinpath('../../data/broken_xml/normal.xml').resolve())
         broken_xml = str(Path(__file__).parent.joinpath('../../data/broken_xml/broken.xml').resolve())
-        result = self.cli('record', 'tests', '--build', self.build_name, 'file', normal_xml, broken_xml)
+        result = self.cli(
+            'record',
+            'test',
+            'file',
+            '--session',
+            self.session,
+            normal_xml,
+            broken_xml)
 
         def remove_backslash(input: str) -> str:
             # Hack for Windowns. They containts double escaped backslash such
@@ -56,33 +55,6 @@ class TestsTest(CliTestCase):
         # normal.xml
         self.assertIn('open_class_user_test.rb', gzip.decompress(self.find_request('/events').request.body).decode())
 
-    @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_with_no_build(self):
-        responses.add(
-            responses.POST,
-            "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/events".format(
-                get_base_url(),
-                self.organization,
-                self.workspace,
-                NO_BUILD_BUILD_NAME,
-                NO_BUILD_TEST_SESSION_ID,
-            ),
-            json={
-                "build": {
-                    "id": 12345,
-                    "buildNumber": 1675750000,
-                },
-                "testSessions": {
-                    "id": 678,
-                    "buildId": 12345,
-                },
-            },
-            status=200)
-
-        result = self.cli('record', 'tests', '--no-build', 'maven', str(self.report_files_dir) + "**/reports/")
-        self.assert_success(result)
-
     def test_parse_launchable_timeformat(self):
         t1 = "2021-04-01T09:35:47.934+00:00"  # 1617269747.934
         t2 = "2021-05-24T18:29:04.285+00:00"  # 1621880944.285
@@ -97,13 +69,15 @@ class TestsTest(CliTestCase):
         self.assertEqual(INVALID_TIMESTAMP, parse_launchable_timeformat(t3))
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_when_total_test_duration_zero(self):
-        write_build(self.build_name)
-
         zero_duration_xml1 = str(Path(__file__).parent.joinpath('../../data/googletest/output_a.xml').resolve())
         zero_duration_xml2 = str(Path(__file__).parent.joinpath('../../data/googletest/output_b.xml').resolve())
-        result = self.cli('record', 'tests', '--build', self.build_name, 'googletest', zero_duration_xml1, zero_duration_xml2)
+        result = self.cli(
+            'record', 'test', 'googletest',
+            '--session', self.session,
+            zero_duration_xml1,
+            zero_duration_xml2)
 
         self.assert_success(result)
         self.assertIn("Total test duration is 0.", result.output)

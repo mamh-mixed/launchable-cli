@@ -5,19 +5,17 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from launchable.utils.http_client import get_base_url
-from launchable.utils.session import write_session
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
 class AttachmentTest(CliTestCase):
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_attachment(self):
         TEST_CONTENT = b"Hello world"
 
-        # emulate launchable record build & session
-        write_session(self.build_name, self.session_id)
+        # Test requires explicit session parameter
 
         attachment = tempfile.NamedTemporaryFile(delete=False)
         attachment.write(TEST_CONTENT)
@@ -34,12 +32,11 @@ class AttachmentTest(CliTestCase):
 
         responses.add_callback(
             responses.POST,
-            "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
-                get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/"
+            f"{self.workspace}/builds/{self.build_name}/test_sessions/{self.session_id}/attachment",
             callback=verify_body)
 
         result = self.cli("record", "attachment", "--session", self.session, attachment.name)
-
         self.assert_success(result)
         self.assertEqual(TEST_CONTENT, body)
 

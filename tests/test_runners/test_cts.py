@@ -3,13 +3,13 @@ from unittest import mock
 
 import responses
 
-from launchable.utils.http_client import get_base_url
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
 class CtsTest(CliTestCase):
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset(self):
         pipe = """ # noqa: E501
 ==================
@@ -45,20 +45,18 @@ armeabi-v7a CtsAbiOverrideHostTestCases
             "isObservation": False,
         }
 
-        responses.replace(responses.POST, "{}/intake/organizations/{}/workspaces/{}/subset".format(
-            get_base_url(),
-            self.organization,
-            self.workspace),
-            json=mock_response,
-            status=200)
+        responses.replace(responses.POST,
+                          f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+                          json=mock_response,
+                          status=200)
 
         result = self.cli(
             "subset",
+            "cts",
             "--target",
             "30%",
             "--session",
             self.session,
-            "cts",
             input=pipe,
             mix_stderr=False)
         self.assert_success(result)
@@ -69,12 +67,12 @@ armeabi-v7a CtsAbiOverrideHostTestCases
 
         result = self.cli(
             "subset",
+            "cts",
             "--target",
             "30%",
             "--session",
             self.session,
             "--output-exclusion-rules",
-            "cts",
             input=pipe,
             mix_stderr=False)
 
@@ -84,9 +82,9 @@ armeabi-v7a CtsAbiOverrideHostTestCases
         self.assertEqual(output, result.stdout)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_tests(self):
-        result = self.cli('record', 'tests', '--session', self.session,
-                          'cts', str(self.test_files_dir) + "/test_result.xml")
+        result = self.cli('record', 'test', 'cts', '--session', self.session,
+                          str(self.test_files_dir) + "/test_result.xml")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')
