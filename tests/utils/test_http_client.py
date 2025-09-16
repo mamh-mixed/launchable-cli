@@ -51,8 +51,8 @@ class HttpClientTest(TestCase):
 
         # use new session to disable retry
         cli = _HttpClient(session=Session())
-        # /error is an actual endpoint that exists on our service to test the behavior
-        res = cli.request("GET", "intake/error")
+        # /raise_error is an actual endpoint that exists on our service to test the behavior
+        res = cli.request("GET", "intake/raise_error")
         self.assertEqual(res.status_code, 500)
         self.assertEqual(res.reason, "Welp")
 
