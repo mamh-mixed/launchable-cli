@@ -9,7 +9,6 @@ from launchable.commands.detect_flakes import detect_flakes as detect_flakes_cmd
 from launchable.commands.record.tests import tests as record_tests_cmd
 from launchable.commands.split_subset import split_subset as split_subset_cmd
 from launchable.commands.subset import subset as subset_cmd
-from launchable.testpath import unparse_test_path
 
 
 def cmdname(m):
@@ -177,7 +176,7 @@ class CommonFlakeDetectionImpls:
     def __init__(
             self,
             module_name,
-            formatter=unparse_test_path,
+            formatter=None,
             seperator="\n",
     ):
         self.cmdname = cmdname(module_name)

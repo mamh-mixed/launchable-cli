@@ -6,6 +6,7 @@ import click
 from launchable.app import Application
 from launchable.commands.helper import find_or_create_session
 from launchable.commands.test_path_writer import TestPathWriter
+from launchable.testpath import unparse_test_path
 from launchable.utils.click import ignorable_error
 from launchable.utils.env_keys import REPORT_ERROR_KEY
 from launchable.utils.launchable_client import LaunchableClient
@@ -75,6 +76,9 @@ def detect_flakes(ctx, retry_threshold, session):
                 test_paths = res.json().get("testPaths", [])
                 if test_paths:
                     self.print(test_paths)
+                    click.echo("Trying to retry the following tests:", err=True)
+                    for detail in res.json().get("testDetails", []):
+                        click.echo(f"{detail.get('reason')}: {unparse_test_path(detail.get('fullTestPath'))}", err=True)
             except Exception as e:
                 tracking_client.send_error_event(
                     event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
