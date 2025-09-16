@@ -5,7 +5,6 @@ on:
     branches: [main, smart-tests] # smart-tests branch temporarily added for Smart Tests CLI development
   workflow_dispatch:
 
-
 env:
   SMART_TESTS_DEBUG: 1
   SMART_TESTS_REPORT_ERROR: 1
@@ -26,7 +25,7 @@ jobs:
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
           java-version: 8
-          distribution: 'temurin'
+          distribution: "temurin"
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version: 1.24
@@ -46,17 +45,17 @@ jobs:
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_BAZEL }}
       - name: "bazel: Record build"
-        run: 'smart-tests record build --build "$GITHUB_RUN_ID" --branch "$GITHUB_REF_NAME" --source main=../.. --source cli=../../..'
+        run: 'smart-tests record build --build "$GITHUB_RUN_ID" --source main=../.. --source cli=../../..'
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_BAZEL }}
         working-directory: examples/bazel/java
       - name: "bazel: Record session"
-        run: 'smart-tests record session --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-bazel" --test-suite "bazel"'
+        run: 'smart-tests record session --build "$GITHUB_RUN_ID" --test-suite "bazel" > bazel-test-session.txt'
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_BAZEL }}
         working-directory: examples/bazel/java
       - name: "bazel: Subset"
-        run: bazelisk query 'tests(//...)' | smart-tests subset bazel --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-bazel" --target 30% > subset.txt
+        run: bazelisk query 'tests(//...)' | smart-tests subset bazel --session $(cat bazel-test-session.txt) --target 30% > subset.txt
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_BAZEL }}
         working-directory: examples/bazel/java
@@ -64,7 +63,7 @@ jobs:
         run: bazelisk test $(cat subset.txt)
         working-directory: examples/bazel/java
       - name: "bazel: Record test results"
-        run: smart-tests record test bazel --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-bazel" .
+        run: smart-tests record test bazel --session $(cat bazel-test-session.txt) .
         if: always()
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_BAZEL }}
@@ -79,17 +78,17 @@ jobs:
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GO }}
       - name: "go: Record build"
-        run: 'smart-tests record build --build "$GITHUB_RUN_ID" --branch "$GITHUB_REF_NAME" --source main=.. --source cli=../..'
+        run: 'smart-tests record build --build "$GITHUB_RUN_ID" --source main=.. --source cli=../..'
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GO }}
         working-directory: examples/go
       - name: "go: Record session"
-        run: 'smart-tests record session --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-go" --test-suite "go-test"'
+        run: 'smart-tests record session --build "$GITHUB_RUN_ID" --test-suite "go-test" > go-test-session.txt'
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GO }}
         working-directory: examples/go
       - name: "go: Subset"
-        run: go test -list="Test|Example" ./... | smart-tests subset go-test --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-go" --confidence 80% > smart-tests-subset.txt
+        run: go test -list="Test|Example" ./... | smart-tests subset go-test --session $(cat go-test-session.txt) --confidence 80% > smart-tests-subset.txt
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GO }}
         working-directory: examples/go
@@ -97,7 +96,7 @@ jobs:
         run: go test -run $(cat smart-tests-subset.txt) ./... -v 2>&1 | go-junit-report -set-exit-code > report.xml
         working-directory: examples/go
       - name: "go: Record test results"
-        run: smart-tests record test go-test --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-go" report.xml
+        run: smart-tests record test go-test --session $(cat go-test-session.txt) report.xml
         if: always()
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GO }}
@@ -108,17 +107,17 @@ jobs:
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GRADLE }}
       - name: "gradle: Record build"
-        run: 'smart-tests record build --build "$GITHUB_RUN_ID" --branch "$GITHUB_REF_NAME" --source main=.. --source cli=../..'
+        run: 'smart-tests record build --build "$GITHUB_RUN_ID" --source main=.. --source cli=../..'
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GRADLE }}
         working-directory: examples/gradle
       - name: "gradle: Record session"
-        run: 'smart-tests record session --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-gradle" --test-suite "gradle"'
+        run: 'smart-tests record session --build "$GITHUB_RUN_ID" --test-suite "gradle" > gradle-test-session.txt'
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GRADLE }}
         working-directory: examples/gradle
       - name: "gradle: Subset"
-        run: smart-tests subset gradle --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-gradle" --target 80% src/test/java > smart-tests-subset.txt
+        run: smart-tests subset gradle --session $(cat gradle-test-session.txt) --target 80% src/test/java > smart-tests-subset.txt
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GRADLE }}
         working-directory: examples/gradle
@@ -126,7 +125,7 @@ jobs:
         run: ./gradlew test $(cat smart-tests-subset.txt)
         working-directory: examples/gradle
       - name: "gradle: Record test results"
-        run: smart-tests record test gradle --build "$GITHUB_RUN_ID" --session "$GITHUB_RUN_NUMBER-gradle" build/test-results/test
+        run: smart-tests record test gradle --session $(cat gradle-test-session.txt) build/test-results/test
         if: always()
         env:
           SMART_TESTS_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN_GRADLE }}
