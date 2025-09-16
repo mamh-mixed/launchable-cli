@@ -6,12 +6,13 @@ import click
 from launchable.app import Application
 from launchable.commands.helper import find_or_create_session
 from launchable.commands.test_path_writer import TestPathWriter
+from launchable.testpath import unparse_test_path
 from launchable.utils.click import ignorable_error
 from launchable.utils.env_keys import REPORT_ERROR_KEY
 from launchable.utils.launchable_client import LaunchableClient
 from launchable.utils.tracking import Tracking, TrackingClient
 
-from ...utils.commands import Command
+from ..utils.commands import Command
 
 
 @click.group(help="Early flake detection")
@@ -23,14 +24,16 @@ from ...utils.commands import Command
     required=True
 )
 @click.option(
-    '--confidence',
-    help='Confidence level for flake detection',
+    '--retry-threshold',
+    'retry_threshold',
+    help='Throughness of how "flake" is detected',
     type=click.Choice(['low', 'medium', 'high'], case_sensitive=False),
+    default='medium',
     required=True,
 )
 @click.pass_context
-def flake_detection(ctx, confidence, session):
-    tracking_client = TrackingClient(Command.FLAKE_DETECTION, app=ctx.obj)
+def detect_flakes(ctx, retry_threshold, session):
+    tracking_client = TrackingClient(Command.DETECT_FLAKE, app=ctx.obj)
     client = LaunchableClient(app=ctx.obj, tracking_client=tracking_client, test_runner=ctx.invoked_subcommand)
     session_id = None
     try:
@@ -64,15 +67,18 @@ def flake_detection(ctx, confidence, session):
             try:
                 res = client.request(
                     "get",
-                    "retry/flake-detection",
+                    "detect-flake",
                     params={
-                        "confidence": confidence.upper(),
+                        "confidence": retry_threshold.upper(),
                         "session-id": os.path.basename(session_id),
                         "test-runner": ctx.invoked_subcommand})
                 res.raise_for_status()
                 test_paths = res.json().get("testPaths", [])
                 if test_paths:
                     self.print(test_paths)
+                    click.echo("Trying to retry the following tests:", err=True)
+                    for detail in res.json().get("testDetails", []):
+                        click.echo(f"{detail.get('reason')}: {unparse_test_path(detail.get('fullTestPath'))}", err=True)
             except Exception as e:
                 tracking_client.send_error_event(
                     event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
