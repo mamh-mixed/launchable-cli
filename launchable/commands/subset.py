@@ -207,6 +207,12 @@ from .test_path_writer import TestPathWriter
     help="get subset list from git managed files",
     is_flag=True,
 )
+@click.option(
+    "--use-case",
+    "use_case",
+    type=click.Choice(["one-commit", "feature-branch", "recurring"]),
+    hidden=True,  # control PTS v2 test selection behavior. Non-committed, so hidden for now.
+)
 @click.pass_context
 def subset(
     context: click.core.Context,
@@ -235,6 +241,7 @@ def subset(
     prioritized_tests_mapping_file: Optional[TextIO] = None,
     test_suite: Optional[str] = None,
     is_get_tests_from_guess: bool = False,
+    use_case: Optional[str] = None,
 ):
     app = context.obj
     tracking_client = TrackingClient(Command.SUBSET, app=app)
@@ -512,6 +519,9 @@ def subset(
 
             if prioritized_tests_mapping_file:
                 payload['prioritizedTestsMapping'] = json.load(prioritized_tests_mapping_file)
+
+            if use_case:
+                payload["changesUnderTest"] = use_case
 
             return payload
 
