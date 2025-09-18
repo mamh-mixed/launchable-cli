@@ -6,6 +6,7 @@ from typing import Annotated, List
 import typer
 from tabulate import tabulate
 
+from smart_tests.commands.record.session import KeyValue, LinkKind, parse_key_value
 from smart_tests.utils.link import CIRCLECI_KEY, GITHUB_ACTIONS_KEY, JENKINS_URL_KEY, capture_link
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
@@ -71,6 +72,11 @@ def build(
         help="Used to overwrite the build time when importing historical data. "
              "Note: Format must be `YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)"
     )] = None,
+    links: Annotated[List[KeyValue], typer.Option(
+        "--link",
+        help="Set external link of a title and url",
+        parser=parse_key_value,
+    )] = [],
 ):
     app = ctx.obj
 
@@ -283,9 +289,16 @@ def build(
 
     # send all the data to server and obtain build_id, or none if the service is down, to recover
     def send(ws: List[Workspace]) -> str | None:
+        # TODO(Konboi): port forward #1128
         # figure out all the CI links to capture
         def compute_links():
             _links = capture_link(os.environ)
+            for k, v in links:
+                _links.append({
+                    "title": k,
+                    "url": v,
+                    "kind": LinkKind.CUSTOM_LINK.name,
+                })
             return _links
 
         try:

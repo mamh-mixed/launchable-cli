@@ -384,3 +384,33 @@ class BuildTest(CliTestCase):
             ".=main")
         self.assert_exit_code(result, 1)
         self.assertIn("--no-commit-collection must be specified when --repo-branch-map is used", result.stdout)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    # to tests on GitHub Actions
+    @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
+    @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
+    def test_with_link(self):
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'url=https://smart-tests.test',
+            '--link', 'build:https://build.smart-tests.test',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+
+        self.assert_exit_code(result, 0)
+        payload = json.loads(responses.calls[1].request.body.decode())
+        self.assert_json_orderless_equal(
+            {
+                "buildNumber": "123",
+                "lineage": "main",
+                "commitHashes": [{"repositoryName": "app", "commitHash": "abc12", "branchName": ""}],
+                "links": [
+                    {"title": "url", "url": "https://smart-tests.test", "kind": "CUSTOM_LINK"},
+                    {"title": "build", "url": "https://build.smart-tests.test", "kind": "CUSTOM_LINK"},
+                ],
+                "timestamp": None
+            }, payload)

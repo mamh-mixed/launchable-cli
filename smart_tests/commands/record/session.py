@@ -45,7 +45,7 @@ def session(
     )] = False,
     links: Annotated[List[KeyValue], typer.Option(
         "--link",
-        help="Set external link of atitle and url",
+        help="Set external link of a title and url",
         parser=parse_key_value,
     )] = [],
     is_no_build: Annotated[bool, typer.Option(
