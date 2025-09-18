@@ -15,6 +15,8 @@ from smart_tests.utils.env_keys import BASE_URL_KEY
 from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
+# test coment
+
 
 # dummy server for exe.jar
 # exe.jar calls commits/latest (GET) then commits/collect (POST)
