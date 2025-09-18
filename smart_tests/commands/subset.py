@@ -14,6 +14,7 @@ from tabulate import tabulate
 
 from smart_tests.utils.authentication import get_org_workspace
 from smart_tests.utils.commands import Command
+from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
@@ -122,11 +123,6 @@ def subset(
         session=session,
     ))
 
-    def print_error_and_die(msg: str, event: Tracking.ErrorEvent):
-        typer.echo(typer.style(msg, fg="red"), err=True)
-        tracking_client.send_error_event(event_name=event, stack_trace=msg)
-        sys.exit(1)
-
     def warn(msg: str):
         typer.echo(typer.style("Warning: " + msg, fg="yellow"), err=True)
         tracking_client.send_error_event(
@@ -143,7 +139,7 @@ def subset(
         session_id = test_session.id
         is_observation = test_session.observation_mode
     except ValueError as e:
-        print_error_and_die(msg=str(e), event=Tracking.ErrorEvent.USER_ERROR)
+        print_error_and_die(msg=str(e), tracking_client=tracking_client, event=Tracking.ErrorEvent.USER_ERROR)
     except Exception as e:
         if os.getenv(REPORT_ERROR_KEY):
             raise e
@@ -155,6 +151,7 @@ def subset(
     if is_get_tests_from_guess and is_get_tests_from_previous_sessions:
         print_error_and_die(
             "--get-tests-from-guess (list up tests from git ls-files and subset from there) and --get-tests-from-previous-sessions (list up tests from the recent runs and subset from there) are mutually exclusive. Which one do you want to use?",  # noqa E501
+            tracking_client,
             Tracking.ErrorEvent.USER_ERROR
         )
 
@@ -165,12 +162,14 @@ def subset(
         if ignore_new_tests or (ignore_flaky_tests_above is not None and ignore_flaky_tests_above > 0):
             print_error_and_die(
                 "Cannot use --ignore-new-tests or --ignore-flaky-tests-above options with --prioritize-tests-failed-within-hours",
+                tracking_client,
                 Tracking.ErrorEvent.INTERNAL_CLI_ERROR
             )
 
     if is_non_blocking and not is_observation:
         print_error_and_die(
             "You have to specify --observation option to use non-blocking mode",
+            tracking_client,
             Tracking.ErrorEvent.INTERNAL_CLI_ERROR)
 
     file_path_normalizer = FilePathNormalizer(base_path, no_base_path_inference=no_base_path_inference)
@@ -400,7 +399,7 @@ def subset(
                 res = subset_request(client=client, timeout=timeout, payload=payload)
                 # The status code 422 is returned when validation error of the test mapping file occurs.
                 if res.status_code == 422:
-                    print_error_and_die("Error: {}".format(res.reason), Tracking.ErrorEvent.USER_ERROR)
+                    print_error_and_die("Error: {}".format(res.reason), tracking_client, Tracking.ErrorEvent.USER_ERROR)
 
                 return SubsetResult.from_response(res.json())
             except Exception as e:
@@ -420,10 +419,11 @@ def subset(
 
             if not self.is_get_tests_from_previous_sessions and len(self.test_paths) == 0:
                 if self.input_given:
-                    print_error_and_die("ERROR: Given arguments did not match any tests. They appear to be incorrect/non-existent.", Tracking.ErrorEvent.USER_ERROR)  # noqa E501
+                    print_error_and_die("ERROR: Given arguments did not match any tests. They appear to be incorrect/non-existent.", tracking_client, Tracking.ErrorEvent.USER_ERROR)  # noqa E501
                 else:
                     print_error_and_die(
                         "ERROR: Expecting tests to be given, but none provided. See https://www.launchableinc.com/docs/features/predictive-test-selection/requesting-and-running-a-subset-of-tests/subsetting-with-the-launchable-cli/ and provide ones, or use the `--get-tests-from-previous-sessions` option",  # noqa E501
+                        tracking_client,
                         Tracking.ErrorEvent.USER_ERROR)
 
             # When Error occurs, return the test name as it is passed.
