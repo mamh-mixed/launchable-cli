@@ -81,10 +81,6 @@ def subset(
         "--ignore-new-tests",
         help="Ignore tests that were added recently. NOTICE: this option will ignore tests that you added just now as well"
     )] = False,
-    is_observation: Annotated[bool, typer.Option(
-        '--observation',
-        help="enable observation mode"
-    )] = False,
     is_get_tests_from_previous_sessions: Annotated[bool, typer.Option(
         "--get-tests-from-previous-sessions",
         help="get subset list from previous full tests"
@@ -124,7 +120,6 @@ def subset(
     fail_fast_mode_validate(FailFastModeValidateParams(
         command=Command.SUBSET,
         session=session,
-        is_observation=is_observation,
     ))
 
     def print_error_and_die(msg: str, event: Tracking.ErrorEvent):
