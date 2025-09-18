@@ -134,6 +134,9 @@ def subset(
             stack_trace=msg
         )
 
+    # Note(Konboi): when get_session throws exception, is_observation won't be defined
+    # To avoid that, we define is_observation here (out of try block)
+    is_observation = False
     try:
         test_session = get_session(session, client)
         build_name = test_session.build_name
