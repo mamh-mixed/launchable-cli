@@ -1,6 +1,5 @@
 import json
 import os
-import platform
 import tempfile
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -10,7 +9,6 @@ from unittest import mock
 import responses  # type: ignore
 from requests.exceptions import ReadTimeout
 
-from smart_tests.commands.verify import compare_version
 from smart_tests.utils.env_keys import BASE_URL_KEY
 from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
@@ -382,46 +380,31 @@ class APIErrorTest(CliTestCase):
         # test commands
         result = self.cli("verify")
         self.assert_success(result)
-        # Since Timeout error is caught inside of LaunchableClient, the tracking event is sent twice.
         self.assert_tracking_count(tracking=tracking, count=2)
 
         result = self.cli(
-            "record",
-            "build",
-            "--build",
-            "example",
-            "--branch",
-            "main",
-            "--repo-branch-map",
-            ".=main",
+            "record", "build",
+            "--build", "example",
+            "--branch", "main",
+            "--repo-branch-map", ".=main",
             "--no-commit-collection")
         self.assert_success(result)
-
-        # Since Timeout error is caught inside of LaunchableClient, the tracking event is sent twice.
         self.assert_tracking_count(tracking=tracking, count=5)
 
         # set delete=False to solve the error `PermissionError: [Errno 13] Permission denied:` on Windows.
         with tempfile.NamedTemporaryFile(delete=False) as rest_file:
-            result = self.cli("subset",
-                              "minitest",
-                              "--target",
-                              "30%",
-                              "--session",
-                              self.session,
-                              "--rest",
-                              rest_file.name,
+            result = self.cli("subset", "minitest",
+                              "--target", "30%",
+                              "--session", self.session,
+                              "--rest", rest_file.name,
                               str(self.test_files_dir) + "/test/**/*.rb", mix_stderr=False)
             self.assert_success(result)
 
-        # Since Timeout error is caught inside of LaunchableClient, the tracking event is sent twice.
         self.assert_tracking_count(tracking=tracking, count=7)
 
         result = self.cli("record", "test", "minitest", "--session", self.session, str(self.test_files_dir) + "/")
         self.assert_success(result)
-        # Since Timeout error is caught inside of LaunchableClient, the tracking event is sent twice.
         self.assert_tracking_count(tracking=tracking, count=11)
 
     def assert_tracking_count(self, tracking, count: int):
-        # Prior to 3.6, `Response` object can't be obtained.
-        if compare_version([int(x) for x in platform.python_version().split('.')], [3, 7]) >= 0:
-            self.assertEqual(tracking.call_count, count)
+        self.assertEqual(tracking.call_count, count)
