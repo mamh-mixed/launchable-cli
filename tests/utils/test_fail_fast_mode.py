@@ -1,12 +1,12 @@
 import io
+import unittest
 from contextlib import contextmanager, redirect_stderr
 
 from smart_tests.utils.commands import Command
 from smart_tests.utils.fail_fast_mode import FailFastModeValidateParams, fail_fast_mode_validate
-from tests.cli_test_case import CliTestCase
 
 
-class FailFastModeTest(CliTestCase):
+class FailFastModeTest(unittest.TestCase):
     def test_fail_fast_mode_validate(self):
         params = FailFastModeValidateParams(
             command=Command.SUBSET,
