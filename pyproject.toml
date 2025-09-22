@@ -1,11 +1,9 @@
 [project]
 name = "smart-tests-cli"
-authors = [
-    {name = "CloudBees", email = "support@cloudbees.com"}
-]
+authors = [{ name = "CloudBees", email = "support@cloudbees.com" }]
 description = "Smart Tests CLI"
 readme = "README.md"
-license = {text = "Apache Software License v2"}
+license = { text = "Apache Software License v2" }
 requires-python = ">=3.13"
 classifiers = [
     "Programming Language :: Python :: 3",
