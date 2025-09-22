@@ -415,6 +415,8 @@ def subset(
                 if res.status_code == 422:
                     print_error_and_die("Error: {}".format(res.reason), tracking_client, Tracking.ErrorEvent.USER_ERROR)
 
+                res.raise_for_status()
+
                 return SubsetResult.from_response(res.json())
             except Exception as e:
                 tracking_client.send_error_event(
