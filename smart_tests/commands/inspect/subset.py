@@ -65,7 +65,7 @@ class SubsetResultTableDisplay(SubsetResultAbstractDisplay):
                     result._estimated_duration_sec,
                 ]
             )
-        typer.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
+        typer.echo_via_pager(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
 
 
 class SubsetResultJSONDisplay(SubsetResultAbstractDisplay):
