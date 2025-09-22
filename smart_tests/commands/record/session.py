@@ -9,7 +9,7 @@ import typer
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.fail_fast_mode import set_fail_fast_mode
-from smart_tests.utils.link import LinkKind, capture_link
+from smart_tests.utils.link import capture_links
 from smart_tests.utils.no_build import NO_BUILD_BUILD_NAME
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
@@ -78,24 +78,16 @@ def session(
     if is_no_build:
         build_name = NO_BUILD_BUILD_NAME
 
-    payload = {
-        "flavors": dict([(f.key, f.value) for f in flavors]),
-        "isObservation": is_observation,
-        "noBuild": is_no_build,
-        "testSuite": test_suite,
-        "timestamp": parsed_timestamp.isoformat() if parsed_timestamp else None,
-    }
-
-    _links = capture_link(os.environ)
-    for link in links:
-        _links.append({
-            "title": link.key,
-            "url": link.value,
-            "kind": LinkKind.CUSTOM_LINK.name,
-        })
-    payload["links"] = _links
-
     try:
+        payload = {
+            "flavors": dict([(f.key, f.value) for f in flavors]),
+            "isObservation": is_observation,
+            "noBuild": is_no_build,
+            "testSuite": test_suite,
+            "timestamp": parsed_timestamp.isoformat() if parsed_timestamp else None,
+            "links": capture_links(link_options=[(link.key, link.value) for link in links], env=os.environ)
+        }
+
         sub_path = f"builds/{build_name}/test_sessions"
         res = client.request("post", sub_path, payload=payload)
 

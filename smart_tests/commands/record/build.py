@@ -6,8 +6,8 @@ from typing import Annotated, List
 import typer
 from tabulate import tabulate
 
-from smart_tests.commands.record.session import KeyValue, LinkKind, parse_key_value
-from smart_tests.utils.link import CIRCLECI_KEY, GITHUB_ACTIONS_KEY, JENKINS_URL_KEY, capture_link
+from smart_tests.commands.record.session import KeyValue, parse_key_value
+from smart_tests.utils.link import CIRCLECI_KEY, GITHUB_ACTIONS_KEY, JENKINS_URL_KEY, capture_links
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ...utils import subprocess
@@ -292,14 +292,7 @@ def build(
         # TODO(Konboi): port forward #1128
         # figure out all the CI links to capture
         def compute_links():
-            _links = capture_link(os.environ)
-            for k, v in links:
-                _links.append({
-                    "title": k,
-                    "url": v,
-                    "kind": LinkKind.CUSTOM_LINK.name,
-                })
-            return _links
+            return capture_links(link_options=links, env=os.environ)
 
         try:
             lineage = branch or ws[0].branch
