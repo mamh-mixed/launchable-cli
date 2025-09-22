@@ -503,11 +503,11 @@ dev = [
 requires-dist = [
     { name = "junitparser", specifier = ">=4.0.0" },
     { name = "more-itertools", specifier = ">=7.1.0" },
-    { name = "python-dateutil" },
-    { name = "requests", specifier = ">=2.25" },
-    { name = "tabulate" },
-    { name = "typer", specifier = ">=0.9.0" },
-    { name = "urllib3", specifier = ">=1.26" },
+    { name = "python-dateutil", specifier = ">=2.9" },
+    { name = "requests", specifier = ">=2.32.5" },
+    { name = "tabulate", specifier = ">=0.9" },
+    { name = "typer", specifier = ">=0.19.1" },
+    { name = "urllib3", specifier = ">=2.5" },
 ]
 
 [package.metadata.requires-dev]
