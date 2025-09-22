@@ -6,9 +6,9 @@ from typing import Annotated
 
 import typer
 
+from smart_tests.commands.detect_flakes import app as detect_flakes_cmd
 from smart_tests.commands.record.tests import app as record_tests_cmd
 from smart_tests.commands.subset import app as subset_cmd
-from smart_tests.commands.detect_flakes import app as detect_flakes_cmd
 from smart_tests.utils.test_runner_registry import cmdname, create_test_runner_wrapper, get_registry
 
 
@@ -182,4 +182,7 @@ class CommonDetectFlakesImpls:
 
             client.run()
 
+        # Register with new registry system for NestedCommand
+        registry = get_registry()
+        registry.register_detect_flakes(self.cmdname, detect_flakes)
         return wrap(detect_flakes, detect_flakes_cmd, self.cmdname)

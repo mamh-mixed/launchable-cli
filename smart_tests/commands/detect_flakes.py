@@ -1,6 +1,7 @@
-from enum import Enum
 import os
+from enum import Enum
 from typing import Annotated
+
 import typer
 
 from smart_tests.app import Application
@@ -95,3 +96,11 @@ def detect_flakes(
     ctx.obj = FlakeDetection(app=ctx.obj)
 
 
+nested_command_app = typer.Typer(name="detect-flakes", help="Detect flaky tests from test files (NestedCommand)")
+
+
+def create_nested_command_app():
+    builder = DynamicCommandBuilder()
+
+    callback_options = extract_callback_options(detect_flakes)
+    builder.create_detect_flakes_commands(nested_command_app, detect_flakes, callback_options)

@@ -65,12 +65,17 @@ class TestRunnerRegistry:
         """Get all registered split subset functions."""
         return self._split_subset_functions.copy()
 
+    def get_detect_flakes_functions(self) -> Dict[str, Callable]:
+        """Get all registered detect flakes functions."""
+        return self._detect_flakes_functions.copy()
+
     def get_all_test_runner_names(self) -> List[str]:
         """Get all unique test runner names across all command types."""
         all_names: set[str] = set()
         all_names.update(self._subset_functions.keys())
         all_names.update(self._record_test_functions.keys())
         all_names.update(self._split_subset_functions.keys())
+        all_names.update(self._detect_flakes_functions.keys())
         return sorted(list(all_names))
 
 
