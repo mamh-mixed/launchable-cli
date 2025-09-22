@@ -55,3 +55,6 @@ def record_tests(
     for r in reports:
         client.report(r)
     client.run()
+
+
+smart_tests.CommonDetectFlakesImpls(__name__).detect_flakes()

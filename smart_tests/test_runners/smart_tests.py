@@ -8,6 +8,7 @@ import typer
 
 from smart_tests.commands.record.tests import app as record_tests_cmd
 from smart_tests.commands.subset import app as subset_cmd
+from smart_tests.commands.detect_flakes import app as detect_flakes_cmd
 from smart_tests.utils.test_runner_registry import cmdname, create_test_runner_wrapper, get_registry
 
 
@@ -31,6 +32,13 @@ def subset(f):
     test_runner_name = cmdname(f.__module__)
     registry = get_registry()
     registry.register_subset(test_runner_name, f)
+    return f
+
+
+def detect_flakes(f):
+    test_runner_name = cmdname(f.__module__)
+    registry = get_registry()
+    registry.register_detect_flakes(test_runner_name, f)
     return f
 
 
@@ -152,3 +160,26 @@ class CommonRecordTestImpls:
                 return
 
         client.run()
+
+
+class CommonDetectFlakesImpls:
+    def __init__(
+            self,
+            module_name,
+            formatter=None,
+            separator="\n",
+    ):
+        self.cmdname = cmdname(module_name)
+        self._formatter = formatter
+        self._separator = separator
+
+    def detect_flakes(self):
+        def detect_flakes(client):
+            if self._formatter:
+                client.formatter = self._formatter
+            if self._separator:
+                client.separator = self._separator
+
+            client.run()
+
+        return wrap(detect_flakes, detect_flakes_cmd, self.cmdname)

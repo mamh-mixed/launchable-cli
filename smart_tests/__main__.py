@@ -9,6 +9,7 @@ from typing import Annotated
 import typer
 
 from smart_tests.app import Application
+from smart_tests.commands import detect_flakes
 from smart_tests.commands.record.tests import create_nested_commands as create_record_target_commands
 from smart_tests.commands.subset import create_nested_commands as create_subset_target_commands
 from smart_tests.utils.test_runner_registry import get_registry
@@ -150,6 +151,7 @@ try:
     app.add_typer(inspect.app, name="inspect")
     app.add_typer(stats.app, name="stats")
     app.add_typer(compare.app, name="compare")
+    app.add_typer(detect_flakes.app, name="detect-flakes")
 
     # Add record-target as a sub-app to record command
     record.app.add_typer(record_target_app, name="test")  # Use NestedCommand version
@@ -162,6 +164,7 @@ except Exception as e:
     app.add_typer(verify.app, name="verify")
     app.add_typer(inspect.app, name="inspect")
     app.add_typer(stats.app, name="stats")
+    app.add_typer(detect_flakes.app, name="detect-flakes")
 
 app.callback()(main)
 

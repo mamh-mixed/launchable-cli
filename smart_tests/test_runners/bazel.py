@@ -30,6 +30,9 @@ def subset(client):
     client.run()
 
 
+smart_tests.CommonDetectFlakesImpls(__name__).detect_flakes()
+
+
 @smart_tests.record.tests
 def record_tests(
     client,

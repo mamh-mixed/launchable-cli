@@ -22,6 +22,7 @@ class TestRunnerRegistry:
         self._subset_functions: Dict[str, Callable] = {}
         self._record_test_functions: Dict[str, Callable] = {}
         self._split_subset_functions: Dict[str, Callable] = {}
+        self._detect_flakes_functions: Dict[str, Callable] = {}
         # Callback to trigger when new test runners are registered
         self._on_register_callback: Callable[[], None] | None = None
 
@@ -44,6 +45,11 @@ class TestRunnerRegistry:
     def register_split_subset(self, test_runner_name: str, func: Callable) -> None:
         """Register a split subset function for a test runner."""
         self._split_subset_functions[test_runner_name] = func
+        if self._on_register_callback:
+            self._on_register_callback()
+
+    def register_detect_flakes(self, test_runner_name: str, func: Callable) -> None:
+        self._detect_flakes_functions[test_runner_name] = func
         if self._on_register_callback:
             self._on_register_callback()
 
