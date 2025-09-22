@@ -9,11 +9,12 @@ from typing import Annotated
 import typer
 
 from smart_tests.app import Application
+from smart_tests.commands.detect_flakes import create_nested_command_app as create_detect_flakes_commands
 from smart_tests.commands.record.tests import create_nested_commands as create_record_target_commands
 from smart_tests.commands.subset import create_nested_commands as create_subset_target_commands
 from smart_tests.utils.test_runner_registry import get_registry
 
-from .commands import compare, inspect, record, stats, subset, verify
+from .commands import compare, detect_flakes, inspect, record, stats, subset, verify
 from .utils import logger
 from .utils.env_keys import SKIP_CERT_VERIFICATION
 from .version import __version__
@@ -29,6 +30,7 @@ for f in glob(join(dirname(__file__), 'test_runners', "*.py")):
 try:
     create_subset_target_commands()
     create_record_target_commands()
+    create_detect_flakes_commands()
 except Exception as e:
     # If NestedCommand creation fails, continue with legacy commands
     # This ensures backward compatibility
@@ -47,7 +49,8 @@ def _rebuild_nested_commands_with_plugins():
 
     try:
         # Clear existing commands from nested apps and rebuild
-        for module_name in ['smart_tests.commands.subset', 'smart_tests.commands.record.tests']:
+        for module_name in ['smart_tests.commands.subset', 'smart_tests.commands.record.tests',
+                            'smart_tests.commands.detect_flakes']:
             module = importlib.import_module(module_name)
             if hasattr(module, 'nested_command_app'):
                 nested_app = module.nested_command_app
@@ -141,6 +144,7 @@ def main(
 
 # Use NestedCommand apps if available, otherwise fall back to legacy
 try:
+    from smart_tests.commands.detect_flakes import nested_command_app as detect_flakes_target_app
     from smart_tests.commands.record.tests import nested_command_app as record_target_app
     from smart_tests.commands.subset import nested_command_app as subset_target_app
 
@@ -150,6 +154,7 @@ try:
     app.add_typer(inspect.app, name="inspect")
     app.add_typer(stats.app, name="stats")
     app.add_typer(compare.app, name="compare")
+    app.add_typer(detect_flakes_target_app, name="detect-flakes")
 
     # Add record-target as a sub-app to record command
     record.app.add_typer(record_target_app, name="test")  # Use NestedCommand version
@@ -162,6 +167,7 @@ except Exception as e:
     app.add_typer(verify.app, name="verify")
     app.add_typer(inspect.app, name="inspect")
     app.add_typer(stats.app, name="stats")
+    app.add_typer(detect_flakes.app, name="detect-flakes")
 
 app.callback()(main)
 

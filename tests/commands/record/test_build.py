@@ -414,3 +414,47 @@ class BuildTest(CliTestCase):
                 ],
                 "timestamp": None
             }, payload)
+
+        # with invalid kind
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'UNKNOWN_KIND|PR=https://github.com/cloudbees-oss/smart-tests/pull/1',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assertIn("Invalid kind 'UNKNOWN_KIND' passed to --link option.", result.output)
+
+        # with invalid URL
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'GITHUB_PULL_REQUEST|PR=https://smart-tests.test/pull/1/files',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assertIn("Invalid url 'https://smart-tests.test/pull/1/files' passed to --link option.", result.output)
+
+        # with infer kind
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'PR=https://smart-tests.test/pull/1',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assert_success(result)
+
+        # with explicit kind
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'GITHUB_PULL_REQUEST|PR=https://smart-tests.test/pull/1',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assert_success(result)

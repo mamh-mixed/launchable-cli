@@ -52,4 +52,4 @@ def subsets(
         (before, after, f"{diff:+}" if isinstance(diff, int) else diff, test)
         for before, after, diff, test in rows
     ]
-    typer.echo(tabulate(tabular_data, headers=headers, tablefmt="github"))
+    typer.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))

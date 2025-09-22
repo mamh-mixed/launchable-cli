@@ -5,6 +5,7 @@ import pathlib
 import re
 import subprocess
 import sys
+from enum import Enum
 from multiprocessing import Process
 from os.path import join
 from typing import Annotated, Any, Callable, Dict, List, TextIO
@@ -32,6 +33,12 @@ from .test_path_writer import TestPathWriter
 
 
 app = typer.Typer(name="subset", help="Subsetting tests")
+
+
+class SubsetUseCase(str, Enum):
+    ONE_COMMIT = "one-commit"
+    FEATURE_BRANCH = "feature-branch"
+    RECURRING = "recurring"
 
 
 @app.callback()
@@ -111,7 +118,11 @@ def subset(
     is_get_tests_from_guess: Annotated[bool, typer.Option(
         "--get-tests-from-guess",
         help="Get subset list from guessed tests"
-    )] = False
+    )] = False,
+    use_case: Annotated[SubsetUseCase | None, typer.Option(
+        "--use-case",
+        hidden=True
+    )] = None,
 ):
     app = ctx.obj
     tracking_client = TrackingClient(Command.SUBSET, app=app)
@@ -352,6 +363,9 @@ def subset(
             if prioritized_tests_mapping_file:
                 payload['prioritizedTestsMapping'] = json.load(prioritized_tests_mapping_file)
 
+            if use_case:
+                payload['changesUnderTest'] = use_case.value
+
             return payload
 
         def _collect_potential_test_files(self):
@@ -400,6 +414,8 @@ def subset(
                 # The status code 422 is returned when validation error of the test mapping file occurs.
                 if res.status_code == 422:
                     print_error_and_die("Error: {}".format(res.reason), tracking_client, Tracking.ErrorEvent.USER_ERROR)
+
+                res.raise_for_status()
 
                 return SubsetResult.from_response(res.json())
             except Exception as e:
