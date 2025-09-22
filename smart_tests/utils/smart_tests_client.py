@@ -29,7 +29,7 @@ class SmartTestsClient:
                 "Could not identify a Smart Tests organization/workspace. "
                 "Confirm that you set SMART_TESTS_TOKEN "
                 "(or SMART_TESTS_ORGANIZATION and SMART_TESTS_WORKSPACE) environment variable(s)\n"
-                "See https://docs.launchableinc.com/getting-started#setting-your-api-key")
+                "See https://help.launchableinc.com/sending-data-to-launchable/using-the-launchable-cli/getting-started/")
         self._workspace_state_cache: Dict[str, str | bool] | None = None
 
     def request(
