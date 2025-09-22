@@ -155,7 +155,7 @@ def tests_main(
         # A common mechanism to build ParseFunc by building JUnit XML report in-memory (or build it the usual way
         # and patch it to fix things up). This is handy as some libraries
         # produce invalid / broken JUnit reports
-        JUnitXmlParseFunc = Callable[[str], ET.Element]
+        JUnitXmlParseFunc = Callable[[str], ET.Element | ET.ElementTree]
 
         @property
         def path_builder(self) -> CaseEvent.TestPathBuilder:

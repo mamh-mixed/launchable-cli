@@ -1,6 +1,6 @@
 import html
 import xml.etree.ElementTree as ET  # type: ignore
-from typing import Annotated, List
+from typing import Annotated, List, cast
 
 import typer
 from junitparser import TestCase, TestSuite
@@ -18,8 +18,10 @@ def record_tests(
 ):
 
     def parse_func(p: str) -> ET.ElementTree:
-        tree = ET.parse(p)
+        tree = cast(ET.ElementTree, ET.parse(p))
         root = tree.getroot()
+        if root is None:
+            return tree
 
         for testsuite in root.findall('testsuite'):
             for testcase in testsuite.findall('testcase'):

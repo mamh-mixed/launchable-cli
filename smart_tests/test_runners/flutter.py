@@ -200,7 +200,7 @@ class ReportParser:
             suite._test_cases[test_id] = TestCase(test_id, name, is_skipped)
 
         elif data_type == "testDone":
-            test_id = data.get("testID")
+            test_id = data.get("testID", 0)
             test = self._get_test(test_id)
 
             if test is None:
@@ -211,7 +211,7 @@ class ReportParser:
             test.duration = duration_msec / 1000  # to sec
 
         elif data_type == "error":
-            test_id = data.get("testID")
+            test_id = data.get("testID", 0)
             test = self._get_test(test_id)
             if test is None:
                 typer.secho(
@@ -223,7 +223,7 @@ class ReportParser:
         elif data_type == "print":
             # It's difficult to identify the "Retry" case because Flutter reports it with the same test ID
             # So we won't handle it at the moment.
-            test_id = data.get("testID")
+            test_id = data.get("testID", 0)
             test = self._get_test(test_id)
             if test is None:
                 typer.secho(
