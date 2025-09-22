@@ -23,7 +23,7 @@ class XCTestTest(CliTestCase):
             },
             status=200)
 
-        result = self.cli('record', 'test', 'xctest', '--session', self.session,
+        result = self.cli('record', 'tests', 'xctest', '--session', self.session,
                           str(self.test_files_dir.joinpath("junit.xml")))
 
         self.assert_success(result)

@@ -258,7 +258,7 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_gradle(self):
-        result = self.cli('record', 'test', 'gradle', '--session', self.session,
+        result = self.cli('record', 'tests', 'gradle', '--session', self.session,
                           str(self.test_files_dir) + "/**/reports")
         self.assert_success(result)
         self.assert_record_tests_payload('recursion/expected.json')

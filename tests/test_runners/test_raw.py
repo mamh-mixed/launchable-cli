@@ -205,7 +205,7 @@ class RawTest(CliTestCase):
                     '  ]',
                     '}',
                 ]) + '\n')
-            result = self.cli('record', 'test', 'raw', '--session', self.session,
+            result = self.cli('record', 'tests', 'raw', '--session', self.session,
                               test_path_file, test_path_file2, test_path_file3)
             self.assert_success(result)
 
@@ -305,7 +305,7 @@ class RawTest(CliTestCase):
                     '  </testsuite>',
                     '</testsuites>',
                 ]) + '\n')
-            result = self.cli('record', 'test', 'raw', '--session', self.session,
+            result = self.cli('record', 'tests', 'raw', '--session', self.session,
                               test_path_file, test_path_file2)
             if result.exit_code != 0:
                 self.assertEqual(

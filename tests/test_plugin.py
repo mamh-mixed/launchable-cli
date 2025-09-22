@@ -47,7 +47,7 @@ class PluginTest(CliTestCase):
         Load plugins/foo.py as a plugin and execute its code
         """
         plugin_dir = Path(__file__).parent.joinpath('plugins').resolve()
-        result = self.cli('--plugins', str(plugin_dir), 'record', 'test', 'foo',
+        result = self.cli('--plugins', str(plugin_dir), 'record', 'tests', 'foo',
                           '--session', self.session, 'alpha', 'bravo', 'charlie')
         self.assertTrue("foo:alpha" in result.stdout, result.stdout)
         self.assertTrue("foo:bravo" in result.stdout, result.stdout)

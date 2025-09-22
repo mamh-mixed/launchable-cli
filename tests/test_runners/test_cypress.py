@@ -12,7 +12,7 @@ class CypressTest(CliTestCase):
     def test_record_test_cypress(self):
         # test-result.xml was generated used to cypress-io/cypress-example-kitchensink
         # cypress run --reporter junit report.xml
-        result = self.cli('record', 'test', 'cypress', '--session', self.session,
+        result = self.cli('record', 'tests', 'cypress', '--session', self.session,
                           str(self.test_files_dir) + "/test-result.xml")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')
@@ -38,7 +38,7 @@ class CypressTest(CliTestCase):
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_empty_xml(self):
         # parse empty test report XML
-        result = self.cli('record', 'test', 'cypress', '--session', self.session,
+        result = self.cli('record', 'tests', 'cypress', '--session', self.session,
                           str(self.test_files_dir) + "/empty.xml")
         self.assert_success(result)
         for call in responses.calls:
