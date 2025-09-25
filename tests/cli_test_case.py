@@ -163,19 +163,12 @@ class CliTestCase(unittest.TestCase):
         """
         Invoke CLI command and returns its result
         """
-
-        # for CliRunner kwargs
-        mix_stderr = True
-        if 'mix_stderr' in kwargs:
-            mix_stderr = kwargs['mix_stderr']
-            del kwargs['mix_stderr']
-
         # Disable rich colors for testing by setting the environment variable
         import os
         old_no_color = os.environ.get('NO_COLOR')
         os.environ['NO_COLOR'] = '1'
         try:
-            return CliRunner(mix_stderr=mix_stderr).invoke(main, args, catch_exceptions=False, **kwargs)
+            return CliRunner().invoke(app=main, args=args, catch_exceptions=False, **kwargs)
         finally:
             if old_no_color is None:
                 os.environ.pop('NO_COLOR', None)

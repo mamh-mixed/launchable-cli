@@ -78,6 +78,7 @@ class CTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test(self):
-        result = self.cli('record', 'test', 'ctest', '--session', self.session, str(self.test_files_dir) + "/Testing/**/Test.xml")
+        result = self.cli('record', 'tests', 'ctest', '--session', self.session,
+                          str(self.test_files_dir) + "/Testing/**/Test.xml")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')

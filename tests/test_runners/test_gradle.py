@@ -43,7 +43,7 @@ class GradleTest(CliTestCase):
                  "--tests com.launchableinc.rocket_car_gradle.AppTest " \
                  "--tests com.launchableinc.rocket_car_gradle.sub.App3Test " \
                  "--tests com.launchableinc.rocket_car_gradle.utils.UtilsTest"
-        self.assertIn(output, result.output.rstrip('\n'))
+        self.assertIn(output, result.stdout.rstrip('\n'))
 
     @ignore_warnings
     @responses.activate
@@ -114,15 +114,14 @@ class GradleTest(CliTestCase):
         result = self.cli('subset', 'gradle', '--session', self.session, '--target',
                           '10%',
                           '--get-tests-from-previous-sessions',
-                          '--output-exclusion-rules',
-                          mix_stderr=False)
+                          '--output-exclusion-rules')
 
         if result.exit_code != 0:
             self.assertEqual(
                 result.exit_code,
                 0,
-                "Exit code is not 0. The output is\n" + result.output + "\n" + result.stderr)
-        subset_arg = result.output.rstrip('\n')
+                "Exit code is not 0. The output is\n" + result.stdout + "\n" + result.stderr)
+        subset_arg = result.stdout.rstrip('\n')
         self.assertEqual(
             subset_arg,
             "-PexcludeTests=com/launchableinc/rocket_car_gradle/sub/App2Test.class,com/launchableinc/rocket_car_gradle/"
@@ -158,15 +157,14 @@ class GradleTest(CliTestCase):
         result = self.cli('subset', 'gradle', '--session', self.session, '--target',
                           '10%',
                           '--get-tests-from-previous-sessions',
-                          '--output-exclusion-rules',
-                          mix_stderr=False)
+                          '--output-exclusion-rules')
 
         if result.exit_code != 0:
             self.assertEqual(
                 result.exit_code,
                 0,
-                "Exit code is not 0. The output is\n" + result.output + "\n" + result.stderr)
-        subset_arg = result.output.rstrip('\n')
+                "Exit code is not 0. The output is\n" + result.stdout + "\n" + result.stderr)
+        subset_arg = result.stdout.rstrip('\n')
         self.assertEqual(subset_arg, "-PexcludeTests=")
 
     @ignore_warnings
@@ -200,8 +198,7 @@ class GradleTest(CliTestCase):
                           '10%',
                           '--get-tests-from-previous-sessions',
                           '--output-exclusion-rules',
-                          str(self.test_files_dir.joinpath('java/app/src/test').resolve()),
-                          mix_stderr=False)
+                          str(self.test_files_dir.joinpath('java/app/src/test').resolve()))
 
         if result.exit_code != 0:
             self.assertEqual(
@@ -261,7 +258,7 @@ class GradleTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_gradle(self):
-        result = self.cli('record', 'test', 'gradle', '--session', self.session,
+        result = self.cli('record', 'tests', 'gradle', '--session', self.session,
                           str(self.test_files_dir) + "/**/reports")
         self.assert_success(result)
         self.assert_record_tests_payload('recursion/expected.json')

@@ -34,7 +34,7 @@ class SubsetTest(CliTestCase):
             json=self.mock_json,
             status=200)
 
-        result = self.cli('inspect', 'subset', '--subset-id', self.subsetting_id, mix_stderr=False)
+        result = self.cli('inspect', 'subset', '--subset-id', self.subsetting_id)
         expect = """|   Order | Test Path          | In Subset   |   Estimated duration (sec) |
 |---------|--------------------|-------------|----------------------------|
 |       1 | file=test_file1.py | ✔           |                       1.20 |
@@ -55,7 +55,7 @@ class SubsetTest(CliTestCase):
             json=self.mock_json,
             status=200)
 
-        result = self.cli('inspect', 'subset', '--subset-id', self.subsetting_id, "--json", mix_stderr=False)
+        result = self.cli('inspect', 'subset', '--subset-id', self.subsetting_id, "--json")
         expect = """{
   "subset": [
     {

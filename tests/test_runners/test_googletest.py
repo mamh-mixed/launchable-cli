@@ -30,7 +30,7 @@ class GoogleTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_googletest(self):
-        result = self.cli('record', 'test', 'googletest', '--session', self.session, str(self.test_files_dir) + "/")
+        result = self.cli('record', 'tests', 'googletest', '--session', self.session, str(self.test_files_dir) + "/")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')
 
@@ -38,7 +38,7 @@ class GoogleTestTest(CliTestCase):
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_failed_test_googletest(self):
         # ./test_a --gtest_output=xml:output.xml
-        result = self.cli('record', 'test', 'googletest', '--session', self.session,
+        result = self.cli('record', 'tests', 'googletest', '--session', self.session,
                           str(self.test_files_dir) + "/fail/")
         self.assert_success(result)
         self.assert_record_tests_payload('fail/record_test_result.json')
@@ -47,6 +47,6 @@ class GoogleTestTest(CliTestCase):
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_empty_dir(self):
         path = 'latest/gtest_*_results.xml'
-        result = self.cli('record', 'test', 'googletest', '--session', self.session, path)
+        result = self.cli('record', 'tests', 'googletest', '--session', self.session, path)
         self.assertEqual(result.output.rstrip('\n'), f"No matches found: {path}")
         self.assert_success(result)

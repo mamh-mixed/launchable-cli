@@ -26,7 +26,7 @@ class GoTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_tests_with_session(self):
-        result = self.cli('record', 'test', 'go-test', '--session', self.session,
+        result = self.cli('record', 'tests', 'go-test', '--session', self.session,
                           str(self.test_files_dir.joinpath('reportv1')) + "/")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')
@@ -34,7 +34,7 @@ class GoTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_tests_v2(self):
-        result = self.cli('record', 'test', 'go-test', '--session', self.session,
+        result = self.cli('record', 'tests', 'go-test', '--session', self.session,
                           str(self.test_files_dir.joinpath('reportv2')) + "/")
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')

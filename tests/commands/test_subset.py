@@ -47,7 +47,6 @@ class SubsetTest(CliTestCase):
             self.session,
             "--rest",
             rest.name,
-            mix_stderr=False,
             input=pipe)
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\n")
@@ -87,7 +86,6 @@ class SubsetTest(CliTestCase):
             self.session,
             "--rest",
             rest.name,
-            mix_stderr=False,
             input=pipe)
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
@@ -133,8 +131,7 @@ class SubsetTest(CliTestCase):
             self.session,
             "--rest",
             observation_mode_rest.name,
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
         self.assert_success(result)
 
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
@@ -174,7 +171,6 @@ class SubsetTest(CliTestCase):
             self.session,
             "--rest",
             rest.name,
-            mix_stderr=False,
             input=pipe)
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
@@ -214,8 +210,7 @@ class SubsetTest(CliTestCase):
             "file",
             "--session",
             self.session,
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
@@ -279,8 +274,7 @@ class SubsetTest(CliTestCase):
             "file",
             "--session", self.session,
             "--ignore-flaky-tests-above", 0.05,
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
@@ -292,7 +286,7 @@ class SubsetTest(CliTestCase):
         # check error when input candidates are empty without --get-tests-from-previous-sessions option
         result = self.cli("subset", "file", "--target", "30%", "--session", self.session)
         self.assert_exit_code(result, 1)
-        self.assertIn("use the `--get-tests-from-previous-sessions` option", result.stdout)
+        self.assertIn("use the `--get-tests-from-previous-sessions` option", result.stderr)
 
         responses.replace(
             responses.POST,
@@ -327,8 +321,7 @@ class SubsetTest(CliTestCase):
             self.session,
             "--rest",
             rest.name,
-            "--get-tests-from-previous-sessions",
-            mix_stderr=False)
+            "--get-tests-from-previous-sessions")
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_aaa.py\ntest_bbb.py\ntest_ccc.py\n")
@@ -372,8 +365,7 @@ class SubsetTest(CliTestCase):
             self.session,
             "--rest",
             rest.name,
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_aaa.py\ntest_bbb.py\ntest_ccc.py\n")
@@ -392,8 +384,7 @@ class SubsetTest(CliTestCase):
             "--rest",
             rest.name,
             "--output-exclusion-rules",
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_111.py\ntest_222.py\ntest_333.py\n")
@@ -435,8 +426,7 @@ class SubsetTest(CliTestCase):
             "--rest",
             rest.name,
             "--output-exclusion-rules",
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "")
@@ -478,8 +468,7 @@ class SubsetTest(CliTestCase):
             self.session,
             "--prioritize-tests-failed-within-hours",
             24,
-            input=pipe,
-            mix_stderr=False)
+            input=pipe)
 
         self.assert_success(result)
 

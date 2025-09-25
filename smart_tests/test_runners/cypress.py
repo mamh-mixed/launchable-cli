@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated, List, cast
 from xml.etree import ElementTree as ET
 
 import typer
@@ -17,7 +17,7 @@ def record_tests(
         client.report(r)
 
     def parse_func(p: str) -> ET.ElementTree:
-        tree = ET.parse(p)
+        tree = cast(ET.ElementTree, ET.parse(p))
         for suites in tree.iter("testsuites"):
             if len(suites) == 0:
                 continue

@@ -438,7 +438,7 @@ def subset(
                     print_error_and_die("ERROR: Given arguments did not match any tests. They appear to be incorrect/non-existent.", tracking_client, Tracking.ErrorEvent.USER_ERROR)  # noqa E501
                 else:
                     print_error_and_die(
-                        "ERROR: Expecting tests to be given, but none provided. See https://www.launchableinc.com/docs/features/predictive-test-selection/requesting-and-running-a-subset-of-tests/subsetting-with-the-launchable-cli/ and provide ones, or use the `--get-tests-from-previous-sessions` option",  # noqa E501
+                        "ERROR: Expecting tests to be given, but none provided. See https://help.launchableinc.com/features/predictive-test-selection/requesting-and-running-a-subset-of-tests/ and provide ones, or use the `--get-tests-from-previous-sessions` option",  # noqa E501
                         tracking_client,
                         Tracking.ErrorEvent.USER_ERROR)
 

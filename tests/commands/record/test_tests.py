@@ -18,7 +18,7 @@ class TestsTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_with_group_name(self):
-        result = self.cli('record', 'test', 'maven', '--session', self.session, '--group', 'hoge',
+        result = self.cli('record', 'tests', 'maven', '--session', self.session, '--group', 'hoge',
                           str(self.report_files_dir) + "**/reports/")
 
         self.assert_success(result)
@@ -34,7 +34,7 @@ class TestsTest(CliTestCase):
         broken_xml = str(Path(__file__).parent.joinpath('../../data/broken_xml/broken.xml').resolve())
         result = self.cli(
             'record',
-            'test',
+            'tests',
             'file',
             '--session',
             self.session,
@@ -74,7 +74,7 @@ class TestsTest(CliTestCase):
         zero_duration_xml1 = str(Path(__file__).parent.joinpath('../../data/googletest/output_a.xml').resolve())
         zero_duration_xml2 = str(Path(__file__).parent.joinpath('../../data/googletest/output_b.xml').resolve())
         result = self.cli(
-            'record', 'test', 'googletest',
+            'record', 'tests', 'googletest',
             '--session', self.session,
             zero_duration_xml1,
             zero_duration_xml2)

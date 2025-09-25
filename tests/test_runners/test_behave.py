@@ -24,7 +24,7 @@ class BehaveTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test(self):
-        result = self.cli('record', 'test', 'behave', '--session', self.session,
+        result = self.cli('record', 'tests', 'behave', '--session', self.session,
                           str(self.test_files_dir) + "/reports/report.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")

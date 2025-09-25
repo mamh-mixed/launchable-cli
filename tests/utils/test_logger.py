@@ -29,7 +29,7 @@ class LoggerTest(TestCase):
         logger_instance.info("info")
         logger_instance.warning("warn")
         logger_instance.debug("debug")
-        self.assertEqual(mock_err.getvalue(), "WARNING:launchable:warn\n")
+        self.assertEqual(mock_err.getvalue(), "WARNING:smart-tests:warn\n")
 
     @patch("sys.stderr", new_callable=StringIO)
     def test_log_level_audit(self, mock_err):
@@ -42,4 +42,4 @@ class LoggerTest(TestCase):
         logger_instance.info("info")
         logger_instance.debug("debug")
         self.assertEqual(mock_err.getvalue(
-        ), "AUDIT:launchable:audit\nCRITICAL:launchable:critical\nERROR:launchable:error\nWARNING:launchable:warn\n")
+        ), "AUDIT:smart-tests:audit\nCRITICAL:smart-tests:critical\nERROR:smart-tests:error\nWARNING:smart-tests:warn\n")

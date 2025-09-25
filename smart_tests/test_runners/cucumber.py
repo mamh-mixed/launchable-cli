@@ -5,7 +5,7 @@ import re
 from copy import deepcopy
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Dict, Generator, List
+from typing import Annotated, Dict, Generator, List, cast
 from xml.etree import ElementTree as ET
 
 import typer
@@ -41,7 +41,7 @@ def record_tests(
         _record_tests_from_xml(client, reports, report_file_and_test_file_map)
 
         def parse_func(report: str) -> ET.ElementTree:
-            tree = ET.parse(report)
+            tree = cast(ET.ElementTree, ET.parse(report))
             for case in tree.findall("testcase"):
                 case.attrib["file"] = str(report_file_and_test_file_map[report])
 

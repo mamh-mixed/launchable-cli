@@ -27,9 +27,7 @@ class DetectFlakeTest(CliTestCase):
             "detect-flakes",
             "file",
             "--session", self.session,
-            "--retry-threshold", "high",
-            mix_stderr=False,
-        )
+            "--retry-threshold", "high")
         self.assert_success(result)
         self.assertIn("test_flaky_1.py", result.stdout)
         self.assertIn("test_flaky_2.py", result.stdout)
@@ -52,9 +50,7 @@ class DetectFlakeTest(CliTestCase):
         result = self.cli(
             "detect-flakes",
             "file",
-            "--session", self.session,
-            mix_stderr=False,
-        )
+            "--session", self.session)
         self.assert_success(result)
         self.assertIn("test_flaky_1.py", result.stdout)
         self.assertIn("test_flaky_2.py", result.stdout)
@@ -73,9 +69,7 @@ class DetectFlakeTest(CliTestCase):
             "detect-flakes",
             "file",
             "--session", self.session,
-            "--retry-threshold", "low",
-            mix_stderr=False,
-        )
+            "--retry-threshold", "low")
         self.assert_success(result)
         self.assertEqual(result.stdout, "")
 
@@ -91,9 +85,7 @@ class DetectFlakeTest(CliTestCase):
             "detect-flakes",
             "file",
             "--session", self.session,
-            "--retry-threshold", "medium",
-            mix_stderr=False,
-        )
+            "--retry-threshold", "medium")
         self.assert_exit_code(result, 0)
         self.assertIn("Error", result.stderr)
         self.assertEqual(result.stdout, "")

@@ -39,7 +39,7 @@ tests/fooo/filenameonly_test.py
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_pytest(self):
-        result = self.cli('record', 'test', 'pytest', '--session', self.session,
+        result = self.cli('record', 'tests', 'pytest', '--session', self.session,
                           str(self.test_files_dir.joinpath("report.xml")))
 
         self.assert_success(result)
@@ -48,7 +48,7 @@ tests/fooo/filenameonly_test.py
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_with_json_option(self):
-        result = self.cli('record', 'test', 'pytest', '--session', self.session,
+        result = self.cli('record', 'tests', 'pytest', '--session', self.session,
                           '--json', str(self.test_files_dir.joinpath("report.json")))
 
         self.assert_success(result)

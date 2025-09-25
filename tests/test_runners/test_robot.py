@@ -18,7 +18,7 @@ class RobotTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test(self):
-        result = self.cli('record', 'test', 'robot', '--session', self.session, str(self.test_files_dir) + "/output.xml")
+        result = self.cli('record', 'tests', 'robot', '--session', self.session, str(self.test_files_dir) + "/output.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
 
@@ -26,6 +26,6 @@ class RobotTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_executed_only_one_file(self):
-        result = self.cli('record', 'test', 'robot', '--session', self.session, str(self.test_files_dir) + "/single-output.xml")
+        result = self.cli('record', 'tests', 'robot', '--session', self.session, str(self.test_files_dir) + "/single-output.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_executed_only_one_file_result.json")

@@ -63,7 +63,7 @@ app = typer.Typer(name="verify", help="Verify CLI setup and connectivity")
 def verify(ctx: typer.Context):
     # Run the verification (no subcommands in this app)
     # In this command, regardless of REPORT_ERROR_KEY, always report an unexpected error with full stack trace
-    # to assist troubleshooting. `click.UsageError` is handled by the invoking
+    # to assist troubleshooting. `typer.BadParameter` is handled by the invoking
     # Click gracefully.
 
     app_instance = ctx.obj

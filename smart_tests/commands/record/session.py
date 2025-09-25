@@ -32,7 +32,6 @@ def session(
         help="Set test suite name. A test suite is a collection of test sessions. Setting a test suite allows you to "
              "manage data over test sessions and lineages."
     )],
-    print_session: bool = True,
     flavors: Annotated[List[KeyValue], typer.Option(
         "--flavor",
         help="flavors",

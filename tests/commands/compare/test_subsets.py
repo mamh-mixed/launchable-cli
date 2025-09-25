@@ -36,7 +36,7 @@ class SubsetsTest(CliTestCase):
                 "src/test/java/example/SubTest.java",
             ]))
 
-        result = self.cli('compare', 'subsets', "subset-before.txt", "subset-after.txt", mix_stderr=False)
+        result = self.cli('compare', 'subsets', "subset-before.txt", "subset-after.txt")
         expect = """|   Before |   After |   After - Before | Test                                 |
 |----------|---------|------------------|--------------------------------------|
 |        9 |       3 |               -6 | src/test/java/example/AddTest.java   |
@@ -83,7 +83,7 @@ class SubsetsTest(CliTestCase):
                 "src/test/java/example/AddTest.java"
             ]))
 
-        result = self.cli('compare', 'subsets', "subset-before.txt", "subset-after.txt", mix_stderr=False)
+        result = self.cli('compare', 'subsets', "subset-before.txt", "subset-after.txt")
         expect = """| Before   |   After | After - Before   | Test                                 |
 |----------|---------|------------------|--------------------------------------|
 | -        |       1 | NEW              | src/test/java/example/NewTest.java   |
@@ -131,7 +131,7 @@ class SubsetsTest(CliTestCase):
                 "src/test/java/example/DivTest.java"
             ]))
 
-        result = self.cli('compare', 'subsets', "subset-before.txt", "subset-after.txt", mix_stderr=False)
+        result = self.cli('compare', 'subsets', "subset-before.txt", "subset-after.txt")
         expect = """|   Before | After   | After - Before   | Test                                 |
 |----------|---------|------------------|--------------------------------------|
 |        1 | -       | DELETED          | src/test/java/example/NewTest.java   |

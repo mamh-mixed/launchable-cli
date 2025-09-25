@@ -102,7 +102,7 @@ class MavenTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_maven(self):
-        result = self.cli('record', 'test', 'maven', '--session', self.session, str(self.test_files_dir) + "/**/reports")
+        result = self.cli('record', 'tests', 'maven', '--session', self.session, str(self.test_files_dir) + "/**/reports")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
 
@@ -142,7 +142,7 @@ class MavenTest(CliTestCase):
         self.assertNotIn("$", result_path[0]["name"])
 
         # Now run the actual CLI command to ensure integration works
-        result = self.cli('record', 'test', 'maven', '--session', self.session,
+        result = self.cli('record', 'tests', 'maven', '--session', self.session,
                           str(self.test_files_dir) + "/maven/reports/TEST-1.xml",
                           str(self.test_files_dir) + "/maven/reports/TEST-2.xml",
                           str(self.test_files_dir) + "/maven/reports/TEST-nested.xml")

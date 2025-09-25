@@ -23,7 +23,7 @@ class XCTestTest(CliTestCase):
             },
             status=200)
 
-        result = self.cli('record', 'test', 'xctest', '--session', self.session,
+        result = self.cli('record', 'tests', 'xctest', '--session', self.session,
                           str(self.test_files_dir.joinpath("junit.xml")))
 
         self.assert_success(result)
@@ -58,8 +58,7 @@ class XCTestTest(CliTestCase):
 
         result = self.cli('subset', 'xctest', '--session', self.session,
                           '--get-tests-from-previous-sessions',
-                          '--output-exclusion-rules',
-                          mix_stderr=False)
+                          '--output-exclusion-rules')
 
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')

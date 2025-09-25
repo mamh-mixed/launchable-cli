@@ -1,7 +1,7 @@
 # Usage
 
-See https://www.launchableinc.com/docs/resources/cli-reference/ and
-https://www.launchableinc.com/docs/getting-started/.
+See https://help.launchableinc.com/resources/cli-reference/ and
+https://help.launchableinc.com/sending-data-to-launchable/using-the-launchable-cli/getting-started/.
 
 # Development
 
@@ -82,7 +82,7 @@ uv run poe install
 # Add runtime dependency
 uv add some-package
 
-# Add development dependency  
+# Add development dependency
 uv add --dev some-dev-package
 ```
 

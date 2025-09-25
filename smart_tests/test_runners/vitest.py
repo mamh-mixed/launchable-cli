@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Annotated, List
+from typing import Annotated, List, cast
 
 import typer
 
@@ -19,8 +19,12 @@ def record_tests(
         So, set the classname value as the file name in this function.
         e.g.) <testcase classname="src/components/Hello.test.tsx" name="renders hello message" time="0.008676833">
           """
-        tree = ET.parse(report)
+        tree = cast(ET.ElementTree, ET.parse(report))
         root = tree.getroot()
+
+        if root is None:
+            return tree
+
         for test_suite in root.findall('testsuite'):
             for test_case in test_suite.findall('testcase'):
                 classname = test_case.get('classname', '')

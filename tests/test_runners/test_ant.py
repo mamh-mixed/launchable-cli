@@ -18,7 +18,7 @@ class AntTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_ant(self):
-        result = self.cli('record', 'test', 'ant', '--session', self.session,
+        result = self.cli('record', 'tests', 'ant', '--session', self.session,
                           str(self.test_files_dir) + "/junitreport/TESTS-TestSuites.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
