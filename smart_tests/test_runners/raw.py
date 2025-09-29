@@ -13,7 +13,7 @@ from . import smart_tests
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     test_path_file: Annotated[str | None, typer.Argument(
         help="File containing test paths, one per line"
     )] = None,
@@ -24,6 +24,8 @@ def subset(
     "file=a.py#class=classA") one per line. Lines start with a hash ('#') are
     considered as a comment and ignored.
     """
+
+    client = ctx.obj
 
     if not client.is_get_tests_from_previous_sessions and test_path_file is None:
         raise typer.BadParameter("Missing argument 'TEST_PATH_FILE'.")
@@ -53,7 +55,7 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     test_result_files: Annotated[List[str], typer.Argument(
         help="Test result files (JSON or JUnit XML)"
     )],
@@ -171,6 +173,8 @@ def record_tests(
     If the file path ends with '.xml', the command parses the file as a JUnit XML file. When this mode is used the subset input
     TestPath should look like 'class={classname}#testcase={testcase}'.
     """
+
+    client = ctx.obj
 
     def parse_json(test_result_file: str) -> Generator[CaseEventType, None, None]:
         with open(test_result_file, 'r') as f:

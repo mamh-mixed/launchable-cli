@@ -55,25 +55,40 @@ class DotnetTest(CliTestCase):
                           status=200)
 
         # dotnet profiles requires Zero Input Subsetting
-        result = self.cli('subset', 'dotnet', '--session', self.session, '--target', '25%')
+        result = self.cli(
+            'subset',
+            '--session',
+            self.session,
+            '--target',
+            '25%',
+            'dotnet',
+        )
         self.assert_exit_code(result, 1)
 
         result = self.cli(
-            'subset', 'dotnet',
-            '--session', self.session,
-            '--target', '25%',
-            '--get-tests-from-previous-sessions')
+            'subset',
+            '--session',
+            self.session,
+            '--target',
+            '25%',
+            '--get-tests-from-previous-sessions',
+            'dotnet',
+        )
         self.assert_success(result)
 
         output = "FullyQualifiedName=rocket_car_dotnet.ExampleTest.TestSub|FullyQualifiedName=rocket_car_dotnet.ExampleTest.TestMul\n"  # noqa: E501
         self.assertEqual(result.stdout, output)
 
         result = self.cli(
-            'subset', 'dotnet',
-            '--session', self.session,
-            '--target', '25%',
+            'subset',
+            '--session',
+            self.session,
+            '--target',
+            '25%',
             '--get-tests-from-previous-sessions',
-            '--output-exclusion-rules')
+            '--output-exclusion-rules',
+            'dotnet',
+        )
         self.assert_success(result)
 
         output = "FullyQualifiedName!=rocket_car_dotnet.ExampleTest.TestAdd&FullyQualifiedName!=rocket_car_dotnet.ExampleTest.TestDiv\n"  # noqa: E501
@@ -126,23 +141,31 @@ class DotnetTest(CliTestCase):
                           status=200)
 
         result = self.cli(
-            'subset', 'dotnet',
-            '--session', self.session,
-            '--target', '25%',
+            'subset',
+            '--session',
+            self.session,
+            '--target',
+            '25%',
             '--get-tests-from-previous-sessions',
-            '--bare')
+            'dotnet',
+            '--bare',
+        )
         self.assert_success(result)
 
         output = "rocket_car_dotnet.ExampleTest.TestSub\nrocket_car_dotnet.ExampleTest.TestMul\n"
         self.assertEqual(result.stdout, output)
 
         result = self.cli(
-            'subset', 'dotnet',
-            '--session', self.session,
-            '--target', '25%',
+            'subset',
+            '--session',
+            self.session,
+            '--target',
+            '25%',
             '--get-tests-from-previous-sessions',
             '--output-exclusion-rules',
-            '--bare')
+            'dotnet',
+            '--bare',
+        )
         self.assert_success(result)
 
         output = "rocket_car_dotnet.ExampleTest.TestAdd\nrocket_car_dotnet.ExampleTest.TestDiv\n"
@@ -151,6 +174,13 @@ class DotnetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_tests(self):
-        result = self.cli('record', 'tests', 'dotnet', '--session', self.session, str(self.test_files_dir) + "/test-result.xml")
+        result = self.cli(
+            'record',
+            'tests',
+            '--session',
+            self.session,
+            'dotnet',
+            str(self.test_files_dir) + "/test-result.xml",
+        )
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")

@@ -38,11 +38,13 @@ from . import smart_tests
 #
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     source_roots: Annotated[List[str] | None, typer.Argument(
         help="Source root directories for pytest test collection"
     )] = None,
 ):
+    client = ctx.obj
+
     def _add_testpaths(lines: List[str]):
         for line in lines:
             line = line.rstrip()
@@ -133,7 +135,7 @@ def _pytest_formatter(test_path):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     source_roots: Annotated[List[str], typer.Argument(
         help="Source directories containing test report files"
     )],
@@ -142,6 +144,7 @@ def record_tests(
         help="use JSON report files produced by pytest-dev/pytest-reportlog"
     )] = False,
 ):
+    client = ctx.obj
 
     def data_builder(case: TestCase):
         props = case.child(Properties)

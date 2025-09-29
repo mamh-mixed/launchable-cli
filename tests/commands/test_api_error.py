@@ -236,13 +236,13 @@ class APIErrorTest(CliTestCase):
         with tempfile.NamedTemporaryFile(delete=False) as rest_file:
             result = self.cli(
                 "subset",
-                "minitest",
                 "--target",
                 "30%",
                 "--session",
                 self.session,
                 "--rest",
                 rest_file.name,
+                "minitest",
                 str(self.test_files_dir) + "/test/**/*.rb")
 
             self.assert_success(result)
@@ -257,15 +257,17 @@ class APIErrorTest(CliTestCase):
                           status=404)
 
         with tempfile.NamedTemporaryFile(delete=False) as rest_file:
-            result = self.cli("subset",
-                              "minitest",
-                              "--target",
-                              "30%",
-                              "--session",
-                              self.session,
-                              "--rest",
-                              rest_file.name,
-                              str(self.test_files_dir) + "/test/**/*.rb")
+            result = self.cli(
+                "subset",
+                "--target",
+                "30%",
+                "--session",
+                self.session,
+                "--rest",
+                rest_file.name,
+                "minitest",
+                str(self.test_files_dir) + "/test/**/*.rb",
+            )
             self.assert_success(result)
 
             self.assertEqual(len(result.stdout.rstrip().split("\n")), 1)
@@ -282,15 +284,17 @@ class APIErrorTest(CliTestCase):
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
         with tempfile.NamedTemporaryFile(delete=False) as rest_file:
-            result = self.cli("subset",
-                              "minitest",
-                              "--target",
-                              "30%",
-                              "--session",
-                              self.session,
-                              "--rest",
-                              rest_file.name,
-                              str(self.test_files_dir) + "/test/**/*.rb")
+            result = self.cli(
+                "subset",
+                "--target",
+                "30%",
+                "--session",
+                self.session,
+                "--rest",
+                rest_file.name,
+                "minitest",
+                str(self.test_files_dir) + "/test/**/*.rb",
+            )
             self.assert_success(result)
             # Since Timeout error is caught inside of LaunchableClient, the tracking event is sent twice.
             self.assert_tracking_count(tracking=tracking, count=2)
@@ -303,7 +307,14 @@ class APIErrorTest(CliTestCase):
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
 
-        result = self.cli("record", "tests", "minitest", "--session", self.session, str(self.test_files_dir) + "/")
+        result = self.cli(
+            "record",
+            "tests",
+            "--session",
+            self.session,
+            "minitest",
+            str(self.test_files_dir) + "/",
+        )
         self.assert_success(result)
         # Since session name resolution works, the tracking event is sent once.
         self.assert_tracking_count(tracking=tracking, count=2)
@@ -317,7 +328,14 @@ class APIErrorTest(CliTestCase):
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
 
-        result = self.cli("record", "tests", "minitest", "--session", self.session, str(self.test_files_dir) + "/")
+        result = self.cli(
+            "record",
+            "tests",
+            "--session",
+            self.session,
+            "minitest",
+            str(self.test_files_dir) + "/",
+        )
         self.assert_success(result)
         # Since HTTPError is occurred outside of LaunchableClient, the count is 1.
         self.assert_tracking_count(tracking=tracking, count=3)
@@ -332,7 +350,14 @@ class APIErrorTest(CliTestCase):
             f"{get_base_url()}/intake/cli_tracking",
             body=ReadTimeout("error"))
 
-        result = self.cli("record", "tests", "minitest", "--session", self.session, str(self.test_files_dir) + "/")
+        result = self.cli(
+            "record",
+            "tests",
+            "--session",
+            self.session,
+            "minitest",
+            str(self.test_files_dir) + "/",
+        )
         self.assert_success(result)
 
         self.assert_tracking_count(tracking=tracking, count=3)
@@ -391,16 +416,29 @@ class APIErrorTest(CliTestCase):
 
         # set delete=False to solve the error `PermissionError: [Errno 13] Permission denied:` on Windows.
         with tempfile.NamedTemporaryFile(delete=False) as rest_file:
-            result = self.cli("subset", "minitest",
-                              "--target", "30%",
-                              "--session", self.session,
-                              "--rest", rest_file.name,
-                              str(self.test_files_dir) + "/test/**/*.rb")
+            result = self.cli(
+                "subset",
+                "--target",
+                "30%",
+                "--session",
+                self.session,
+                "--rest",
+                rest_file.name,
+                "minitest",
+                str(self.test_files_dir) + "/test/**/*.rb",
+            )
             self.assert_success(result)
 
         self.assert_tracking_count(tracking=tracking, count=7)
 
-        result = self.cli("record", "tests", "minitest", "--session", self.session, str(self.test_files_dir) + "/")
+        result = self.cli(
+            "record",
+            "tests",
+            "--session",
+            self.session,
+            "minitest",
+            str(self.test_files_dir) + "/",
+        )
         self.assert_success(result)
         self.assert_tracking_count(tracking=tracking, count=11)
 

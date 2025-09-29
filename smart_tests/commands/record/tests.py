@@ -14,7 +14,6 @@ from more_itertools import ichunked
 from tabulate import tabulate
 
 from smart_tests.utils.authentication import ensure_org_workspace
-from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
@@ -98,7 +97,7 @@ def tests_main(
     org, workspace = ensure_org_workspace()
 
     # Get test runner name from context (set by DynamicCommandBuilder)
-    test_runner = getattr(ctx, 'test_runner', None)
+    test_runner = ctx.invoked_subcommand
 
     tracking_client = TrackingClient(Command.RECORD_TESTS, app=ctx.obj)
     client = SmartTestsClient(test_runner=test_runner, app=ctx.obj, tracking_client=tracking_client)
@@ -548,21 +547,3 @@ def get_env_values(client: SmartTestsClient) -> Dict[str, str]:
         metadata[key] = val
 
     return metadata
-
-
-# NestedCommand implementation: create test runner-specific commands
-# This section adds the new command structure where test runners come before options
-nested_command_app = typer.Typer(name="record", help="Record test results (NestedCommand)")
-
-
-def create_nested_commands():
-    """Create NestedCommand commands after all test runners are loaded."""
-    builder = DynamicCommandBuilder()
-
-    # Extract options from the original tests callback
-    callback_options = extract_callback_options(tests_main)
-
-    # Create test runner-specific record test commands
-    builder.create_record_test_commands(nested_command_app, tests_main, callback_options)
-
-# The commands will be created when test runners are loaded

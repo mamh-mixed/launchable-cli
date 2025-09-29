@@ -45,7 +45,15 @@ class RawTest(CliTestCase):
                     '# This is a comment',
                     'testcase=FooTest.Baz',
                 ]) + '\n')
-            result = self.cli('subset', 'raw', '--session', self.session, '--target', '10%', test_path_file)
+            result = self.cli(
+                'subset',
+                '--session',
+                self.session,
+                '--target',
+                '10%',
+                'raw',
+                test_path_file,
+            )
             self.assert_success(result)
 
             # Check request body
@@ -94,14 +102,15 @@ class RawTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(mode="+w", encoding="utf-8", delete=False)
         result = self.cli(
             'subset',
-            'raw',
             '--session',
             self.session,
             '--get-tests-from-previous-sessions',
             '--target',
             '10%',
-            "--rest",
-            rest.name)
+            '--rest',
+            rest.name,
+            'raw',
+        )
         self.assert_success(result)
 
         # Check request body
@@ -205,8 +214,16 @@ class RawTest(CliTestCase):
                     '  ]',
                     '}',
                 ]) + '\n')
-            result = self.cli('record', 'tests', 'raw', '--session', self.session,
-                              test_path_file, test_path_file2, test_path_file3)
+            result = self.cli(
+                'record',
+                'tests',
+                '--session',
+                self.session,
+                'raw',
+                test_path_file,
+                test_path_file2,
+                test_path_file3,
+            )
             self.assert_success(result)
 
             # Check request body
@@ -305,8 +322,15 @@ class RawTest(CliTestCase):
                     '  </testsuite>',
                     '</testsuites>',
                 ]) + '\n')
-            result = self.cli('record', 'tests', 'raw', '--session', self.session,
-                              test_path_file, test_path_file2)
+            result = self.cli(
+                'record',
+                'tests',
+                '--session',
+                self.session,
+                'raw',
+                test_path_file,
+                test_path_file2,
+            )
             if result.exit_code != 0:
                 self.assertEqual(
                     result.exit_code,

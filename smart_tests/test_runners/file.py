@@ -11,7 +11,8 @@ from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))
@@ -21,11 +22,13 @@ def subset(client):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
+
     def path_builder(case: TestCase, suite: TestSuite,
                      report_file: str) -> TestPath:
         """path builder that puts the file name first, which is consistent with the subset command"""

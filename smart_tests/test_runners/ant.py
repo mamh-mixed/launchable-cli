@@ -9,11 +9,13 @@ from . import smart_tests
 
 @smart_tests.subset
 def subset(
-    client,
+    context: typer.Context,
     source_roots: Annotated[List[str], typer.Argument(
         help="Source directories to scan for test files"
     )]
 ):
+    client = context.obj
+
     def file2test(f: str):
         if jvm_test_pattern.match(f):
             f = f[:f.rindex('.')]   # remove extension

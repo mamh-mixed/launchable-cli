@@ -36,11 +36,18 @@ class CTestTest(CliTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             # Use a non-existing dir to check it creates a dir.
             output_dir = os.path.join(tempdir, 'subdir')
-            result = self.cli('subset', 'ctest', '--session', self.session, '--target', '10%',
-                              '--output-regex-files',
-                              '--output-regex-files-dir=' + output_dir,
-                              '--output-regex-files-size=32',
-                              str(self.test_files_dir.joinpath("ctest_list.json")))
+            result = self.cli(
+                'subset',
+                '--session',
+                self.session,
+                '--target',
+                '10%',
+                'ctest',
+                '--output-regex-files',
+                '--output-regex-files-dir=' + output_dir,
+                '--output-regex-files-size=32',
+                str(self.test_files_dir.joinpath("ctest_list.json")),
+            )
             self.assert_success(result)
 
             subset_files = []
@@ -70,15 +77,28 @@ class CTestTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_without_session(self):
-        result = self.cli('subset', 'ctest', '--session', self.session, '--target', '10%',
-                          str(self.test_files_dir.joinpath("ctest_list.json")))
+        result = self.cli(
+            'subset',
+            '--session',
+            self.session,
+            '--target',
+            '10%',
+            'ctest',
+            str(self.test_files_dir.joinpath("ctest_list.json")),
+        )
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test(self):
-        result = self.cli('record', 'tests', 'ctest', '--session', self.session,
-                          str(self.test_files_dir) + "/Testing/**/Test.xml")
+        result = self.cli(
+            'record',
+            'tests',
+            '--session',
+            self.session,
+            'ctest',
+            str(self.test_files_dir) + "/Testing/**/Test.xml",
+        )
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')

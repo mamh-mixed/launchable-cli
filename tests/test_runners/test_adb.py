@@ -52,11 +52,11 @@ INSTRUMENTATION_CODE: -1
     def test_subset(self):
         result = self.cli(
             'subset',
-            'adb',
             '--session',
             self.session,
             '--target',
             '10%',
+            'adb',
             input=self.subset_input)
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')

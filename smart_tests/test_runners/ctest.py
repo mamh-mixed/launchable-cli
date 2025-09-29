@@ -13,7 +13,7 @@ from . import smart_tests
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     file: Annotated[str, typer.Argument(
         help="JSON file to process"
     )],
@@ -30,6 +30,7 @@ def subset(
         help="Max size of each regex file"
     )] = 60 * 1024,
 ):
+    client = ctx.obj
     if file:
         with Path(file).open() as json_file:
             data = json.load(json_file)
@@ -83,11 +84,12 @@ def _group_by_size(elems, max_size):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     source_roots: Annotated[List[str], typer.Argument(
         help="Source root directories or files to process"
     )],
 ):
+    client = ctx.obj
     for root in source_roots:
         match = False
         for t in glob.iglob(root, recursive=True):

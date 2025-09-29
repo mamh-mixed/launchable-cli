@@ -1,5 +1,7 @@
 import re
 
+import typer
+
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -9,7 +11,8 @@ def make_test_path(cls, case) -> TestPath:
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     cls = ''
     class_pattern = re.compile(r'^([^\.]+)\.')
     case_pattern = re.compile(r'^  ([^ ]+)')

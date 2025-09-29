@@ -9,11 +9,12 @@ from . import smart_tests
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     for r in reports:
         client.report(r)
 
@@ -45,7 +46,8 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     for t in client.stdin():
         if 0 < t.find(".feature"):
             paths = os.path.split(t)

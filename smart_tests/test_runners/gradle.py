@@ -11,7 +11,7 @@ from . import smart_tests
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     source_roots: Annotated[List[str] | None, typer.Argument(
         help="Source root directories to scan for tests"
     )] = None,
@@ -20,6 +20,8 @@ def subset(
         help="outputs class names alone"
     )] = False,
 ):
+    client = ctx.obj
+
     def file2test(f: str):
         if jvm_test_pattern.match(f):
             f = f[:f.rindex('.')]   # remove extension
@@ -80,10 +82,11 @@ def to_class_file(class_name: str):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     client.path_builder = junit5_nested_class_path_builder(client.path_builder)
     smart_tests.CommonRecordTestImpls.load_report_files(client=client, source_roots=reports)

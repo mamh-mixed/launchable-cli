@@ -17,7 +17,7 @@ TEST_CASE_DELIMITER = " › "
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
@@ -26,6 +26,7 @@ def record_tests(
         help="use JSON report format"
     )] = False,
 ):
+    client = ctx.obj
     def path_builder(case: TestCase, suite: TestSuite,
                      report_file: str) -> TestPath:
         """
@@ -58,7 +59,8 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))

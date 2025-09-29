@@ -8,7 +8,6 @@ from smart_tests.app import Application
 from smart_tests.commands.test_path_writer import TestPathWriter
 from smart_tests.testpath import unparse_test_path
 from smart_tests.utils.commands import Command
-from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.session import get_session
@@ -94,13 +93,3 @@ def detect_flakes(
                     typer.echo(ignorable_error(e), err=True)
 
     ctx.obj = FlakeDetection(app=ctx.obj)
-
-
-nested_command_app = typer.Typer(name="detect-flakes", help="Detect flaky tests from test files (NestedCommand)")
-
-
-def create_nested_command_app():
-    builder = DynamicCommandBuilder()
-
-    callback_options = extract_callback_options(detect_flakes)
-    builder.create_detect_flakes_commands(nested_command_app, detect_flakes, callback_options)

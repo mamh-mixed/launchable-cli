@@ -9,76 +9,20 @@ from typing import Annotated
 import typer
 
 from smart_tests.app import Application
-from smart_tests.commands.detect_flakes import create_nested_command_app as create_detect_flakes_commands
-from smart_tests.commands.record.tests import create_nested_commands as create_record_target_commands
-from smart_tests.commands.subset import create_nested_commands as create_subset_target_commands
-from smart_tests.utils.test_runner_registry import get_registry
+from smart_tests.commands import compare, detect_flakes, inspect, record, stats, subset, verify
 
-from .commands import compare, detect_flakes, inspect, record, stats, subset, verify
 from .utils import logger
 from .utils.env_keys import SKIP_CERT_VERIFICATION
 from .version import __version__
 
-# Load all test runners at module level so they register their commands
-for f in glob(join(dirname(__file__), 'test_runners', "*.py")):
-    f = basename(f)[:-3]
-    if f == '__init__':
-        continue
-    importlib.import_module('smart_tests.test_runners.%s' % f)
-
-# Create initial NestedCommand commands with built-in test runners
-try:
-    create_subset_target_commands()
-    create_record_target_commands()
-    create_detect_flakes_commands()
-except Exception as e:
-    # If NestedCommand creation fails, continue with legacy commands
-    # This ensures backward compatibility
-    logging.warning(f"Failed to create NestedCommand commands at import time: {e}")
-    pass
-
-# Global flag to track if plugins have been loaded and commands need rebuilding
-_plugins_loaded = False
-
-
-def _rebuild_nested_commands_with_plugins():
-    """Rebuild NestedCommand apps after plugins are loaded."""
-    global _plugins_loaded
-    if _plugins_loaded:
-        return  # Already rebuilt
-
-    try:
-        # Clear existing commands from nested apps and rebuild
-        for module_name in ['smart_tests.commands.subset', 'smart_tests.commands.record.tests',
-                            'smart_tests.commands.detect_flakes']:
-            module = importlib.import_module(module_name)
-            if hasattr(module, 'nested_command_app'):
-                nested_app = module.nested_command_app
-                nested_app.registered_commands.clear()
-                nested_app.registered_groups.clear()
-            if hasattr(module, 'create_nested_commands'):
-                module.create_nested_commands()
-
-        _plugins_loaded = True
-        logging.info("Successfully rebuilt NestedCommand apps with plugins")
-
-    except Exception as e:
-        logging.warning(f"Failed to rebuild NestedCommand apps with plugins: {e}")
-        import traceback
-        logging.warning(f"Traceback: {traceback.format_exc()}")
-
-
-# Set up automatic rebuilding when new test runners are registered
-
-
-def _on_test_runner_registered():
-    """Callback triggered when new test runners are registered."""
-    _rebuild_nested_commands_with_plugins()
-
-
-get_registry().set_on_register_callback(_on_test_runner_registered)
-
 app = typer.Typer()
+app.add_typer(verify.app, name="verify")
+app.add_typer(record.app, name="record")
+app.add_typer(subset.app, name="subset")
+app.add_typer(inspect.app, name="inspect")
+app.add_typer(stats.app, name="stats")
+app.add_typer(compare.app, name="compare")
+app.add_typer(detect_flakes.app, name="detect-flakes")
 
 
 def version_callback(value: bool):
@@ -87,7 +31,8 @@ def version_callback(value: bool):
         raise typer.Exit()
 
 
-def main(
+@app.callback()
+def root(
     ctx: typer.Context,
     log_level: Annotated[str, typer.Option(
         help="Set logger's log level (CRITICAL, ERROR, WARNING, AUDIT, INFO, DEBUG)."
@@ -128,52 +73,37 @@ def main(
         for f in glob(join(plugin_dir, '*.py')):
             spec = importlib.util.spec_from_file_location(
                 f"smart_tests.plugins.{basename(f)[:-3]}", f)
-            if spec is None:
-                raise ImportError(f"Failed to create module spec for plugin: {f}")
-            if spec.loader is None:
-                raise ImportError(f"Plugin spec has no loader: {f}")
-            plugin = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(plugin)
 
-    # After loading plugins, rebuild NestedCommand apps to include plugin commands
-    if plugin_dir:
-        _rebuild_nested_commands_with_plugins()
+            if spec is None:
+                print(f"Cannot load plugin from {f}")
+                continue
+
+            plugin = importlib.util.module_from_spec(spec)
+
+            if spec.loader is None or plugin is None:
+                print(f"Failed to load plugin from {f}")
+                continue
+
+            spec.loader.exec_module(plugin)
 
     ctx.obj = Application(dry_run=dry_run, skip_cert_verification=skip_cert_verification)
 
 
-# Use NestedCommand apps if available, otherwise fall back to legacy
-try:
-    from smart_tests.commands.detect_flakes import nested_command_app as detect_flakes_target_app
-    from smart_tests.commands.record.tests import nested_command_app as record_target_app
-    from smart_tests.commands.subset import nested_command_app as subset_target_app
+# v1 can load test runners in root function
+# However, v2 adopts typer so we need to load test runners manually
+def _load_builtin_test_runners():
+    # load all test runners
+    for f in glob(join(dirname(__file__), 'test_runners', "*.py")):
+        f = basename(f)[:-3]
+        if f == '__init__':
+            continue
+        importlib.import_module('smart_tests.test_runners.%s' % f)
 
-    app.add_typer(record.app, name="record")
-    app.add_typer(subset_target_app, name="subset")  # Use NestedCommand version
-    app.add_typer(verify.app, name="verify")
-    app.add_typer(inspect.app, name="inspect")
-    app.add_typer(stats.app, name="stats")
-    app.add_typer(compare.app, name="compare")
-    app.add_typer(detect_flakes_target_app, name="detect-flakes")
 
-    # Add record-target as a sub-app to record command
-    record.app.add_typer(record_target_app, name="tests")
+_load_builtin_test_runners()
 
-except Exception as e:
-    logging.warning(f"Failed to use NestedCommand apps at init: {e}")
-    # Fallback to original structure
-    app.add_typer(record.app, name="record")
-    app.add_typer(subset.app, name="subset")
-    app.add_typer(verify.app, name="verify")
-    app.add_typer(inspect.app, name="inspect")
-    app.add_typer(stats.app, name="stats")
-    app.add_typer(detect_flakes.app, name="detect-flakes")
 
-app.callback()(main)
-
-# For backward compatibility with tests that expect a Click CLI
-# We'll need to use Typer's testing utilities instead
 main = app
 
 if __name__ == '__main__':
-    app()
+    main()

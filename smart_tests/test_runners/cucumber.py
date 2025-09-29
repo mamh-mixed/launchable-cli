@@ -23,7 +23,7 @@ REPORT_FILE_PREFIX = "TEST-"
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
@@ -32,6 +32,7 @@ def record_tests(
         help="use JSON report format"
     )] = False,
 ):
+    client = ctx.obj
     if json_format:
         for r in reports:
             client.report(r)

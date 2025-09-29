@@ -18,8 +18,16 @@ class TestsTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_with_group_name(self):
-        result = self.cli('record', 'tests', 'maven', '--session', self.session, '--group', 'hoge',
-                          str(self.report_files_dir) + "**/reports/")
+        result = self.cli(
+            'record',
+            'tests',
+            '--session',
+            self.session,
+            '--group',
+            'hoge',
+            'maven',
+            str(self.report_files_dir) + "**/reports/",
+        )
 
         self.assert_success(result)
         request = json.loads(gzip.decompress(self.find_request('/events').request.body).decode())
@@ -35,11 +43,12 @@ class TestsTest(CliTestCase):
         result = self.cli(
             'record',
             'tests',
-            'file',
             '--session',
             self.session,
+            'file',
             normal_xml,
-            broken_xml)
+            broken_xml,
+        )
 
         def remove_backslash(input: str) -> str:
             # Hack for Windowns. They containts double escaped backslash such
@@ -74,10 +83,14 @@ class TestsTest(CliTestCase):
         zero_duration_xml1 = str(Path(__file__).parent.joinpath('../../data/googletest/output_a.xml').resolve())
         zero_duration_xml2 = str(Path(__file__).parent.joinpath('../../data/googletest/output_b.xml').resolve())
         result = self.cli(
-            'record', 'tests', 'googletest',
-            '--session', self.session,
+            'record',
+            'tests',
+            '--session',
+            self.session,
+            'googletest',
             zero_duration_xml1,
-            zero_duration_xml2)
+            zero_duration_xml2,
+        )
 
         self.assert_success(result)
         self.assertIn("Total test duration is 0.", result.output)

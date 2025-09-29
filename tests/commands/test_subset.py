@@ -40,14 +40,15 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "30%",
             "--session",
             self.session,
             "--rest",
             rest.name,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\n")
         self.assertEqual(rest.read().decode(), os.linesep.join(["test_3.py", "test_4.py"]))
@@ -79,14 +80,15 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "30%",
             "--session",
             self.session,
             "--rest",
             rest.name,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
         self.assertEqual(rest.read().decode(), "")
@@ -124,14 +126,15 @@ class SubsetTest(CliTestCase):
         observation_mode_rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "30%",
             "--session",
             self.session,
             "--rest",
             observation_mode_rest.name,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
         self.assert_success(result)
 
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
@@ -164,14 +167,15 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "30%",
             "--session",
             self.session,
             "--rest",
             rest.name,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py\n")
         self.assertEqual(rest.read().decode(), "")
@@ -207,10 +211,11 @@ class SubsetTest(CliTestCase):
 
         result = self.cli(
             "subset",
-            "file",
             "--session",
             self.session,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
@@ -235,10 +240,13 @@ class SubsetTest(CliTestCase):
 
         result = self.cli(
             "subset",
+            "--session",
+            self.session,
+            "--goal-spec",
+            "foo(),bar(zot=3%)",
             "file",
-            "--session", self.session,
-            "--goal-spec", "foo(),bar(zot=3%)",
-            input="test_aaa.py")
+            input="test_aaa.py",
+        )
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
@@ -271,10 +279,13 @@ class SubsetTest(CliTestCase):
 
         result = self.cli(
             "subset",
+            "--session",
+            self.session,
+            "--ignore-flaky-tests-above",
+            0.05,
             "file",
-            "--session", self.session,
-            "--ignore-flaky-tests-above", 0.05,
-            input=pipe)
+            input=pipe,
+        )
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
@@ -284,7 +295,14 @@ class SubsetTest(CliTestCase):
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_get_tests_from_previous_full_runs(self):
         # check error when input candidates are empty without --get-tests-from-previous-sessions option
-        result = self.cli("subset", "file", "--target", "30%", "--session", self.session)
+        result = self.cli(
+            "subset",
+            "--target",
+            "30%",
+            "--session",
+            self.session,
+            "file",
+        )
         self.assert_exit_code(result, 1)
         self.assertIn("use the `--get-tests-from-previous-sessions` option", result.stderr)
 
@@ -314,14 +332,15 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "30%",
             "--session",
             self.session,
             "--rest",
             rest.name,
-            "--get-tests-from-previous-sessions")
+            "--get-tests-from-previous-sessions",
+            "file",
+        )
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_aaa.py\ntest_bbb.py\ntest_ccc.py\n")
@@ -358,14 +377,15 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "70%",
             "--session",
             self.session,
             "--rest",
             rest.name,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_aaa.py\ntest_bbb.py\ntest_ccc.py\n")
@@ -376,7 +396,6 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "70%",
             "--session",
@@ -384,7 +403,9 @@ class SubsetTest(CliTestCase):
             "--rest",
             rest.name,
             "--output-exclusion-rules",
-            input=pipe)
+            "file",
+            input=pipe,
+        )
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "test_111.py\ntest_222.py\ntest_333.py\n")
@@ -418,7 +439,6 @@ class SubsetTest(CliTestCase):
         rest = tempfile.NamedTemporaryFile(delete=False)
         result = self.cli(
             "subset",
-            "file",
             "--target",
             "70%",
             "--session",
@@ -426,7 +446,9 @@ class SubsetTest(CliTestCase):
             "--rest",
             rest.name,
             "--output-exclusion-rules",
-            input=pipe)
+            "file",
+            input=pipe,
+        )
 
         self.assert_success(result)
         self.assertEqual(result.stdout, "")
@@ -463,12 +485,13 @@ class SubsetTest(CliTestCase):
 
         result = self.cli(
             "subset",
-            "file",
             "--session",
             self.session,
             "--prioritize-tests-failed-within-hours",
             24,
-            input=pipe)
+            "file",
+            input=pipe,
+        )
 
         self.assert_success(result)
 
@@ -503,7 +526,13 @@ class SubsetTest(CliTestCase):
             status=[200]
         )
 
-        result = self.cli("subset", "file", "--session", self.session, "--get-tests-from-guess")
+        result = self.cli(
+            "subset",
+            "--session",
+            self.session,
+            "--get-tests-from-guess",
+            "file",
+        )
         self.assert_success(result)
         """
         1. request to  /state

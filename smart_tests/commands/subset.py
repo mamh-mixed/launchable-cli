@@ -21,7 +21,6 @@ from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ..app import Application
 from ..testpath import FilePathNormalizer, TestPath
-from ..utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
@@ -126,7 +125,7 @@ def subset(
 ):
     app = ctx.obj
     tracking_client = TrackingClient(Command.SUBSET, app=app)
-    client = SmartTestsClient(app=app, tracking_client=tracking_client)
+    client = SmartTestsClient(app=app, tracking_client=tracking_client, test_runner=ctx.invoked_subcommand)
 
     set_fail_fast_mode(client.is_fail_fast_mode())
     fail_fast_mode_validate(FailFastModeValidateParams(
@@ -393,7 +392,7 @@ def subset(
 
         def request_subset(self) -> SubsetResult:
             # Get test runner name from the object (set by DynamicCommandBuilder)
-            test_runner = self.test_runner
+            test_runner = ctx.invoked_subcommand
             # temporarily extend the timeout because subset API response has become slow
             # TODO: remove this line when API response return response
             # within 300 sec
@@ -531,24 +530,6 @@ def subset(
 
 def subset_request(client: SmartTestsClient, timeout: tuple[int, int], payload: dict[str, Any]):
     return client.request("post", "subset", timeout=timeout, payload=payload, compress=True)
-
-
-# NestedCommand implementation: create test runner-specific commands
-# This section adds the new command structure where test runners come before options
-nested_command_app = typer.Typer(name="subset", help="Subsetting tests (NestedCommand)")
-
-
-def create_nested_commands():
-    """Create NestedCommand commands after all test runners are loaded."""
-    builder = DynamicCommandBuilder()
-
-    # Extract options from the original subset callback
-    callback_options = extract_callback_options(subset)
-
-    # Create test runner-specific subset commands
-    builder.create_subset_commands(nested_command_app, subset, callback_options)
-
-# The commands will be created when test runners are loaded
 
 
 class SubsetResult:

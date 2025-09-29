@@ -126,7 +126,7 @@ def nunit_parse_func(report: str):
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     report_xmls: Annotated[List[str], typer.Argument(
         help="Test report XML files to process"
     )],
@@ -134,6 +134,7 @@ def subset(
     """
     Parse an XML file produced from NUnit --explore option to list up all the viable test cases
     """
+    client = ctx.obj
 
     def on_element(e: ET.Element, parent: ET.Element):
         build_path(e, parent)
@@ -151,11 +152,12 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     report_xml: Annotated[List[str], typer.Argument(
         help="Test report XML files to process"
     )],
 ):
+    client = ctx.obj
     client.parse_func = nunit_parse_func
     smart_tests.CommonRecordTestImpls.load_report_files(client=client, source_roots=report_xml)
 

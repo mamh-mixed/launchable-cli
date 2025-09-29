@@ -55,7 +55,7 @@ def do_subset(client, bare):
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     bare: Annotated[bool, typer.Option(
         "--bare",
         help="outputs class names alone"
@@ -64,6 +64,7 @@ def subset(
     """
     Alpha: Supports only Zero Input Subsetting
     """
+    client = ctx.obj
     if not client.is_get_tests_from_previous_sessions:
         typer.secho(
             "The dotnet profile only supports Zero Input Subsetting.\nMake sure to use "
@@ -77,7 +78,7 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     files: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
@@ -85,6 +86,7 @@ def record_tests(
     """
     Alpha: Supports only NUnit report formats.
     """
+    client = ctx.obj
     for file in files:
         match = False
         for t in glob.iglob(file, recursive=True):

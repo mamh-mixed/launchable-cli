@@ -47,7 +47,7 @@ def is_file(f: str) -> bool:
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     source_roots: Annotated[List[str] | None, typer.Argument(
         help="Source root directories to scan for tests"
     )] = None,
@@ -61,6 +61,7 @@ def subset(
              "use them as test inputs."
     )] = False,
 ):
+    client = ctx.obj
 
     def file2class_test_path(f: str) -> List[Dict[str, str]]:
         # remove extension
@@ -133,10 +134,11 @@ def subset(
 # not surefire-reports/**/TEST-*.xml nor surefire-reports/*.xml
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     client.path_builder = junit5_nested_class_path_builder(client.path_builder)
     smart_tests.CommonRecordTestImpls.load_report_files(client=client, source_roots=reports)

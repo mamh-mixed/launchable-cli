@@ -69,11 +69,12 @@ def parse_func(p: str) -> ET.ElementTree:
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     for r in reports:
         client.report(r)
 
@@ -83,11 +84,12 @@ def record_tests(
 
 @smart_tests.subset
 def subset(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     for r in reports:
         xml = JUnitXml.fromfile(r, parse_func)
 

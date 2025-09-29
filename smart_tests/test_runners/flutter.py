@@ -239,7 +239,8 @@ class ReportParser:
 
 # This decorator is converted to Typer annotations in the function signature
 @smart_tests.record.tests
-def record_tests(client, reports):
+def record_tests(ctx: typer.Context, reports: List[str]):
+    client = ctx.obj
     file_path_normalizer = FilePathNormalizer(base_path=client.base_path, no_base_path_inference=client.no_base_path_inference)
     client.parse_func = ReportParser(file_path_normalizer).parse_func
 

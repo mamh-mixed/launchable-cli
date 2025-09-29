@@ -118,11 +118,12 @@ def parse_func(p: str):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     """
     Beta: Report test result that Compatibility Test Suite (CTS) produced. Supports only CTS v2
     """
@@ -134,7 +135,8 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     """
     Beta: Produces test list from previous test sessions for Compatibility Test Suite (CTS). Supports only CTS v2
     """

@@ -15,7 +15,16 @@ class CucumberTest(CliTestCase):
         reports = []
         for f in glob.iglob(str(self.test_files_dir.joinpath("report/*.xml")), recursive=True):
             reports.append(f)
-        result = self.cli('record', 'tests', 'cucumber', '--session', self.session, '--base', str(self.test_files_dir), *reports)
+        result = self.cli(
+            'record',
+            'tests',
+            '--session',
+            self.session,
+            '--base',
+            str(self.test_files_dir),
+            'cucumber',
+            *reports,
+        )
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result.json')
 
@@ -28,11 +37,12 @@ class CucumberTest(CliTestCase):
         result = self.cli(
             'record',
             'tests',
-            'cucumber',
             '--session',
             self.session,
-            "--json",
-            *reports)
+            'cucumber',
+            '--json',
+            *reports,
+        )
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_json_result.json')
 

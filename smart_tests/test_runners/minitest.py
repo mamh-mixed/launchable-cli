@@ -13,11 +13,12 @@ TEST_PATH_ORDER = {"file": 1, "class": 2, "testcase": 3}
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     default_path_builder = client.path_builder
 
     def path_builder(case: TestCase, suite: TestSuite, report_file: str) -> TestPath:

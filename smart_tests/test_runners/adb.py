@@ -1,10 +1,13 @@
 import re
 
+import typer
+
 from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     prev_cls_name = None
     pattern = re.compile(r'^INSTRUMENTATION_STATUS: class=(.+)$')
     for line in client.stdin():

@@ -8,11 +8,12 @@ from . import smart_tests
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
     for r in reports:
         client.report(r)
 
@@ -34,7 +35,8 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))

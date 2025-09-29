@@ -7,7 +7,7 @@ from smart_tests.test_runners import smart_tests
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
@@ -17,5 +17,5 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
     typer.echo("Subset!")

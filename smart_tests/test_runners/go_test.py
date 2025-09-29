@@ -12,7 +12,8 @@ from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     logger = Logger()
 
     # NOTE: This should be using package name + test function name to specify
@@ -42,11 +43,12 @@ def subset(client):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     source_roots: Annotated[List[str], typer.Argument(
         help="Source root directories or files to process"
     )],
 ):
+    client = ctx.obj
     for root in source_roots:
         match = False
         for t in glob.iglob(root, recursive=True):

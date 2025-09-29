@@ -11,11 +11,12 @@ from . import smart_tests
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    ctx: typer.Context,
     reports: Annotated[List[str], typer.Argument(
         help="Test report files to process"
     )],
 ):
+    client = ctx.obj
 
     def parse_func(p: str) -> ET.ElementTree:
         tree = cast(ET.ElementTree, ET.parse(p))
@@ -50,7 +51,8 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(ctx: typer.Context):
+    client = ctx.obj
     if not client.is_get_tests_from_previous_sessions or not client.is_output_exclusion_rules:
         typer.secho(
             "XCTest profile only supports the subset with `--get-tests-from-previous-sessions` and `--output-exclusion-rules` options",  # noqa: E501
