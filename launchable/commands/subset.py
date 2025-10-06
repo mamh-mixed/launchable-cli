@@ -378,6 +378,7 @@ def subset(
             self.output_handler = self._default_output_handler
             self.exclusion_output_handler = self._default_exclusion_output_handler
             self.is_get_tests_from_previous_sessions = is_get_tests_from_previous_sessions
+            self.is_get_tests_from_guess = is_get_tests_from_guess
             self.is_output_exclusion_rules = is_output_exclusion_rules
             self.is_get_tests_from_guess = is_get_tests_from_guess
             super(Optimize, self).__init__(app=app)
@@ -486,6 +487,7 @@ def subset(
                 },
                 "ignoreNewTests": ignore_new_tests,
                 "getTestsFromPreviousSessions": self.is_get_tests_from_previous_sessions,
+                "getTestsFromGuess": self.is_get_tests_from_guess,
             }
 
             if target is not None:
