@@ -1,0 +1,31 @@
+from typing import Any
+
+
+class Argument:
+    many: bool  # True if this argument can appear multiple times
+
+    def __init__(self, name: str, type: type = str, many: bool = False,
+                 required: bool = True, metavar: str = None, help: str = None):
+        self.name = name
+        self.type = type
+        self.many = many
+        self.required = required
+        self.metavar = metavar
+        self.help = help
+
+    def append(self, existing: Any, arg: str):
+        '''
+        Given the current value 'existing' that represents the present value to invoke the user function with,
+        this method is called when another argument 'arg' is consumed from the command line to create the updated
+        value that replaces 'existing'.
+        '''
+
+        v = self.type(arg)  # TODO: handle conversion errors & custom converter
+
+        if self.many:
+            if existing is None:
+                existing = []
+            existing.append(v)
+            return existing
+        else:
+            return v
