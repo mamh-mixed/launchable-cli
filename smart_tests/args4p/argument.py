@@ -1,5 +1,6 @@
 from typing import Any
 
+from .exceptions import BadCmdLineException
 from .parameter import Parameter
 
 
@@ -22,7 +23,10 @@ class Argument(Parameter):
         value that replaces 'existing'.
         '''
 
-        v = self.type(arg)  # TODO: handle conversion errors & custom converter
+        try:
+            v = self.type(arg)
+        except ValueError as e:
+            raise BadCmdLineException(f"Invalid value '{arg}' for argument '{self.name}'") from e
 
         if self.multiple:
             if existing is None:

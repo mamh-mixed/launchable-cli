@@ -48,7 +48,7 @@ def group(name: Optional[str] = None) -> Callable[[...], Group]:
 @decorator
 def option(
     *param_decls: str,  # option names, followed by the variable name
-    help: str = None, type: type = None, default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False
+    help: str = None, type: type|Callable = None, default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False
 ) -> Callable:
     '''
     Args:
@@ -83,7 +83,7 @@ def option(
 @decorator
 def argument(
     name: str,
-    type: type = str,
+    type: type|Callable = str,
     multiple: bool = False,
     required: bool = True,
     metavar: str = None,

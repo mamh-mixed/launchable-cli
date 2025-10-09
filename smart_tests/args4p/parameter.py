@@ -1,5 +1,5 @@
 import inspect
-from typing import Any
+from typing import Any, Callable
 
 from smart_tests.args4p.exceptions import BadConfigException
 
@@ -10,7 +10,7 @@ class Parameter:
     '''
     name: str   # the name of the argument, used as the variable name in the user function
     multiple: bool  # True if this argument can appear multiple times
-    type: type  # the type to convert the string argument to. For multiple=True, this is the type of each individual value
+    type: type|Callable # convert the string argument to a value. For multiple=True, this is the type of each individual value. 'type' object itself, like 'int' is a convenient callable to do just that
     required: bool  # True if this argument is required
     metavar: str  # the name to use in help messages for the argument value
     help: str  # the help message for this argument

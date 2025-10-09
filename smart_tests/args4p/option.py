@@ -27,7 +27,10 @@ class Option(Parameter):
         if self.type==bool:
             v = True
         else:
-            v = self.type(args.eat(option_name))
+            try:
+                v = self.type(args.eat(option_name))
+            except ValueError as e:
+                raise BadCmdLineException(f"Invalid value '{arg}' for option '{option_name}'") from e
 
         if self.multiple:
             if existing is None:

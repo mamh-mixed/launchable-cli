@@ -27,19 +27,19 @@ class CommandTest(TestCase):
         self.assertEqual("exit code", r)
 
     def test_option_default_value(self):
-            v = None
+        v = None
 
-            @args4p.command()
-            @args4p.option("--foo", "foo", default=3)
-            def cli(foo: int):
-                nonlocal v
-                v = foo
+        @args4p.command()
+        @args4p.option("--foo", "foo", default=3)
+        def cli(foo: int):
+            nonlocal v
+            v = foo
 
-            cli()
-            self.assertEqual(v,3)
+        cli()
+        self.assertEqual(v,3)
 
-            cli("--foo","5")
-            self.assertEqual(v,5)
+        cli("--foo","5")
+        self.assertEqual(v,5)
 
     def test_command_with_arguments(self):
         """Test command with positional arguments"""
@@ -278,3 +278,11 @@ class CommandTest(TestCase):
         r = f("--", "--opt", "value")
         self.assertEqual(r["opt"], None)
         self.assertEqual(r["args"], ["--opt","value"])
+
+    def test_custom_converter(self):
+        @args4p.command()
+        @args4p.argument("p1", type=lambda x: x.upper())
+        def f(p1: str):
+            return p1
+
+        self.assertEqual(f("hello"), "HELLO")
