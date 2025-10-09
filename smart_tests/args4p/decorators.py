@@ -57,7 +57,7 @@ def option(
     '''
     def decorator(f: Callable) -> Callable:
         if len(param_decls) == 0:
-            raise "Variable name is required"
+            raise ValueError("Variable name is required")
 
         variable_name = param_decls[-1]
         if len(param_decls) == 1:
