@@ -6,7 +6,7 @@ from smart_tests.args4p.exceptions import BadConfigException
 
 
 class ConsistencyCheckTest(TestCase):
-    """Test suite for command consistency validation checks"""
+    """Test suite for bad usage of args4p by a programmer"""
 
     # Parameter Binding Issues
 
