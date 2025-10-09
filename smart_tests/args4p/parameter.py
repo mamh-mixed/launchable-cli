@@ -8,7 +8,11 @@ class Parameter:
     '''
     Common parts of Argument and Option
     '''
-    name: str   # the name of the argument, used as the variable name in the user function
+
+    # the name of the argument, used as the variable name in the user function
+    # when created from typer.Option or typer.Argument, this is not set until attached to a command
+    name: str
+
     multiple: bool  # True if this argument can appear multiple times
     required: bool  # True if this argument is required
     metavar: str  # the name to use in help messages for the argument value

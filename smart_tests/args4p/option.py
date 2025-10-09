@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from .exceptions import BadCmdLineException
 from .parameter import Parameter
@@ -7,7 +7,7 @@ from .parameter import Parameter
 class Option(Parameter):
     clazz = "option"
 
-    def __init__(self, name: str, option_names: list[str], help: str = None, type: type = str,
+    def __init__(self, name: Optional[str], option_names: list[str], help: str = None, type: type = str,
                  default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False):
         self.name = name
         self.option_names = option_names
