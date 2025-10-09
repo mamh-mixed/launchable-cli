@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, cast, List, Optional
 
+from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException
 from .option import Option
@@ -24,17 +25,25 @@ class Command:
             self.add_param(p)
 
     def add_param(self, param: Parameter):
+        '''
+        Attach an option/argument to this command. Use this to programmatically construct Command with parameters.
+        It is possible to attach the same parameter to different commands simultaneously.
+        '''
         param.attach_to_command(self)
         if isinstance(param, Option):
             self.options.append(param)
         else:
             self.arguments.append(param)
 
-    def __call__(self, *_args: str):
+    def __call__(self, *_args: str) -> Any:
+        '''
+        Given the command line arguments, parse them, bind them to the user function parameters,
+        and invoke the function. This method returns the return value of the user function.
+        '''
         self.check_consistency()
 
-        invoker = Invoker(self)
-        args = ArgList(list(_args))
+        invoker = _Invoker(self)
+        args = _ArgList(list(_args))
 
         while args.has_more():
             a = args.eat(None)
@@ -54,12 +63,16 @@ class Command:
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
 
 class Group(Command):
+    '''
+    Special type of command that has sub-commands, e.g. 'git commit', 'git push', where 'git' is a group command.
+    '''
     commands: List[Command]
 
     def __init__(self, name: str, callback: Callable, params: list[Parameter]):
         super().__init__(name, callback, params)
         self.commands = []
 
+    @decorator
     def command(self, name: Optional[str] = None) -> Callable[[...], Command]:
         from .decorators import _command
 
@@ -69,6 +82,7 @@ class Group(Command):
             return c
         return decorator
 
+    @decorator
     def group(self, name: Optional[str] = None) -> Callable[[...], Group]:
         from .decorators import _command
 
@@ -85,7 +99,7 @@ class Group(Command):
         # TODO: typo look up, etc
         raise BadCmdLineException(f"Unknown command: {name}")
 
-class ArgList:
+class _ArgList:
     '''
     This class represents a list of arguments, and provides methods to consume arguments from the front of the list
     '''
@@ -108,12 +122,12 @@ class ArgList:
         return len(self.args) > 0
 
 
-class Invoker:
+class _Invoker:
     '''
     This class builds up data needed to invoke a command
     '''
     command: Command
-    parent: Invoker = None
+    parent: _Invoker = None
     kwargs: dict[str, Any]
 
     nargs = 0  # number of arguments consumed, used to identify the processor of the next argument
@@ -136,7 +150,7 @@ class Invoker:
         self.kwargs[a.name] = a.append(self.kwargs.get(a.name), arg)
         self.nargs += 1
 
-    def eat_options(self, option_name :str, args: ArgList):
+    def eat_options(self, option_name :str, args: _ArgList):
         inv = self
         while inv is not None:
             for o in inv.command.options:
@@ -148,9 +162,9 @@ class Invoker:
         # TODO: typo look up, etc
         raise BadCmdLineException(f"No such option '{option_name}' for '{self.command.name}' command")
 
-    def sub_command(self, name: str) -> Invoker:
+    def sub_command(self, name: str) -> _Invoker:
         c = cast(Group, self.command).find_subcommand(name)
-        i = Invoker(c)
+        i = _Invoker(c)
         i.parent = self
         return i
 

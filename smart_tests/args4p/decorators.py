@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional, Type
 
+from . import decorator
 from .argument import Argument
 from .command import Command, Group
 from .option import Option
+from .parameter import Parameter
 
 
 def _command(
@@ -32,19 +34,27 @@ def _command(
     return decorator
 
 
+@decorator
 def command(name: Optional[str] = None) -> Callable[[...], Command]:
     return _command(name, Command)
 
 
+@decorator
 def group(name: Optional[str] = None) -> Callable[[...], Group]:
     return _command(name, Group) # type: ignore
 
 
 # is_flag is replaced by type=bool
+@decorator
 def option(
     *param_decls: str,  # option names, followed by the variable name
     help: str = None, type: type = None, default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False
 ) -> Callable:
+    '''
+    Args:
+        type:
+
+    '''
     def decorator(f: Callable) -> Callable:
         if len(param_decls) == 0:
             raise "Variable name is required"
@@ -70,6 +80,7 @@ def option(
     return decorator
 
 
+@decorator
 def argument(
     name: str,
     type: type = str,
@@ -82,7 +93,9 @@ def argument(
     return lambda f: _attach(f, a)
 
 
-def _attach(f: Callable[[...], Any], param: Option | Argument):
+def _attach(f: Callable[[...], Any], param: Parameter):
+    # depending on whether a command annotation comes before/after parameter annotations, 'f' might be
+    # a naked user-defined function or a Command instance
     if isinstance(f, Command):
         f.add_param(param)
     else:
