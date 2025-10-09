@@ -154,7 +154,7 @@ class DecoratorTest(TestCase):
         """Test @argument decorator with multiple values"""
         @args4p.command()
         @args4p.argument("files", multiple=True)
-        def f(files: list):
+        def f(files: list[str]):
             return f"Processing {len(files)} files: {', '.join(files)}"
 
         arg = f.arguments[0]
@@ -170,7 +170,7 @@ class DecoratorTest(TestCase):
         @args4p.option("--output", "output", default="stdout")
         @args4p.argument("input_file")
         @args4p.argument("extra_args", multiple=True, required=False)
-        def complex_cmd(input_file: str, extra_args: list, verbose: bool, output: str):
+        def complex_cmd(input_file: str, extra_args: list[str], verbose: bool, output: str):
             result = f"Processing {input_file}"
             if verbose:
                 result += f" with output to {output}"
