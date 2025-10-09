@@ -10,7 +10,7 @@ class Parameter:
     '''
     name: str   # the name of the argument, used as the variable name in the user function
     multiple: bool  # True if this argument can appear multiple times
-    type: type  # the type to convert the string argument to
+    type: type  # the type to convert the string argument to. For multiple=True, this is the type of each individual value
     required: bool  # True if this argument is required
     metavar: str  # the name to use in help messages for the argument value
     help: str  # the help message for this argument
@@ -21,7 +21,18 @@ class Parameter:
             if name == self.name:
                 # we found the parameter that matches the name
                 if self.type is None:
-                    self.type = param.annotation
+                    def infer_type(annotation) -> type:
+                        if self.multiple:
+                            # we expect a List[something] and we want to extract 'something'
+                            if getattr(annotation, '__origin__', None) is list:
+                                return annotation.__args__[0]
+                        else:
+                            if annotation != inspect.Parameter.empty:
+                                return annotation
+                        raise BadConfigException(
+                            f"Type annotation '{annotation}' of parameter '{name}' in function '{parent.callback.__name__}' is incompatible with args4p annotation: {inspect.getsourcefile(parent.callback)}:{inspect.getsourcelines(parent.callback)[1]}")
+
+                    self.type = infer_type(param.annotation)
                 return
 
         raise BadConfigException(
