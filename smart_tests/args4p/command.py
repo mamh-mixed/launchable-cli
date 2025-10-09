@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import inspect
+import os
 import re
+import sys
 from typing import Any, Callable, cast, List, Optional
 
 from . import decorator
@@ -59,6 +61,11 @@ class Command:
                 while args.has_more():
                     invoker.eat_arg(args.eat(None))
             elif a.startswith("-"):
+                # Handle built-in help options
+                if a in ["--help", "-h"]:
+                    print(invoker.command.format_help())
+                    return 0
+
                 invoker.eat_options(a, args)
             elif isinstance(invoker.command, Group):
                 invoker = invoker.sub_command(a)
@@ -187,6 +194,150 @@ class Command:
             # Recursively check subcommands for Groups
             for c in self.commands:
                 c.check_consistency()
+
+    def format_help(self, program_name :str = os.path.basename(sys.argv[0])) -> str:
+        """
+        Generate and return a formatted help message for this command.
+
+        :param program_name
+            Name of the program to display in the usage line. Defaults to the name of the running script.
+        """
+        def usage_line() -> str:
+            parts = ["Usage:"]
+
+            # Program name
+            parts.append(program_name)
+
+            # Build command path (for subcommands)
+            command_path = []
+            current = self
+            while current.parent is not None:
+                command_path.insert(0, current.name)
+                current = current.parent
+            if len(command_path)>0:
+                parts.append(" ".join(command_path))
+
+            # Add options placeholder if we have options
+            if self.options:
+                parts.append("[OPTIONS]")
+
+            # Add arguments
+            for a in self.arguments:
+                if a.required:
+                    if a.multiple:
+                        parts.append(f"<{a.metavar}>...")
+                    else:
+                        parts.append(f"<{a.metavar}>")
+                else:
+                    if a.multiple:
+                        parts.append(f"[{a.metavar}...]")
+                    else:
+                        parts.append(f"[{a.metavar}]")
+
+            # Add subcommand placeholder for groups
+            if isinstance(self, Group):
+                parts.append("COMMAND [ARGS]...")
+
+            return " ".join(parts)
+
+        lines = [usage_line()]
+
+        # Description from docstring
+        if self.callback.__doc__:
+            lines.append("")
+            # Clean up the docstring - remove leading/trailing whitespace and dedent
+            doc_lines = self.callback.__doc__.strip().split('\n')
+            # Remove common leading whitespace
+            import textwrap
+            description = textwrap.dedent('\n'.join(doc_lines)).strip()
+            lines.append(description)
+
+        # Arguments section
+        if self.arguments:
+            lines.append("")
+            lines.append("Arguments:")
+            for arg in self.arguments:
+                arg_line = f"  {arg.metavar}"
+
+                # Add type info
+                if arg.type != str:
+                    type_name = getattr(arg.type, '__name__', str(arg.type))
+                    arg_line += f" ({type_name})"
+
+                # Add required/optional indicator and default
+                if not arg.required:
+                    if arg.default is not None:
+                        arg_line += f" [default: {arg.default}]"
+                    else:
+                        arg_line += " [optional]"
+                # Add multiple indicator
+                if arg.multiple:
+                    arg_line += " (multiple)"
+                lines.append(arg_line)
+
+                # Add help text if available
+                if arg.help:
+                    help_lines = arg.help.strip().split('\n')
+                    for help_line in help_lines:
+                        lines.append(f"      {help_line}")
+
+        # Options section
+        if self.options:
+            lines.append("")
+            lines.append("Options:")
+            for opt in self.options:
+                # Format option names
+                opt_names = ", ".join(opt.option_names)
+                opt_line = f"  {opt_names}"
+
+                # Add metavar for non-boolean options
+                if opt.type == bool:
+                    pass
+                elif opt.metavar:
+                    opt_line += f" {opt.metavar}"
+                else:
+                    type_name = getattr(opt.type, '__name__', str(opt.type))
+                    opt_line += f" {type_name.upper()}"
+
+                lines.append(opt_line)
+
+                # Add description line with help and metadata
+                desc_parts = []
+                if opt.help:
+                    desc_parts.append(opt.help)
+
+                # Add default value info
+                if opt.default is not None:
+                    desc_parts.append(f"[default: {opt.default}]")
+                elif not opt.required and opt.type != bool:
+                    desc_parts.append("[optional]")
+
+                # Add required indicator
+                if opt.required:
+                    desc_parts.append("[required]")
+
+                # Add multiple indicator
+                if opt.multiple:
+                    desc_parts.append("(multiple)")
+
+                if desc_parts:
+                    lines.append(f"      {' '.join(desc_parts)}")
+
+        # Commands section (for Groups)
+        if isinstance(self, Group) and self.commands:
+            lines.append("")
+            lines.append("Commands:")
+            for cmd in self.commands:
+                cmd_line = f"  {cmd.name}"
+                lines.append(cmd_line)
+
+                # Add command description from docstring
+                if cmd.callback.__doc__:
+                    # Get first line of docstring as brief description
+                    first_line = cmd.callback.__doc__.strip().split('\n')[0]
+                    lines.append(f"      {first_line}")
+
+        return '\n'.join(lines)
 
     def __repr__(self):
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
