@@ -52,7 +52,11 @@ class Command:
 
         while args.has_more():
             a = args.eat(None)
-            if a.startswith("-"):
+            if a=="--":
+                # everything after this is a positional argument
+                while args.has_more():
+                    invoker.eat_arg(args.eat(None))
+            elif a.startswith("-"):
                 invoker.eat_options(a, args)
             elif isinstance(invoker.command, Group):
                 invoker = invoker.sub_command(a)

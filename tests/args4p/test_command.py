@@ -271,3 +271,18 @@ class CommandTest(TestCase):
             def bad_config(existing_param: str):
                 pass
 
+    def test_double_dash_argument(self):
+        """Test handling of '--' to stop option parsing"""
+        @args4p.command()
+        @args4p.option("--opt", "opt")
+        @args4p.argument("args", multiple=True)
+        def f(opt: str, args: list[str]):
+            return {"opt": opt, "args": args}
+
+        r = f("--opt", "value", "--", "--not-an-opt", "positional")
+        self.assertEqual(r["opt"], "value")
+        self.assertEqual(r["args"], ["--not-an-opt", "positional"])
+
+        r = f("--", "--opt", "value")
+        self.assertEqual(r["opt"], None)
+        self.assertEqual(r["args"], ["--opt","value"])
