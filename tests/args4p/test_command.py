@@ -8,22 +8,22 @@ class CommandTest(TestCase):
     def test_invocation(self):
         @args4p.group()
         @args4p.option("--foo", "foo")
-        def cli(foo :bool):
+        def cli(foo: bool):
             self.assertTrue(foo)
             return "cli called"
 
         @cli.command()
         @args4p.option("--bar", "bar")
-        def cmd1(parent_output :str, bar :int):
+        def cmd1(parent_output: str, bar: int):
             self.assertEqual(parent_output, "cli called")
-            self.assertEqual(bar,3)
+            self.assertEqual(bar, 3)
             return "exit code"
 
         @cli.command()
         def cmd2():
             self.fail("Shouldn't be called")
 
-        r = cli("cmd1","--foo","--bar","3")
+        r = cli("cmd1", "--foo", "--bar", "3")
         self.assertEqual("exit code", r)
 
     def test_option_default_value(self):
@@ -36,10 +36,10 @@ class CommandTest(TestCase):
             v = foo
 
         cli()
-        self.assertEqual(v,3)
+        self.assertEqual(v, 3)
 
-        cli("--foo","5")
-        self.assertEqual(v,5)
+        cli("--foo", "5")
+        self.assertEqual(v, 5)
 
     def test_command_with_arguments(self):
         """Test command with positional arguments"""
@@ -277,7 +277,7 @@ class CommandTest(TestCase):
 
         r = f("--", "--opt", "value")
         self.assertEqual(r["opt"], None)
-        self.assertEqual(r["args"], ["--opt","value"])
+        self.assertEqual(r["args"], ["--opt", "value"])
 
     def test_custom_converter(self):
         @args4p.command()

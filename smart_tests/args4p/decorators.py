@@ -41,20 +41,22 @@ def command(name: Optional[str] = None) -> Callable[[...], Command]:
 
 @decorator
 def group(name: Optional[str] = None) -> Callable[[...], Group]:
-    return _command(name, Group) # type: ignore
+    return _command(name, Group)  # type: ignore
 
 
 # is_flag is replaced by type=bool
 @decorator
 def option(
-    *param_decls: str,  # option names, followed by the variable name
-    help: str = None, type: type|Callable = None, default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False
+        *param_decls: str,  # option names, followed by the variable name
+        help: str = None, type: type | Callable = None, default: Any = None, required: bool = False,
+        metavar: str = None, multiple: bool = False
 ) -> Callable:
     '''
     Args:
         type:
 
     '''
+
     def decorator(f: Callable) -> Callable:
         if len(param_decls) == 0:
             raise ValueError("Variable name is required")
@@ -83,7 +85,7 @@ def option(
 @decorator
 def argument(
     name: str,
-    type: type|Callable = str,
+    type: type | Callable = str,
     multiple: bool = False,
     required: bool = True,
     metavar: str = None,

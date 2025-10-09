@@ -4,7 +4,7 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, cast, List, Optional
+from typing import Any, Callable, List, Optional, cast
 
 from . import decorator
 from .argument import Argument
@@ -52,11 +52,11 @@ class Command:
         self.check_consistency()
 
         invoker = _Invoker(self)
-        args = _ArgList(list(_args))
+        args = ArgList(list(_args))
 
         while args.has_more():
             a = args.eat(None)
-            if a=="--":
+            if a == "--":
                 # everything after this is a positional argument
                 while args.has_more():
                     invoker.eat_arg(args.eat(None))
@@ -195,7 +195,7 @@ class Command:
             for c in self.commands:
                 c.check_consistency()
 
-    def format_help(self, program_name :str = os.path.basename(sys.argv[0])) -> str:
+    def format_help(self, program_name: str = os.path.basename(sys.argv[0])) -> str:
         """
         Generate and return a formatted help message for this command.
 
@@ -214,7 +214,7 @@ class Command:
             while current.parent is not None:
                 command_path.insert(0, current.name)
                 current = current.parent
-            if len(command_path)>0:
+            if len(command_path) > 0:
                 parts.append(" ".join(command_path))
 
             # Add options placeholder if we have options
@@ -342,6 +342,7 @@ class Command:
     def __repr__(self):
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
 
+
 class Group(Command):
     '''
     Special type of command that has sub-commands, e.g. 'git commit', 'git push', where 'git' is a group command.
@@ -388,7 +389,8 @@ class Group(Command):
         # TODO: typo look up, etc
         raise BadCmdLineException(f"Unknown command: {name}")
 
-class _ArgList:
+
+class ArgList:
     '''
     This class represents a list of arguments, and provides methods to consume arguments from the front of the list
     '''
@@ -431,7 +433,7 @@ class _Invoker:
         if self.nargs < len(l):
             a = l[self.nargs]
         else:
-            if len(l)>0 and l[-1].multiple:
+            if len(l) > 0 and l[-1].multiple:
                 a = l[-1]
             else:
                 raise BadCmdLineException(f"Too many arguments for '{self.command.name}' command: {arg}")
@@ -439,7 +441,7 @@ class _Invoker:
         self.kwargs[a.name] = a.append(self.kwargs.get(a.name), arg)
         self.nargs += 1
 
-    def eat_options(self, option_name :str, args: _ArgList):
+    def eat_options(self, option_name: str, args: ArgList):
         inv = self
         while inv is not None:
             for o in inv.command.options:
