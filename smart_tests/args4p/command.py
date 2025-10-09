@@ -128,7 +128,7 @@ class Invoker:
         if self.nargs < len(l):
             a = l[self.nargs]
         else:
-            if len(l)>0 and l[-1].many:
+            if len(l)>0 and l[-1].multiple:
                 a = l[-1]
             else:
                 raise BadCmdLineException(f"Too many arguments for '{self.command.name}' command: {arg}")
@@ -179,5 +179,4 @@ class Invoker:
             r = self.parent.invoke()
             # TODO: pass 'r'
 
-        print(f"about to invoke {self.command.callback} with {self.kwargs}")
         return self.command.callback(**self.kwargs)

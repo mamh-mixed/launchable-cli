@@ -32,6 +32,3 @@ class CommandTest(TestCase):
 
         self.assertTrue(cli_called)
         self.assertTrue(cmd1_called)
-
-if __name__ == "__main__":
-    CommandTest().test_invocation()

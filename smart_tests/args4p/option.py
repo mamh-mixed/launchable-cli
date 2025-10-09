@@ -5,7 +5,7 @@ from .parameter import Parameter
 
 class Option(Parameter):
     def __init__(self, name: str, option_names: list[str], help: str = None, type: type = str,
-                 default: Any = None, required: bool = False, metavar: str = None, many : bool = False):
+                 default: Any = None, required: bool = False, metavar: str = None, multiple : bool = False):
         self.name = name
         self.option_names = option_names
         self.help = help
@@ -13,7 +13,7 @@ class Option(Parameter):
         self.default = default
         self.required = required
         self.metavar = metavar
-        self.many = many
+        self.multiple = multiple
 
     def append(self, existing: Any, option_name: str, args: 'ArgList'):
         '''
@@ -27,7 +27,7 @@ class Option(Parameter):
         else:
             v = self.type(args.eat(option_name))
 
-        if self.many:
+        if self.multiple:
             if existing is None:
                 existing = []
             existing.append(v)
@@ -38,4 +38,4 @@ class Option(Parameter):
     def __repr__(self):
         return (f"Option(name={self.name!r}, option_names={self.option_names!r}, help={self.help!r}, "
                 f"type={self.type.__name__!r}, default={self.default!r}, required={self.required!r}, "
-                f"metavar={self.metavar!r}, many={self.many!r})")
+                f"metavar={self.metavar!r}, many={self.multiple!r})")

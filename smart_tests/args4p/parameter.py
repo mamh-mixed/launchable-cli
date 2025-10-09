@@ -9,7 +9,7 @@ class Parameter:
     Common parts of Argument and Option
     '''
     name: str   # the name of the argument, used as the variable name in the user function
-    many: bool  # True if this argument can appear multiple times
+    multiple: bool  # True if this argument can appear multiple times
     type: type  # the type to convert the string argument to
     required: bool  # True if this argument is required
     metavar: str  # the name to use in help messages for the argument value

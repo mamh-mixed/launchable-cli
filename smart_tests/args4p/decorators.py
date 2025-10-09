@@ -43,7 +43,7 @@ def group(name: Optional[str] = None) -> Callable[[...], Group]:
 # is_flag is replaced by type=bool
 def option(
     *param_decls: str,  # option names, followed by the variable name
-    help: str = None, type: type = None, default: Any = None, required: bool = False, metavar: str = None, many: bool = False
+    help: str = None, type: type = None, default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False
 ) -> Callable:
     def decorator(f: Callable) -> Callable:
         if len(param_decls) == 0:
@@ -63,7 +63,7 @@ def option(
             default=default,
             required=required,
             metavar=metavar,
-            many=many)
+            multiple=multiple)
 
         return _attach(f, o)
 
@@ -73,12 +73,12 @@ def option(
 def argument(
     name: str,
     type: type = str,
-    nargs: int = 1,
+    multiple: bool = False,
     required: bool = True,
     metavar: str = None,
     help: str = None,
 ) -> Callable:
-    a = Argument(name=name, type=type, nargs=nargs, required=required, metavar=metavar, help=help)
+    a = Argument(name=name, type=type, multiple=multiple, required=required, metavar=metavar, help=help)
     return lambda f: _attach(f, a)
 
 

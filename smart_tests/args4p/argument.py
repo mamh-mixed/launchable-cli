@@ -4,11 +4,11 @@ from .parameter import Parameter
 
 
 class Argument(Parameter):
-    def __init__(self, name: str, type: type = str, many: bool = False,
+    def __init__(self, name: str, type: type = str, multiple: bool = False,
                  required: bool = True, metavar: str = None, help: str = None):
         self.name = name
         self.type = type
-        self.many = many
+        self.multiple = multiple
         self.required = required
         self.metavar = metavar
         self.help = help
@@ -22,7 +22,7 @@ class Argument(Parameter):
 
         v = self.type(arg)  # TODO: handle conversion errors & custom converter
 
-        if self.many:
+        if self.multiple:
             if existing is None:
                 existing = []
             existing.append(v)
