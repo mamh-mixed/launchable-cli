@@ -4,6 +4,8 @@ from .parameter import Parameter
 
 
 class Option(Parameter):
+    clazz = "option"
+
     def __init__(self, name: str, option_names: list[str], help: str = None, type: type = str,
                  default: Any = None, required: bool = False, metavar: str = None, multiple : bool = False):
         self.name = name

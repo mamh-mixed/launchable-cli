@@ -16,7 +16,12 @@ class Parameter:
     help: str  # the help message for this argument
     default: Any  # the default value if the argument/option is not provided
 
+    clazz: str # "argument" or "option"
+
     def attach_to_command(self, parent : 'Command'):
+        def error(msg: str):
+            raise BadConfigException(f"{msg} in function '{parent.callback.__name__}': {inspect.getsourcefile(parent.callback)}:{inspect.getsourcelines(parent.callback)[1]}")
+
         for name, param in inspect.signature(parent.callback).parameters.items():
             if name == self.name:
                 # we found the parameter that matches the name
@@ -26,14 +31,13 @@ class Parameter:
                             # we expect a List[something] and we want to extract 'something'
                             if getattr(annotation, '__origin__', None) is list:
                                 return annotation.__args__[0]
+                            raise error(f"multiple=True requires a List[T] type annotation with parameter '{name}'")
                         else:
-                            if annotation != inspect.Parameter.empty:
-                                return annotation
-                        raise BadConfigException(
-                            f"Type annotation '{annotation}' of parameter '{name}' in function '{parent.callback.__name__}' is incompatible with args4p annotation: {inspect.getsourcefile(parent.callback)}:{inspect.getsourcelines(parent.callback)[1]}")
+                            if annotation == inspect.Parameter.empty:
+                                raise error(f"Type annotation is missing on parameter '{name}'")
+                            return annotation
 
                     self.type = infer_type(param.annotation)
                 return
 
-        raise BadConfigException(
-            f"No parameter named '{self.name}' found in function '{parent.callback.__name__}': {inspect.getsourcefile(parent.callback)}:{inspect.getsourcelines(parent.callback)[1]}")
+        raise error(f"No parameter named '{self.name}' found")

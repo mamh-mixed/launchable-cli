@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import inspect
+import re
 from typing import Any, Callable, cast, List, Optional
 
 from . import decorator
 from .argument import Argument
-from .exceptions import BadCmdLineException
+from .exceptions import BadCmdLineException, BadConfigException
 from .option import Option
 from .parameter import Parameter
 
@@ -66,7 +68,125 @@ class Command:
         return invoker.invoke()
 
     def check_consistency(self):
-        pass # TODO: make sure options & arguments are well constructed
+        """
+        Validate that the command configuration is consistent and well-formed.
+        Raises BadConfigException if any issues are found.
+        """
+
+        # Get function signature for parameter analysis
+        sig = inspect.signature(self.callback)
+        func_params = list(sig.parameters.keys())
+
+        # For Group sub-commands, first parameter is context from parent
+        # For regular commands, all parameters should be covered by decorators
+        context_param_offset = 1 if self.parent is not None else 0
+        expected_func_params = func_params[context_param_offset:]
+
+        def error(msg: str) -> BadConfigException:
+            return BadConfigException(
+                f"{msg} in function '{self.callback.__name__}' signature: "
+                f"{inspect.getsourcefile(self.callback)}:{inspect.getsourcelines(self.callback)[1]}")
+
+        # Check for missing function parameters
+        for p in self.options:
+            if p.name not in func_params:
+                raise error(f"@option names '{p.name}' but no such parameter exists")
+
+        for a in self.arguments:
+            if a.name not in func_params:
+                raise error(f"@argument names '{a.name}' but no such parameter exists")
+
+        # Collect all parameter names from decorators
+        decorator_param_names = set()
+        for p in self.options + self.arguments:
+            if p.name in decorator_param_names:
+                raise error(f"Duplicate parameter name '{p.name}' found in command '{self.name}' decorators")
+            decorator_param_names.add(p.name)
+
+        # Check for required parameter with default value
+        for p in self.options + self.arguments:
+            if p.required and p.default is not None:
+                raise error(f"'{p.name}' is marked as required but with default value '{p.default}'")
+
+        # Check for uncovered function parameters
+        for p in expected_func_params:
+            if p not in decorator_param_names:
+                raise error(f"Function parameter '{p}' is not covered by any @option or @argument decorator")
+
+        # Type system checks
+        for p in self.options + self.arguments:
+            fp = sig.parameters[p.name]
+
+            # Check if multiple=True is used correctly with List type
+            if p.multiple:
+                annotation = fp.annotation
+                if annotation == inspect.Parameter.empty:
+                    raise error(f"Parameter '{p.name}' with multiple=True requires a type annotation")
+                if not (hasattr(annotation, '__origin__') and annotation.__origin__ is list):
+                    raise error(f"Parameter '{p.name}' with multiple=True requires a List[T]")
+
+            # Check default value type compatibility
+            if p.default is not None and not isinstance(p.default, p.type):
+                raise error(
+                    f"Default value '{p.default}' for parameter '{p.name}' is incompatible with type '{p.type.__name__}'")
+
+        # Check for duplicate option names
+        all_option_names = set()
+        for p in self.options:
+            for name in p.option_names:
+                if name in all_option_names:
+                    raise error(f"Duplicate option name '{name}' found")
+                all_option_names.add(name)
+
+        # Check option name formats
+        for p in self.options:
+            for opt_name in p.option_names:
+                if not re.match(r'^-[a-zA-Z]$|^--[a-zA-Z][-a-zA-Z0-9]*$', opt_name):
+                    raise error(f"Invalid option name '{opt_name}'")
+
+        # Check boolean option conflicts
+        for p in self.options:
+            if p.type == bool:
+                if p.required:
+                    raise error(f"It makes no sense to require a boolean option '{p.name}'")
+
+        # Check argument ordering (required after optional)
+        found_optional = False
+        for a in self.arguments:
+            if not a.required:
+                found_optional = True
+            elif found_optional:
+                raise error(f"Required argument '{a.name}' cannot appear after optional arguments")
+
+        # Check multiple arguments placement and count
+        multiple_args = [arg.name for arg in self.arguments if arg.multiple]
+        if len(multiple_args) > 1:
+            raise error(f"Cannot have more than one multiple=True argument, found: {multiple_args}")
+
+        if len(multiple_args) == 1:
+            # multiple=True argument must be the last argument
+            if self.arguments and self.arguments[-1].name != multiple_args[0]:
+                raise error(f"Argument '{multiple_args[0]}' with multiple=True must be the last argument")
+
+        # Group-specific checks
+        if isinstance(self, Group):
+            # Groups should not have any arguments since first arg is subcommand name
+            if self.arguments:
+                raise error(f"Group command '{self.name}' cannot have arguments")
+
+            # Check for empty groups (only if this is a Group)
+            if not self.commands:
+                raise error(f"Group command '{self.name}' has no subcommands defined")
+
+            # Check subcommand name conflicts
+            subcommand_names = [cmd.name for cmd in self.commands]
+            if len(subcommand_names) != len(set(subcommand_names)):
+                duplicates = [name for name in set(subcommand_names) if subcommand_names.count(name) > 1]
+                raise error(f"Duplicate subcommand names found in group '{self.name}': {duplicates}")
+
+            # Recursively check subcommands for Groups
+            for c in self.commands:
+                c.check_consistency()
 
     def __repr__(self):
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
@@ -84,13 +204,19 @@ class Group(Command):
         super().__init__(name, callback, params)
         self.commands = []
 
+    def add_command(self, c: Command):
+        self.commands.append(c)
+        if c.parent is not None:
+            raise BadConfigException(f"Command '{c.name}' is already a sub-command of '{c.parent.name}'")
+        c.parent = self
+
     @decorator
     def command(self, name: Optional[str] = None) -> Callable[[...], Command]:
         from .decorators import _command
 
         def decorator(f: Callable) -> Command:
             c = _command(name, Command)(f)
-            self.commands.append(c)
+            self.add_command(c)
             return c
         return decorator
 
@@ -100,7 +226,7 @@ class Group(Command):
 
         def decorator(f: Callable) -> Group:
             g = _command(name, Group)(f)
-            self.commands.append(g)
+            self.add_command(g)
             return g
         return decorator
 

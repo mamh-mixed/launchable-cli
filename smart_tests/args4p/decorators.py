@@ -88,8 +88,9 @@ def argument(
     required: bool = True,
     metavar: str = None,
     help: str = None,
+    default: Any = None
 ) -> Callable:
-    a = Argument(name=name, type=type, multiple=multiple, required=required, metavar=metavar, help=help)
+    a = Argument(name=name, type=type, multiple=multiple, required=required, metavar=metavar, help=help, default=default)
     return lambda f: _attach(f, a)
 
 
