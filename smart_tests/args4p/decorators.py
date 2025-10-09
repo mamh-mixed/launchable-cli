@@ -63,7 +63,7 @@ def option(
         if len(param_decls) == 1:
             option_names = [f"--{variable_name.replace('_', '-')}"]
         else:
-            option_names = param_decls[:-1]
+            option_names = list(param_decls[:-1])
 
         o = Option(
             name=variable_name,
@@ -97,7 +97,7 @@ def _attach(f: Callable[[...], Any], param: Parameter):
     # depending on whether a command annotation comes before/after parameter annotations, 'f' might be
     # a naked user-defined function or a Command instance
     if isinstance(f, Command):
-        f.add_param(param)
+        f.add_param(param, True)
     else:
         if not hasattr(f, "__args4p_params__"):
             f.__args4p_params__ = []  # type: ignore

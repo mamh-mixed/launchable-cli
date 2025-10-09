@@ -24,16 +24,21 @@ class Command:
         for p in params:
             self.add_param(p)
 
-    def add_param(self, param: Parameter):
+    def add_param(self, param: Parameter, prepend: bool = False):
         '''
         Attach an option/argument to this command. Use this to programmatically construct Command with parameters.
         It is possible to attach the same parameter to different commands simultaneously.
+
+        :param prepend
+            when we are adding parameter from decorators, things show up in the reverse order, so we need to prepend,
+            not append.
         '''
         param.attach_to_command(self)
-        if isinstance(param, Option):
-            self.options.append(param)
+        col = self.options if isinstance(param, Option) else self.arguments
+        if prepend:
+            col.insert(0, param)
         else:
-            self.arguments.append(param)
+            col.append(param)
 
     def __call__(self, *_args: str) -> Any:
         '''
@@ -47,7 +52,7 @@ class Command:
 
         while args.has_more():
             a = args.eat(None)
-            if a.startswith("--"):
+            if a.startswith("-"):
                 invoker.eat_options(a, args)
             elif isinstance(invoker.command, Group):
                 invoker = invoker.sub_command(a)
