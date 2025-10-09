@@ -26,6 +26,30 @@ class CommandTest(TestCase):
         r = cli("cmd1", "--foo", "--bar", "3")
         self.assertEqual("exit code", r)
 
+    def nested_sub_commands(self):
+        @args4p.group()
+        @args4p.option("foo")
+        def grandpa(foo: bool):
+            self.assertTrue(foo)
+            return "grandpa"
+
+        @grandpa.command()
+        @args4p.option("bar")
+        def daddy(parent_output: str, bar: int):
+            self.assertEqual(parent_output, "grandpa")
+            self.assertEqual(bar, 3)
+            return "daddy"
+
+        @daddy.command()
+        @args4p.option("zot")
+        def son(parent_output: str, zot: int):
+            self.assertEqual(parent_output, "daddy")
+            self.assertEqual(zot, 5)
+            return "son"
+
+        self.assertEqual("son", grandpa("daddy", "son", "--foo", "--bar", "3", "--zot", "5"))
+        self.assertEqual("son", grandpa("--foo", "daddy", "--bar", "3", "son", "--zot", "5"))
+
     def test_option_default_value(self):
         v = None
 
