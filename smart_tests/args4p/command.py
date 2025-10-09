@@ -74,6 +74,9 @@ class Command:
 class Group(Command):
     '''
     Special type of command that has sub-commands, e.g. 'git commit', 'git push', where 'git' is a group command.
+
+    A sub-command receives the return value of its parent command as the first argument to its callback function,
+    which is how we expect the parent to pass the context to the child.
     '''
     commands: List[Command]
 
@@ -199,7 +202,6 @@ class _Invoker:
                     self.kwargs[o.name] = o.default
 
         if self.parent is not None:
-            r = self.parent.invoke()
-            # TODO: pass 'r'
-
-        return self.command.callback(**self.kwargs)
+            return self.command.callback(self.parent.invoke(), **self.kwargs)
+        else:
+            return self.command.callback(**self.kwargs)

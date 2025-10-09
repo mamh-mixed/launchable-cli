@@ -1,11 +1,8 @@
 from unittest import TestCase
 
 import smart_tests.args4p as args4p
-from smart_tests.args4p.decorators import _attach
 from smart_tests.args4p.command import Command, Group
 from smart_tests.args4p.exceptions import BadCmdLineException
-from smart_tests.args4p.option import Option
-from smart_tests.args4p.argument import Argument
 
 
 class DecoratorTest(TestCase):
@@ -198,11 +195,11 @@ class DecoratorTest(TestCase):
 
         @main_group.command()
         @args4p.option("--local-opt", "local_opt")
-        def sub_cmd(local_opt: str):
+        def sub_cmd(context, local_opt: str):
             return f"local: {local_opt}"
 
         @main_group.group()
-        def sub_group():
+        def sub_group(context):
             return "sub group"
 
         # Check structure

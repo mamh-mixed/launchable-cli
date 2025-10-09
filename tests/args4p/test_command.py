@@ -6,21 +6,16 @@ from smart_tests.args4p.exceptions import BadCmdLineException, BadConfigExceptio
 
 class CommandTest(TestCase):
     def test_invocation(self):
-        cli_called = False
-        cmd1_called = False
-
         @args4p.group()
         @args4p.option("--foo", "foo")
         def cli(foo :bool):
-            nonlocal cli_called
-            cli_called = True
             self.assertTrue(foo)
+            return "cli called"
 
         @cli.command()
         @args4p.option("--bar", "bar")
-        def cmd1(bar :int):
-            nonlocal cmd1_called
-            cmd1_called = True
+        def cmd1(parent_output :str, bar :int):
+            self.assertEqual(parent_output, "cli called")
             self.assertEqual(bar,3)
             return "exit code"
 
@@ -30,9 +25,6 @@ class CommandTest(TestCase):
 
         r = cli("cmd1","--foo","--bar","3")
         self.assertEqual("exit code", r)
-
-        self.assertTrue(cli_called)
-        self.assertTrue(cmd1_called)
 
     def test_option_default_value(self):
             v = None
@@ -134,7 +126,7 @@ class CommandTest(TestCase):
             pass
 
         @cli.command()
-        def known():
+        def known(context):
             pass
 
         with self.assertRaises(BadCmdLineException) as e:
@@ -177,11 +169,11 @@ class CommandTest(TestCase):
             trace.append("main")
 
         @main.group()
-        def sub():
+        def sub(context):
             trace.append("sub")
 
         @sub.command()
-        def leaf():
+        def leaf(context):
             trace.append("leaf")
             return "nested result"
 
@@ -200,7 +192,7 @@ class CommandTest(TestCase):
 
         @main.command()
         @args4p.option("--local", "local_opt")
-        def sub(local_opt: str):
+        def sub(context, local_opt: str):
             captured["local"] = local_opt
 
         main("--global", "g_value", "sub", "--local", "l_value")
@@ -231,7 +223,7 @@ class CommandTest(TestCase):
             pass
 
         @cli.command("custom-name")
-        def some_function():
+        def some_function(context):
             return "custom command executed"
 
         # The command should be accessible by its custom name through the CLI object
