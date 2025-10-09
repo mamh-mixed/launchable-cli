@@ -32,3 +32,19 @@ class CommandTest(TestCase):
 
         self.assertTrue(cli_called)
         self.assertTrue(cmd1_called)
+
+    def test_option_default_value(self):
+            v = None
+
+            @args4p.command()
+            @args4p.option("--foo", "foo", default=3)
+            def cli(foo: int):
+                nonlocal v
+                v = foo
+
+            cli()
+            self.assertEqual(v,3)
+
+            cli("--foo","5")
+            self.assertEqual(v,5)
+
