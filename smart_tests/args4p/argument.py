@@ -1,9 +1,9 @@
 from typing import Any
 
+from .parameter import Parameter
 
-class Argument:
-    many: bool  # True if this argument can appear multiple times
 
+class Argument(Parameter):
     def __init__(self, name: str, type: type = str, many: bool = False,
                  required: bool = True, metavar: str = None, help: str = None):
         self.name = name

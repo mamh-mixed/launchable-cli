@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable, Optional, Type
 
 from .argument import Argument
-from .command import Command
-from .group import Group
+from .command import Command, Group
 from .option import Option
 
 
@@ -37,14 +36,14 @@ def command(name: Optional[str] = None) -> Callable[[...], Command]:
     return _command(name, Command)
 
 
-def group(name: Optional[str] = None) -> Callable[[...], Command]:
-    return _command(name, Group)
+def group(name: Optional[str] = None) -> Callable[[...], Group]:
+    return _command(name, Group) # type: ignore
 
 
 # is_flag is replaced by type=bool
 def option(
     *param_decls: str,  # option names, followed by the variable name
-    help: str = None, type: type, default: Any = None, required: bool = False, metavar: str = None
+    help: str = None, type: type = None, default: Any = None, required: bool = False, metavar: str = None, many: bool = False
 ) -> Callable:
     def decorator(f: Callable) -> Callable:
         if len(param_decls) == 0:
@@ -57,13 +56,14 @@ def option(
             option_names = param_decls[:-1]
 
         o = Option(
-            variable_name=variable_name,
+            name=variable_name,
             option_names=option_names,
             help=help,
             type=type,
             default=default,
             required=required,
-            metavar=metavar)
+            metavar=metavar,
+            many=many)
 
         return _attach(f, o)
 
