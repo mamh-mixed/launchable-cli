@@ -7,8 +7,11 @@ from .parameter import Parameter
 class Option(Parameter):
     clazz = "option"
 
+    hidden: bool
+
     def __init__(self, name: Optional[str], option_names: list[str], help: str = None, type: type = str,
-                 default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False):
+                 default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False,
+                 hidden: bool = False):
         self.name = name
         self.option_names = option_names
         self.help = help
@@ -17,6 +20,7 @@ class Option(Parameter):
         self.required = required
         self.metavar = metavar
         self.multiple = multiple
+        self.hidden = hidden
 
     def append(self, existing: Any, option_name: str, args):  # args is ArgList, but typing it creates a circular import
         '''

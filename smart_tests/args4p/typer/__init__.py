@@ -8,7 +8,7 @@ from ..option import Option as _Option
 def Option(
         *option_names: str,
         help: str = None, type: type | Callable = None, default: Any = None, required: bool = False,
-        metavar: str = None, multiple: bool = False
+        metavar: str = None, multiple: bool = False, hidden: bool = False
 ) -> _Option:
     '''
     :arg option_names:
@@ -28,10 +28,12 @@ def Option(
     :arg multiple:
         Whether the option can be specified multiple times, resulting in a list of values.
         If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
+    :arg hidden:
+        If true, this option is hidden from help messages.
     '''
 
     return _Option(name=None, option_names=list(option_names), help=help, type=type,
-                   default=default, required=required, metavar=metavar, multiple=multiple)
+                   default=default, required=required, metavar=metavar, multiple=multiple, hidden=hidden)
 
 
 def Argument(

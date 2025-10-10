@@ -66,7 +66,7 @@ def group(name: Optional[str] = None, help: Optional[str] = None) -> Callable[[.
 def option(
         *param_decls: str,
         help: str = None, type: type | Callable = None, default: Any = None, required: bool = False,
-        metavar: str = None, multiple: bool = False
+        metavar: str = None, multiple: bool = False, hidden: bool = False
 ) -> Callable:
     '''
     :arg param_decls:
@@ -86,6 +86,8 @@ def option(
     :arg multiple:
         Whether the option can be specified multiple times, resulting in a list of values.
         If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
+    :arg hidden:
+        If true, this option is hidden from help messages.
     '''
 
     def decorator(f: Callable) -> Callable:
@@ -106,7 +108,8 @@ def option(
             default=default,
             required=required,
             metavar=metavar,
-            multiple=multiple)
+            multiple=multiple,
+            hidden=hidden)
 
         return _attach(f, o)
 

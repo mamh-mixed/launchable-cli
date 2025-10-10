@@ -284,10 +284,11 @@ class Command:
                         lines.append(f"      {help_line}")
 
         # Options section
-        if self.options:
+        options = [opt for opt in self.options if not opt.hidden]
+        if options:
             lines.append("")
             lines.append("Options:")
-            for opt in self.options:
+            for opt in options:
                 # Format option names
                 opt_names = ", ".join(opt.option_names)
                 opt_line = f"  {opt_names}"
