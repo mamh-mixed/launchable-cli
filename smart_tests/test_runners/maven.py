@@ -2,7 +2,7 @@ import glob
 import os
 from typing import Annotated, Dict, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.utils import glob as uglob
 from smart_tests.utils.java import junit5_nested_class_path_builder
@@ -85,17 +85,17 @@ def subset(
     files_to_read = list(test_compile_created_file)
     if is_scan_test_compile_lst:
         if len(test_compile_created_file) > 0:
-            typer.secho(
+            click.secho(
                 "Warning: --test-compile-created-file is overridden by --scan-test-compile-lst",
-                fg=typer.colors.YELLOW, err=True)
+                fg='yellow', err=True)
 
         pattern = os.path.join('**', 'createdFiles.lst')
         files_to_read = glob.glob(pattern, recursive=True)
 
         if not files_to_read:
-            typer.secho(
+            click.secho(
                 "Warning: No .lst files. Please run after executing `mvn test-compile`",
-                fg=typer.colors.YELLOW,
+                fg='yellow',
                 err=True)
             return
 
@@ -104,9 +104,9 @@ def subset(
             with open(file, 'r') as f:
                 lines = f.readlines()
                 if len(lines) == 0:
-                    typer.secho(
+                    click.secho(
                         f"Warning: --test-compile-created-file {file} is empty",
-                        fg=typer.colors.YELLOW,
+                        fg='yellow',
                         err=True)
 
                 for line in lines:

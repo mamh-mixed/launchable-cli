@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Dict, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_key_value
@@ -38,7 +38,7 @@ def test_sessions(
     try:
         res = client.request('get', '/stats/test-sessions', params=params)
         res.raise_for_status()
-        typer.echo(res.text)
+        click.echo(res.text)
 
     except Exception as e:
         client.print_exception_and_recover(e, "Warning: the service failed to get stat.")

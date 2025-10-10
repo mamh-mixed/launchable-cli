@@ -1,6 +1,6 @@
 from typing import Annotated, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.test_runners import smart_tests
 
@@ -13,9 +13,9 @@ def record_tests(
     )],
 ):
     for r in reports:
-        typer.echo(f'foo:{r}')
+        click.echo(f'foo:{r}')
 
 
 @smart_tests.subset
 def subset(client):
-    typer.echo("Subset!")
+    click.echo("Subset!")

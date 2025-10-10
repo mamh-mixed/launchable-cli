@@ -47,6 +47,10 @@ class Parameter:
                             return annotation
 
                     self.type = infer_type(param.annotation)
+
+                if self.metavar is None:
+                    self.metavar = self.name.upper()
+
                 return
 
         raise error(f"No parameter named '{self.name}' found")

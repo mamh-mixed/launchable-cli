@@ -19,9 +19,11 @@ class Command:
     arguments: list[Argument]
     name: str
     callback: Callable
+    help: str
 
-    def __init__(self, name: str, callback: Callable, params: list[Parameter]):
+    def __init__(self, name: str, help: str, callback: Callable, params: list[Parameter]):
         self.name = name
+        self.help = help
         self.callback = callback
         self.options = []
         self.arguments = []
@@ -352,8 +354,8 @@ class Group(Command):
     '''
     commands: List[Command]
 
-    def __init__(self, name: str, callback: Callable, params: list[Parameter]):
-        super().__init__(name, callback, params)
+    def __init__(self, name: str, help: str, callback: Callable, params: list[Parameter]):
+        super().__init__(name, help, callback, params)
         self.commands = []
 
     def add_command(self, c: Command):
@@ -363,21 +365,21 @@ class Group(Command):
         c.parent = self
 
     @decorator
-    def command(self, name: Optional[str] = None) -> Callable[[...], Command]:
+    def command(self, name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Command]:
         from .decorators import _command
 
         def decorator(f: Callable) -> Command:
-            c = _command(name, Command)(f)
+            c = _command(name, help, Command)(f)
             self.add_command(c)
             return c
         return decorator
 
     @decorator
-    def group(self, name: Optional[str] = None) -> Callable[[...], Group]:
+    def group(self, name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Group]:
         from .decorators import _command
 
         def decorator(f: Callable) -> Group:
-            g = _command(name, Group)(f)
+            g = _command(name, help, Group)(f)
             self.add_command(g)
             return g
         return decorator

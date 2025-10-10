@@ -1,4 +1,4 @@
-import typer
+import smart_tests.args4p.typer as typer
 
 from . import test_sessions
 

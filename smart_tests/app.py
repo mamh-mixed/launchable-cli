@@ -3,6 +3,9 @@
 #
 # From command implementations, this is available via dependency injection
 class Application:
+    # Kohsuke: I think this is used to capture the CLI profile. Translation of `getattr(ctx, 'test_runner', None)`
+    test_runner : str = None
+
     def __init__(self, dry_run: bool = False, skip_cert_verification: bool = False):
         # Dry run mode. This command is used by customers to inspect data we'd send to our server,
         # but without actually doing so.

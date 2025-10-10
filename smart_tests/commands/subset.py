@@ -10,7 +10,7 @@ from multiprocessing import Process
 from os.path import join
 from typing import Annotated, Any, Callable, Dict, List, TextIO
 
-import typer
+import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 
 from smart_tests.utils.authentication import get_org_workspace
@@ -135,7 +135,7 @@ def subset(
     ))
 
     def warn(msg: str):
-        typer.echo(typer.style("Warning: " + msg, fg="yellow"), err=True)
+        click.echo(typer.style("Warning: " + msg, fg="yellow"), err=True)
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.WARNING_ERROR,
             stack_trace=msg
@@ -404,7 +404,7 @@ def subset(
                 # Create a new process for requesting a subset.
                 process = Process(target=subset_request, args=(client, timeout, payload))
                 process.start()
-                typer.echo("The subset was requested in non-blocking mode.", err=True)
+                click.echo("The subset was requested in non-blocking mode.", err=True)
                 self.output_handler(self.test_paths, [])
                 # With non-blocking mode, we don't need to wait for the response
                 sys.exit(0)
@@ -456,7 +456,7 @@ def subset(
 
             # TODO(Konboi): split subset isn't provided for smart-tests initial release
             # if split:
-            #   typer.echo("subset/{}".format(subset_result.subset_id))
+            #   click.echo("subset/{}".format(subset_result.subset_id))
             output_subset, output_rests = subset_result.subset, subset_result.rest
 
             if subset_result.is_observation:
@@ -503,10 +503,10 @@ def subset(
             ]
 
             if subset_result.is_brainless:
-                typer.echo(
+                click.echo(
                     "Your model is currently in training", err=True)
 
-            typer.echo(
+            click.echo(
                 "Smart Tests created subset {} for build {} (test session {}) in workspace {}/{}".format(
                     subset_result.subset_id,
                     build_name,
@@ -515,14 +515,14 @@ def subset(
                 ), err=True,
             )
             if subset_result.is_observation:
-                typer.echo(
+                click.echo(
                     "(This test session is under observation mode)",
                     err=True)
 
-            typer.echo("", err=True)
-            typer.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"), err=True)
+            click.echo("", err=True)
+            click.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"), err=True)
 
-            typer.echo(
+            click.echo(
                 "\nRun `smart-tests inspect subset --subset-id {}` to view full subset details".format(subset_result.subset_id),
                 err=True)
 

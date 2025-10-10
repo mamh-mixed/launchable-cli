@@ -3,7 +3,7 @@ import re
 import sys
 
 import dateutil.parser
-import typer
+import smart_tests.args4p.typer as typer
 from dateutil.tz import tzlocal
 
 

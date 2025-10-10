@@ -2,13 +2,15 @@ import os
 from enum import Enum
 from typing import Annotated
 
-import typer
+import click
+
+import smart_tests.args4p.typer as typer
+from smart_tests import args4p
 
 from smart_tests.app import Application
 from smart_tests.commands.test_path_writer import TestPathWriter
 from smart_tests.testpath import unparse_test_path
 from smart_tests.utils.commands import Command
-from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.session import get_session
@@ -23,12 +25,9 @@ class DetectFlakesRetryThreshold(str, Enum):
     HIGH = "HIGH"
 
 
-app = typer.Typer(name="detect-flakes", help="Detect flaky tests")
-
-
-@app.callback()
+@args4p.command(help="Detect flaky tests")
 def detect_flakes(
-    ctx: typer.Context,
+    app: Application,
     session: Annotated[str, typer.Option(
         "--session",
         help="In the format builds/<build-name>/test_sessions/<test-session-id>",
@@ -37,13 +36,10 @@ def detect_flakes(
     retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
         "--retry-threshold",
         help="Thoroughness of how \"flake\" is detected",
-        case_sensitive=False,
-        show_default=True,
     )] = DetectFlakesRetryThreshold.MEDIUM,
 ):
-    app = ctx.obj
     tracking_client = TrackingClient(Command.DETECT_FLAKE, app=app)
-    test_runner = getattr(ctx, 'test_runner', None)
+    test_runner = app.test_runner
     client = SmartTestsClient(app=app, tracking_client=tracking_client, test_runner=test_runner)
 
     test_session = None
@@ -55,13 +51,13 @@ def detect_flakes(
         if os.getenv(REPORT_ERROR_KEY):
             raise e
         else:
-            typer.echo(ignorable_error(e), err=True)
+            click.echo(ignorable_error(e), err=True)
 
     if test_session is None:
         return
 
     class FlakeDetection(TestPathWriter):
-        def __init__(self, app: Application):
+        def __init__(self):
             super(FlakeDetection, self).__init__(app)
 
         def run(self):
@@ -80,9 +76,9 @@ def detect_flakes(
                 test_paths = res.json().get("testPaths", [])
                 if test_paths:
                     self.print(test_paths)
-                    typer.echo("Trying to retry the following tests:", err=True)
+                    click.echo("Trying to retry the following tests:", err=True)
                     for detail in res.json().get("testDetails", []):
-                        typer.echo(f"{detail.get('reason'): {unparse_test_path(detail.get('fullTestPath'))}}", err=True)
+                        click.echo(f"{detail.get('reason'): {unparse_test_path(detail.get('fullTestPath'))}}", err=True)
             except Exception as e:
                 tracking_client.send_error_event(
                     event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
@@ -91,16 +87,6 @@ def detect_flakes(
                 if os.getenv(REPORT_ERROR_KEY):
                     raise e
                 else:
-                    typer.echo(ignorable_error(e), err=True)
+                    click.echo(ignorable_error(e), err=True)
 
-    ctx.obj = FlakeDetection(app=ctx.obj)
-
-
-nested_command_app = typer.Typer(name="detect-flakes", help="Detect flaky tests from test files (NestedCommand)")
-
-
-def create_nested_command_app():
-    builder = DynamicCommandBuilder()
-
-    callback_options = extract_callback_options(detect_flakes)
-    builder.create_detect_flakes_commands(nested_command_app, detect_flakes, callback_options)
+    FlakeDetection().run()

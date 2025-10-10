@@ -4,7 +4,7 @@ import sys
 from typing import Annotated, Generator, List
 
 import dateutil.parser
-import typer
+import smart_tests.args4p.typer as typer
 
 from ..commands.record.case_event import CaseEvent, CaseEventType
 from ..testpath import TestPath, parse_test_path, unparse_test_path

@@ -4,11 +4,12 @@ import sys
 from typing import Annotated, List
 from urllib.parse import urlparse
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
-
+from ... import args4p
 from ...app import Application
 from ...utils.commands import Command
 from ...utils.commit_ingester import upload_commits
@@ -22,12 +23,9 @@ from ...utils.logger import LOG_LEVEL_AUDIT, Logger
 jar_file_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../jar/exe_deploy.jar"))
 
 
-app = typer.Typer(name="commit", help="Record commit information")
-
-
-@app.callback(invoke_without_command=True)
+@args4p.command(help="Record commit information")
 def commit(
-    ctx: typer.Context,
+    app: Application,
     name: Annotated[str | None, typer.Option(
         help="repository name"
     )] = None,
@@ -45,14 +43,12 @@ def commit(
         help="import from the git-log output"
     )] = None,
 ):
-    app = ctx.obj
-
     if executable == 'docker':
-        typer.echo("--executable docker is no longer supported", err=True)
+        click.echo("--executable docker is no longer supported", err=True)
         raise typer.Exit(1)
 
-    tracking_client = TrackingClient(Command.COMMIT, app=ctx.obj)
-    client = SmartTestsClient(tracking_client=tracking_client, app=ctx.obj)
+    tracking_client = TrackingClient(Command.COMMIT, app=app)
+    client = SmartTestsClient(tracking_client=tracking_client, app=app)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     if import_git_log_output:
@@ -79,7 +75,7 @@ def commit(
     if not name:
         name = os.path.basename(cwd)
     try:
-        exec_jar(name, cwd, max_days, ctx.obj, is_collect_message, is_collect_files)
+        exec_jar(name, cwd, max_days, app, is_collect_message, is_collect_files)
     except Exception as e:
         if os.getenv(REPORT_ERROR_KEY):
             raise e

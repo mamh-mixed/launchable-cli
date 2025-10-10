@@ -3,7 +3,7 @@ import sys
 from datetime import timezone
 from unittest import TestCase
 
-import typer
+import smart_tests.args4p.typer as typer
 from dateutil.tz import tzlocal
 
 from smart_tests.utils.typer_types import (DATETIME_WITH_TZ, EMOJI, KEY_VALUE, DateTimeWithTimezone, Duration, Fraction,

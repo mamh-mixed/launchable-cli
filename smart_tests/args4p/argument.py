@@ -13,7 +13,7 @@ class Argument(Parameter):
         self.type = type
         self.multiple = multiple
         self.required = required
-        self.metavar = metavar or name.upper()
+        self.metavar = metavar
         self.help = help
         self.default = default
 

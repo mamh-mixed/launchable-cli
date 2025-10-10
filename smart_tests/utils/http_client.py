@@ -5,19 +5,16 @@ import platform
 from typing import IO, BinaryIO, Dict, Tuple, Union
 
 import click
-import typer
 from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry  # type: ignore
-from typer import Context
 
 from smart_tests.version import __version__
-
-from ..app import Application
 from .authentication import authentication_headers
 from .env_keys import BASE_URL_KEY, SKIP_TIMEOUT_RETRY
 from .gzipgen import compress as gzipgen_compress
 from .logger import Logger
+from ..app import Application
 
 DEFAULT_BASE_URL = "https://api.mercury.launchableinc.com"
 
@@ -144,7 +141,7 @@ class _HttpClient:
         return {**h, **authentication_headers()}
 
 
-def format_context(ctx: typer.Context) -> str:
+def format_context(ctx: Application) -> str:
     """
     So that our CSMs can better understand how the users are invoking us,
     capture the implicit command invocations and PID. This way we can correlate
@@ -153,19 +150,21 @@ def format_context(ctx: typer.Context) -> str:
     When commands like `record tests` internally invoke `record session`, so long as it goes through
     `context.invoke()` it appears in the nested context chain
     """
-    cmds = []
 
-    """
-    The cts.parent method will return click.Context or None.
-    Cannot overwrite ctx with ctx.parent directly (it will fail the type check).
-    Therefore defined a _ctx and use it.
-    """
-    _ctx: Context | None = ctx
-    while _ctx:
-        if _ctx.command.name:
-            cmds.append(_ctx.command.name)
-        _ctx = _ctx.parent  # type: ignore
-    return '%s(%s)' % ('>'.join(cmds), os.getpid())
+    raise "TODO"
+    # cmds = []
+    #
+    # """
+    # The cts.parent method will return click.Context or None.
+    # Cannot overwrite ctx with ctx.parent directly (it will fail the type check).
+    # Therefore defined a _ctx and use it.
+    # """
+    # _ctx: Context | None = ctx
+    # while _ctx:
+    #     if _ctx.command.name:
+    #         cmds.append(_ctx.command.name)
+    #     _ctx = _ctx.parent  # type: ignore
+    # return '%s(%s)' % ('>'.join(cmds), os.getpid())
 
 
 def _file_to_generator(f: IO, chunk_size=4096):

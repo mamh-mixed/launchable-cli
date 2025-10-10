@@ -1,7 +1,7 @@
 import os
 from typing import Annotated, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.utils.java import junit5_nested_class_path_builder
 
@@ -35,9 +35,9 @@ def subset(
 
     if client.is_get_tests_from_previous_sessions:
         if len(source_roots) != 0:
-            typer.secho(
+            click.secho(
                 "Warning: SOURCE_ROOTS are ignored when --get-tests-from-previous-sessions is used",
-                fg=typer.colors.YELLOW, err=True)
+                fg='yellow', err=True)
         # Always set to empty list when getting tests from previous sessions
         source_roots = []
     else:
@@ -60,9 +60,9 @@ def subset(
 
         classes = [to_class_file(tp[0]['name']) for tp in rest_tests]
         if bare:
-            typer.echo(','.join(classes))
+            click.echo(','.join(classes))
         else:
-            typer.echo('-PexcludeTests=' + (','.join(classes)))
+            click.echo('-PexcludeTests=' + (','.join(classes)))
     client.exclusion_output_handler = exclusion_output_handler
 
     if bare:

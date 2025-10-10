@@ -1,7 +1,7 @@
 from typing import Annotated, Callable, Dict, List
 from xml.etree import ElementTree as ET
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.commands.record.case_event import CaseEvent
 from smart_tests.testpath import TestPath, parse_test_path, unparse_test_path

@@ -10,7 +10,7 @@ import inspect
 from functools import wraps
 from typing import Callable, Dict, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 
 class TestRunnerRegistry:

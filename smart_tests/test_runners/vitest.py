@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from typing import Annotated, List, cast
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from . import smart_tests
 

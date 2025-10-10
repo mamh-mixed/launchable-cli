@@ -12,6 +12,7 @@ from .parameter import Parameter
 
 def _command(
         name: Optional[str] = None,
+        help: Optional[str] = None,
         cls: Optional[Type[Command]] = Command,
 ):
     def decorator(f: Callable) -> Command:
@@ -46,19 +47,19 @@ def _command(
                                 a.option_names = [f"--{a.name.replace('_', '-')}"]
                         params.append(a)
 
-        return cls(name=cmd_name, callback=f, params=params)
+        return cls(name=cmd_name, help=help, callback=f, params=params)
 
     return decorator
 
 
 @decorator
-def command(name: Optional[str] = None) -> Callable[[...], Command]:
-    return _command(name, Command)
+def command(name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Command]:
+    return _command(name, help, Command)
 
 
 @decorator
-def group(name: Optional[str] = None) -> Callable[[...], Group]:
-    return _command(name, Group)  # type: ignore
+def group(name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Group]:
+    return _command(name, help, Group)  # type: ignore
 
 
 @decorator

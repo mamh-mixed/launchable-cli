@@ -1,7 +1,7 @@
 from os.path import join
 from typing import Callable, Dict, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from ..app import Application
 from ..testpath import TestPath
@@ -54,7 +54,7 @@ class TestPathWriter(object):
             self.separator.join(self.formatter(t) for t in test_paths))
 
     def print(self, test_paths: List[TestPath]):
-        typer.echo(self.separator.join(self.formatter(t)
+        click.echo(self.separator.join(self.formatter(t)
                                        for t in test_paths))
 
     @property

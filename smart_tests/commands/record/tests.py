@@ -7,17 +7,20 @@ from pathlib import Path
 from time import time_ns
 from typing import Annotated, Callable, Dict, Generator, List, Tuple, Union
 
-import typer
+import click
+
+import smart_tests.args4p.typer as typer
 from dateutil.parser import parse
 from junitparser import JUnitXml, TestCase, TestSuite  # type: ignore  # noqa: F401
 from more_itertools import ichunked
 from tabulate import tabulate
 
 from smart_tests.utils.authentication import ensure_org_workspace
-from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
+from ... import args4p
+from ...app import Application
 
 from ...testpath import FilePathNormalizer, TestPathComponent, unparse_test_path
 from ...utils.commands import Command
@@ -45,14 +48,9 @@ def _validate_group(value):
         raise typer.BadParameter("group option supports only alphabet(a-z, A-Z), number(0-9), '-', and '_'")
 
 
-app = typer.Typer(help="Record test results")
-
-# Test runners are loaded in __main__.py to avoid circular imports
-
-
-@app.callback()
+@args4p.group(help="Record test results")
 def tests_main(
-    ctx: typer.Context,
+    app: Application,
     session: Annotated[str, typer.Option(
         "--session",
         help="In the format builds/<build-name>/test_sessions/<test-session-id>"
@@ -97,11 +95,10 @@ def tests_main(
 
     org, workspace = ensure_org_workspace()
 
-    # Get test runner name from context (set by DynamicCommandBuilder)
-    test_runner = getattr(ctx, 'test_runner', None)
+    test_runner = app.test_runner
 
-    tracking_client = TrackingClient(Command.RECORD_TESTS, app=ctx.obj)
-    client = SmartTestsClient(test_runner=test_runner, app=ctx.obj, tracking_client=tracking_client)
+    tracking_client = TrackingClient(Command.RECORD_TESTS, app=app)
+    client = SmartTestsClient(test_runner=test_runner, app=app, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     fail_fast_mode_validate(FailFastModeValidateParams(
@@ -115,9 +112,8 @@ def tests_main(
     elif group:
         group = _validate_group(group)
 
-    app_instance = ctx.obj
-    tracking_client = TrackingClient(Command.RECORD_TESTS, app=app_instance)
-    client = SmartTestsClient(test_runner=test_runner, app=app_instance, tracking_client=tracking_client)
+    tracking_client = TrackingClient(Command.RECORD_TESTS, app=app)
+    client = SmartTestsClient(test_runner=test_runner, app=app, tracking_client=tracking_client)
 
     file_path_normalizer = FilePathNormalizer(
         str(base_path) if base_path else None,
@@ -464,30 +460,30 @@ def tests_main(
             file_count = len(self.reports)
             test_count, success_count, fail_count, duration = recorded_result()
 
-            typer.echo(
+            click.echo(
                 f"Smart Tests recorded tests for build {
                     self.build_name} (test session {
                     self.test_session_id}) to workspace {org}/{workspace} from {file_count} files:")
 
             if is_observation:
-                typer.echo("(This test session is under observation mode)")
+                click.echo("(This test session is under observation mode)")
 
-            typer.echo("")
+            click.echo("")
 
             header = ["Files found", "Tests found", "Tests passed", "Tests failed", "Total duration (min)"]
 
             rows = [[file_count, test_count, success_count, fail_count, duration]]
-            typer.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
+            click.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
 
             if duration == 0:
-                typer.echo(typer.style("\nTotal test duration is 0."
+                click.echo(typer.style("\nTotal test duration is 0."
                                        "\nPlease check whether the test duration times in report files are correct.", "yellow"))
-            typer.echo(
+            click.echo(
                 f"\nVisit https://app.launchableinc.com/organizations/{org}/workspaces/"
                 f"{workspace}/test-sessions/{self.test_session_id} to view uploaded test results "
                 f"(or run `launchable inspect tests --test-session-id {self.test_session_id}`)")
 
-    ctx.obj = RecordTests(dry_run=app_instance.dry_run)
+    return RecordTests(dry_run=app.dry_run)
 
 
 # if we fail to determine the timestamp of the build, we err on the side of collecting more test reports
@@ -514,7 +510,7 @@ def get_record_start_at(session: str, client: SmartTestsClient):
                   f"Make sure to run `smart-tests record build --name {build_name}` before `smart-tests record tests`"
         else:
             msg = f"Unable to determine the timestamp of the build {build_name}. HTTP response code was {res.status_code}"
-        typer.secho(msg, fg=typer.colors.YELLOW, err=True)
+        click.secho(msg, fg='yellow', err=True)
 
         # to avoid stop report command
         return INVALID_TIMESTAMP

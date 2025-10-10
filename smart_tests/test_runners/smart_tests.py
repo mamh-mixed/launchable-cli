@@ -4,7 +4,7 @@ import sys
 import types
 from typing import Annotated
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.commands.detect_flakes import app as detect_flakes_cmd
 from smart_tests.commands.record.tests import app as record_tests_cmd
@@ -155,7 +155,7 @@ class CommonRecordTestImpls:
                 # raise it as an error. Note this can happen for reasons other than a configuration error.
                 # For example, if a build catastrophically failed and no
                 # tests got run.
-                typer.echo(f"No matches found: {root}", err=True)
+                click.echo(f"No matches found: {root}", err=True)
                 # intentionally exiting with zero
                 return
 

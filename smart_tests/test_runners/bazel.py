@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Annotated, Generator, List
 
-import typer
+import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..testpath import TestPath

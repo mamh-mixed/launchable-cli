@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Annotated, List
 from xml.etree import ElementTree as ET
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from . import smart_tests
 
@@ -97,7 +97,7 @@ def record_tests(
             else:
                 client.report(t)
         if not match:
-            typer.echo(f"No matches found: {root}", err=True)
+            click.echo(f"No matches found: {root}", err=True)
 
     def parse_func(p: str) -> ET.ElementTree:
         """

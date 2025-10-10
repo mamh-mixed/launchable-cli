@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Annotated, Dict, Generator, List, cast
 from xml.etree import ElementTree as ET
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.testpath import FilePathNormalizer, TestPath
 
@@ -56,7 +56,7 @@ def _record_tests_from_xml(client, reports, report_file_and_test_file_map: Dict[
     base_path = client.base_path if client.base_path else os.getcwd()
     for report in reports:
         if REPORT_FILE_PREFIX not in report:
-            typer.echo(f"{report} was load skipped because it doesn't look like a report file.", err=True)
+            click.echo(f"{report} was load skipped because it doesn't look like a report file.", err=True)
             continue
 
         test_file = _find_test_file_from_report_file(base_path, report)
@@ -64,7 +64,7 @@ def _record_tests_from_xml(client, reports, report_file_and_test_file_map: Dict[
             report_file_and_test_file_map[report] = str(test_file)
             client.report(report)
         else:
-            typer.echo(f"Cannot find test file of {report}", err=True)
+            click.echo(f"Cannot find test file of {report}", err=True)
 
 
 class JSONReportParser:
@@ -219,7 +219,7 @@ class JSONReportParser:
                 raise Exception(f"Can't read JSON format report file {report_file}. Make sure to confirm report file.") from e
 
         if len(data) == 0:
-            typer.echo(f"Can't find test reports from {report_file}. Make sure to confirm report file.", err=True)
+            click.echo(f"Can't find test reports from {report_file}. Make sure to confirm report file.", err=True)
 
         for d in data:
             file_name = clean_uri(d.get("uri", ""))

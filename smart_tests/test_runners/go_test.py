@@ -3,7 +3,7 @@ import os
 import re
 from typing import Annotated, Dict, List
 
-import typer
+import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..testpath import TestPath
@@ -57,7 +57,7 @@ def record_tests(
                 client.report(t)
 
         if not match:
-            typer.echo(f"No matches found: {root}", err=True)
+            click.echo(f"No matches found: {root}", err=True)
             return
 
     default_path_builder = client.path_builder

@@ -1,15 +1,16 @@
 from pathlib import Path
 from typing import List, Tuple, Union
 
-import typer
+import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 
-app = typer.Typer()
+from smart_tests import args4p
+from smart_tests.app import Application
 
 
-@app.callback(invoke_without_command=True)
+@args4p.command()
 def subsets(
-    ctx: typer.Context,
+    app: Application,
     file_before: Path = typer.Argument(None, help="First subset file to compare"),
     file_after: Path = typer.Argument(None, help="Second subset file to compare")
 ):
@@ -52,4 +53,4 @@ def subsets(
         (before, after, f"{diff:+}" if isinstance(diff, int) else diff, test)
         for before, after, diff, test in rows
     ]
-    typer.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))
+    click.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))

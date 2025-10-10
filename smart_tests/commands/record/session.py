@@ -4,7 +4,11 @@ import sys
 from http import HTTPStatus
 from typing import Annotated, List
 
-import typer
+import click
+
+import smart_tests.args4p.typer as typer
+from smart_tests import args4p
+from smart_tests.app import Application
 
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
@@ -15,14 +19,12 @@ from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
 from smart_tests.utils.typer_types import KeyValue, parse_key_value, validate_datetime_with_tz
 
-app = typer.Typer(name="session", help="Record session information")
-
 TEST_SESSION_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_.-]*$")
 
 
-@app.callback(invoke_without_command=True)
+@args4p.command(help="Record session information")
 def session(
-    ctx: typer.Context,
+    app: Application,
     build_name: Annotated[str, typer.Option(
         "--build",
         help="build name"
@@ -36,7 +38,7 @@ def session(
         "--flavor",
         help="flavors",
         metavar="KEY=VALUE",
-        parser=parse_key_value
+        type=parse_key_value
     )] = [],
     is_observation: Annotated[bool, typer.Option(
         "--observation",
@@ -45,7 +47,7 @@ def session(
     links: Annotated[List[KeyValue], typer.Option(
         "--link",
         help="Set external link of a title and url",
-        parser=parse_key_value,
+        type=parse_key_value,
     )] = [],
     is_no_build: Annotated[bool, typer.Option(
         "--no-build",
@@ -62,8 +64,6 @@ def session(
     if timestamp:
         parsed_timestamp = validate_datetime_with_tz(timestamp)
 
-    # Get application context
-    app = ctx.obj
     tracking_client = TrackingClient(Command.RECORD_SESSION, app=app)
     client = SmartTestsClient(app=app, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
@@ -97,7 +97,7 @@ def session(
                 event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
                 stack_trace=msg,
             )
-            typer.secho(msg, fg=typer.colors.YELLOW, err=True)
+            click.secho(msg, fg='yellow', err=True)
             sys.exit(1)
 
         res.raise_for_status()
@@ -107,7 +107,7 @@ def session(
             build_name = res.json().get("buildNumber", "")
             assert build_name is not None
 
-        typer.echo(f"{sub_path}/{session_id}", nl=False)
+        click.echo(f"{sub_path}/{session_id}", nl=False)
 
     except Exception as e:
         tracking_client.send_error_event(

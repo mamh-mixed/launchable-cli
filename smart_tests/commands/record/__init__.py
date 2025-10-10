@@ -1,12 +1,23 @@
-import typer
+import smart_tests.args4p.typer as typer
 
 from . import attachment, build, commit, session
 
-app = typer.Typer(name="record", help="Record test results, builds, commits, and sessions")
+from .attachment import attachment
+from .build import build
+from .commit import commit
+from .session import session
+from .tests import tests
+from ... import args4p
+from ...app import Application
 
-app.add_typer(build.app, name="build")
-app.add_typer(commit.app, name="commit")
-# NestedCommand version will be added in __main__.py
-# Remove old tests command registration - it will be replaced by NestedCommand in __main__.py
-app.add_typer(session.app, name="session")
-app.add_typer(attachment.app, name="attachment")
+
+@args4p.group(help="Record test results, builds, commits, and sessions")
+def record(app :Application):
+    return app
+
+
+record.add_command(build)
+record.add_command(commit)
+record.add_command(tests)
+record.add_command(session)
+record.add_command(attachment)

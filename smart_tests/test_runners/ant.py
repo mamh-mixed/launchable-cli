@@ -1,7 +1,7 @@
 import os
 from typing import Annotated, List
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from ..utils.file_name_pattern import jvm_test_pattern
 from . import smart_tests

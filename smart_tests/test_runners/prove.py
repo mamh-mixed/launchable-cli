@@ -1,7 +1,7 @@
 import re
 from typing import Annotated, List
 
-import typer
+import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..testpath import TestPath

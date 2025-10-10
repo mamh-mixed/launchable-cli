@@ -5,7 +5,7 @@ import pathlib
 import subprocess
 from typing import Annotated, Generator, List
 
-import typer
+import smart_tests.args4p.typer as typer
 from junitparser import Properties, TestCase  # type: ignore
 
 from smart_tests.commands.record.case_event import CaseEvent, CaseEventType, MetadataTestCase
@@ -181,7 +181,7 @@ def record_tests(
                 client.report(t)
 
         if not match:
-            typer.echo(f"No matches found: {root}", err=True)
+            click.echo(f"No matches found: {root}", err=True)
             return
 
     if json_report:

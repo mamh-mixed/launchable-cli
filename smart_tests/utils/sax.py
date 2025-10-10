@@ -5,7 +5,7 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from xml.sax.xmlreader import AttributesImpl
 
-import typer
+import smart_tests.args4p.typer as typer
 
 
 class Element:

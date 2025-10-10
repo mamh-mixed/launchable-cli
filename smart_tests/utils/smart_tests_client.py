@@ -1,16 +1,15 @@
 import os
 from typing import BinaryIO, Dict
 
+import click
 import requests
-import typer
 from requests import HTTPError, Session, Timeout
 
 from smart_tests.utils.http_client import _HttpClient, _join_paths
 from smart_tests.utils.tracking import Tracking, TrackingClient  # type: ignore
-
-from ..app import Application
 from .authentication import get_org_workspace
 from .env_keys import REPORT_ERROR_KEY
+from ..app import Application
 
 
 class SmartTestsClient:
@@ -91,15 +90,15 @@ class SmartTestsClient:
         if os.getenv(REPORT_ERROR_KEY):
             raise e
 
-        typer.echo(e, err=True)
+        click.echo(e, err=True)
         if isinstance(e, HTTPError):
             # if the payload is present, report that as well to assist troubleshooting
             res = e.response
             if res and res.text:
-                typer.echo(res.text, err=True)
+                click.echo(res.text, err=True)
 
         if warning:
-            typer.secho(warning, fg=getattr(typer.colors, warning_color.upper(), typer.colors.YELLOW), err=True)
+            click.secho(warning, fg=warning_color, err=True)
 
     def base_url(self) -> str:
         return self.http_client.base_url

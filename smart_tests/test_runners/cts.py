@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from xml.etree import ElementTree as ET
 
-import typer
+import smart_tests.args4p.typer as typer
 
 from smart_tests.commands.record.case_event import CaseEvent
 
@@ -169,9 +169,9 @@ def subset(client):
         # e.g) armeabi-v7a CtsAbiOverrideHostTestCases
         device_and_module = line.split()
         if len(device_and_module) != 2:
-            typer.secho(
+            click.secho(
                 f"Warning: {line} is not expected Module format and skipped",
-                fg=typer.colors.YELLOW,
+                fg='yellow',
                 err=True)
             continue
 

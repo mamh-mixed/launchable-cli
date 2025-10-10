@@ -5,7 +5,7 @@
 import json
 from typing import Annotated, Dict, Generator, List
 
-import typer
+import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..commands.record.case_event import CaseEvent
@@ -179,7 +179,7 @@ class JSONReportParser:
 
         suites: List[Dict[str, Dict]] = list(data.get("suites", []))
         if len(suites) == 0:
-            typer.echo(f"Can't find test results from {report_file}. Make sure to confirm report file.", err=True)
+            click.echo(f"Can't find test results from {report_file}. Make sure to confirm report file.", err=True)
 
         for s in suites:
             # The title of the root suite object contains the file name.

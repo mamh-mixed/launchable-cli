@@ -4,9 +4,13 @@ from abc import ABCMeta, abstractmethod
 from http import HTTPStatus
 from typing import Annotated, List
 
-import typer
+import click
+
+import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 
+from ... import args4p
+from ...app import Application
 from ...utils.smart_tests_client import SmartTestsClient
 
 
@@ -65,7 +69,7 @@ class SubsetResultTableDisplay(SubsetResultAbstractDisplay):
                     result._estimated_duration_sec,
                 ]
             )
-        typer.echo_via_pager(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
+        click.echo_via_pager(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
 
 
 class SubsetResultJSONDisplay(SubsetResultAbstractDisplay):
@@ -88,26 +92,19 @@ class SubsetResultJSONDisplay(SubsetResultAbstractDisplay):
                 "estimated_duration_sec": round(result._estimated_duration_sec, 2),
             })
 
-        typer.echo(json.dumps(result_json, indent=2))
+        click.echo(json.dumps(result_json, indent=2))
 
 
-app = typer.Typer(name="subset", help="Inspect subset data")
-
-
-@app.callback(invoke_without_command=True)
+@args4p.command(help="Inspect subset data")
 def subset(
-    ctx: typer.Context,
+    app: Application,
     subset_id: Annotated[int, typer.Option(
-        "--subset-id",
         help="subset id"
     )],
     json: Annotated[bool, typer.Option(
-        "--json",
         help="display JSON format"
     )] = False,
 ):
-    # Run the subset inspection (no subcommands in this app)
-    app = ctx.obj
     is_json_format = json  # Map parameter name
 
     subset = []
@@ -117,8 +114,8 @@ def subset(
         res = client.request("get", f"subset/{subset_id}")
 
         if res.status_code == HTTPStatus.NOT_FOUND:
-            typer.echo(typer.style(
-                f"Subset {subset_id} not found. Check subset ID and try again.", fg=typer.colors.YELLOW), err=True)
+            click.echo(typer.style(
+                f"Subset {subset_id} not found. Check subset ID and try again.", fg='yellow'), err=True)
             sys.exit(1)
 
         res.raise_for_status()

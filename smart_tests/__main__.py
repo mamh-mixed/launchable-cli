@@ -2,16 +2,15 @@ import importlib
 import importlib.util
 import logging
 import os
+import sys
 from glob import glob
 from os.path import basename, dirname, join
 from typing import Annotated
 
-import typer
+import smart_tests.args4p.typer as typer
+from smart_tests import args4p
 
 from smart_tests.app import Application
-from smart_tests.commands.detect_flakes import create_nested_command_app as create_detect_flakes_commands
-from smart_tests.commands.record.tests import create_nested_commands as create_record_target_commands
-from smart_tests.commands.subset import create_nested_commands as create_subset_target_commands
 from smart_tests.utils.test_runner_registry import get_registry
 
 from .commands import compare, detect_flakes, inspect, record, stats, subset, verify
@@ -26,16 +25,6 @@ for f in glob(join(dirname(__file__), 'test_runners', "*.py")):
         continue
     importlib.import_module('smart_tests.test_runners.%s' % f)
 
-# Create initial NestedCommand commands with built-in test runners
-try:
-    create_subset_target_commands()
-    create_record_target_commands()
-    create_detect_flakes_commands()
-except Exception as e:
-    # If NestedCommand creation fails, continue with legacy commands
-    # This ensures backward compatibility
-    logging.warning(f"Failed to create NestedCommand commands at import time: {e}")
-    pass
 
 # Global flag to track if plugins have been loaded and commands need rebuilding
 _plugins_loaded = False
@@ -78,17 +67,14 @@ def _on_test_runner_registered():
 
 get_registry().set_on_register_callback(_on_test_runner_registered)
 
-app = typer.Typer()
-
-
 def version_callback(value: bool):
     if value:
-        typer.echo(f"smart-tests-cli {__version__}")
+        click.echo(f"smart-tests-cli {__version__}")
         raise typer.Exit()
 
 
+@args4p.group()
 def main(
-    ctx: typer.Context,
     log_level: Annotated[str, typer.Option(
         help="Set logger's log level (CRITICAL, ERROR, WARNING, AUDIT, INFO, DEBUG)."
     )] = logger.LOG_LEVEL_DEFAULT_STR,
@@ -111,7 +97,7 @@ def main(
     version: Annotated[bool | None, typer.Option(
         "--version", help="Show version and exit", callback=version_callback, is_eager=True
     )] = None,
-):
+) -> Application:
     level = logger.get_log_level(log_level)
     # In the case of dry-run, it is forced to set the level below the AUDIT.
     # This is because the dry-run log will be output along with the audit log.
@@ -139,41 +125,20 @@ def main(
     if plugin_dir:
         _rebuild_nested_commands_with_plugins()
 
-    ctx.obj = Application(dry_run=dry_run, skip_cert_verification=skip_cert_verification)
+    return Application(dry_run=dry_run, skip_cert_verification=skip_cert_verification)
 
-
-# Use NestedCommand apps if available, otherwise fall back to legacy
-try:
-    from smart_tests.commands.detect_flakes import nested_command_app as detect_flakes_target_app
-    from smart_tests.commands.record.tests import nested_command_app as record_target_app
-    from smart_tests.commands.subset import nested_command_app as subset_target_app
-
-    app.add_typer(record.app, name="record")
-    app.add_typer(subset_target_app, name="subset")  # Use NestedCommand version
-    app.add_typer(verify.app, name="verify")
-    app.add_typer(inspect.app, name="inspect")
-    app.add_typer(stats.app, name="stats")
-    app.add_typer(compare.app, name="compare")
-    app.add_typer(detect_flakes_target_app, name="detect-flakes")
-
-    # Add record-target as a sub-app to record command
-    record.app.add_typer(record_target_app, name="tests")
-
-except Exception as e:
-    logging.warning(f"Failed to use NestedCommand apps at init: {e}")
-    # Fallback to original structure
-    app.add_typer(record.app, name="record")
-    app.add_typer(subset.app, name="subset")
-    app.add_typer(verify.app, name="verify")
-    app.add_typer(inspect.app, name="inspect")
-    app.add_typer(stats.app, name="stats")
-    app.add_typer(detect_flakes.app, name="detect-flakes")
-
-app.callback()(main)
-
-# For backward compatibility with tests that expect a Click CLI
-# We'll need to use Typer's testing utilities instead
-main = app
+main.add_command(record)
+main.add_command(subset)
+main.add_command(split_subset)
+main.add_command(verify)
+main.add_command(inspect)
+main.add_command(stats)
+main.add_command(compare)
+main.add_command(detect_flakes)
 
 if __name__ == '__main__':
-    app()
+    try:
+        main(sys.argv)
+        sys.exit(0)
+    except typer.Exit as e:
+        sys.exit(e.exit_code)

@@ -59,3 +59,11 @@ def Argument(
         If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
     '''
     return _Argument(name=None, type=type, multiple=multiple, required=required, metavar=metavar, help=help, default=default)
+
+
+class Exit(Exception):
+    '''
+    Raise this exception to exit the CLI with the given exit code
+    '''
+    def __init__(self, code: int):
+        self.code = code

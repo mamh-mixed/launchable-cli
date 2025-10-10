@@ -1,17 +1,17 @@
 from typing import Annotated, List
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
 from smart_tests.utils.session import get_session
-
+from ... import args4p
+from ...app import Application
 from ...utils.smart_tests_client import SmartTestsClient
 
-app = typer.Typer(name="attachment", help="Record attachment information")
 
-
-@app.callback(invoke_without_command=True)
+@args4p.command(help="Record attachment information")
 def attachment(
-    ctx: typer.Context,
+    app: Application,
     session: Annotated[str, typer.Option(
         "--session",
         help="test session name"
@@ -20,13 +20,12 @@ def attachment(
         help="Attachment files to upload"
     )],
 ):
-    app = ctx.obj
     client = SmartTestsClient(app=app)
     try:
         # Note: Call get_session method to check test session exists
         _ = get_session(session, client)
         for a in attachments:
-            typer.echo(f"Sending {a}")
+            click.echo(f"Sending {a}")
             with open(a, mode='rb') as f:
                 res = client.request(
                     "post", f"{session}/attachment", compress=True, payload=f,
