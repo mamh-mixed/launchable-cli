@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from time import time_ns
 from typing import Annotated, Callable, Dict, Generator, List, Tuple, Union
-
+import smart_tests.args4p.converters as converters
 import click
 
 import smart_tests.args4p.typer as typer
@@ -49,7 +49,7 @@ def _validate_group(value):
 
 
 @args4p.group(help="Record test results")
-def tests_main(
+def tests(
     app: Application,
     session: Annotated[str, typer.Option(
         "--session",
@@ -58,10 +58,7 @@ def tests_main(
     base_path: Annotated[Path | None, typer.Option(
         "--base",
         help="(Advanced) base directory to make test names portable",
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        resolve_path=True
+        type=converters.path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
     )] = None,
     post_chunk: Annotated[int, typer.Option(
         "--post-chunk",
@@ -544,21 +541,3 @@ def get_env_values(client: SmartTestsClient) -> Dict[str, str]:
         metadata[key] = val
 
     return metadata
-
-
-# NestedCommand implementation: create test runner-specific commands
-# This section adds the new command structure where test runners come before options
-nested_command_app = typer.Typer(name="record", help="Record test results (NestedCommand)")
-
-
-def create_nested_commands():
-    """Create NestedCommand commands after all test runners are loaded."""
-    builder = DynamicCommandBuilder()
-
-    # Extract options from the original tests callback
-    callback_options = extract_callback_options(tests_main)
-
-    # Create test runner-specific record test commands
-    builder.create_record_test_commands(nested_command_app, tests_main, callback_options)
-
-# The commands will be created when test runners are loaded

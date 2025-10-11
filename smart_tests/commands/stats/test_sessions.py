@@ -1,16 +1,17 @@
 from typing import Annotated, Any, Dict, List
 
+import click
+
 import smart_tests.args4p.typer as typer
+from ... import args4p
+from ...app import Application
 
 from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_key_value
 
-app = typer.Typer(name="test-sessions", help="View test session statistics")
-
-
-@app.command()
+@args4p.command(help="View test session statistics")
 def test_sessions(
-    ctx: typer.Context,
+    app: Application,
     days: Annotated[int, typer.Option(
         help="How many days of test sessions in the past to be stat"
     )] = 7,
@@ -19,8 +20,6 @@ def test_sessions(
         metavar="KEY=VALUE"
     )] = [],
 ):
-    app = ctx.obj
-
     # Parse flavors
     parsed_flavors = [validate_key_value(f) for f in flavor]
 

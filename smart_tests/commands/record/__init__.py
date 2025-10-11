@@ -1,5 +1,3 @@
-import smart_tests.args4p.typer as typer
-
 from . import attachment, build, commit, session
 
 from .attachment import attachment

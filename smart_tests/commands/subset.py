@@ -10,29 +10,26 @@ from multiprocessing import Process
 from os.path import join
 from typing import Annotated, Any, Callable, Dict, List, TextIO
 
-import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 
+import smart_tests.args4p.typer as typer
+import smart_tests.args4p as args4p
 from smart_tests.utils.authentication import get_org_workspace
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
-
+from .test_path_writer import TestPathWriter
 from ..app import Application
 from ..testpath import FilePathNormalizer, TestPath
-from ..utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
 from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import Duration, Percentage, parse_duration, parse_percentage
-from .test_path_writer import TestPathWriter
+
 
 # TODO: rename files and function accordingly once the PR landscape
-
-
-app = typer.Typer(name="subset", help="Subsetting tests")
 
 
 class SubsetUseCase(str, Enum):
@@ -41,24 +38,24 @@ class SubsetUseCase(str, Enum):
     RECURRING = "recurring"
 
 
-@app.callback()
+@args4p.group(help="Subsetting tests")
 def subset(
-    ctx: typer.Context,
+    app: Application,
     session: Annotated[str, typer.Option(
         "--session",
         help="In the format builds/<build-name>/test_sessions/<test-session-id>",
         metavar="SESSION"
     )],
     target: Annotated[Percentage | None, typer.Option(
-        parser=parse_percentage,
+        type=parse_percentage,
         help="subsetting target from 0% to 100%"
     )] = None,
     time: Annotated[Duration | None, typer.Option(
-        parser=parse_duration,
+        type=parse_duration,
         help="subsetting by absolute time, in seconds e.g) 300, 5m"
     )] = None,
     confidence: Annotated[Percentage | None, typer.Option(
-        parser=parse_percentage,
+        type=parse_percentage,
         help="subsetting by confidence from 0% to 100%"
     )] = None,
     goal_spec: Annotated[str | None, typer.Option(
@@ -124,7 +121,6 @@ def subset(
         hidden=True
     )] = None,
 ):
-    app = ctx.obj
     tracking_client = TrackingClient(Command.SUBSET, app=app)
     client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
@@ -526,29 +522,11 @@ def subset(
                 "\nRun `smart-tests inspect subset --subset-id {}` to view full subset details".format(subset_result.subset_id),
                 err=True)
 
-    ctx.obj = Optimize(app=app)
+    return Optimize(app=app)
 
 
 def subset_request(client: SmartTestsClient, timeout: tuple[int, int], payload: dict[str, Any]):
     return client.request("post", "subset", timeout=timeout, payload=payload, compress=True)
-
-
-# NestedCommand implementation: create test runner-specific commands
-# This section adds the new command structure where test runners come before options
-nested_command_app = typer.Typer(name="subset", help="Subsetting tests (NestedCommand)")
-
-
-def create_nested_commands():
-    """Create NestedCommand commands after all test runners are loaded."""
-    builder = DynamicCommandBuilder()
-
-    # Extract options from the original subset callback
-    callback_options = extract_callback_options(subset)
-
-    # Create test runner-specific subset commands
-    builder.create_subset_commands(nested_command_app, subset, callback_options)
-
-# The commands will be created when test runners are loaded
 
 
 class SubsetResult:

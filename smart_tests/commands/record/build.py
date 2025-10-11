@@ -4,23 +4,21 @@ import sys
 from typing import Annotated, List
 
 import click
-
-import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 
+import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.session import KeyValue, parse_key_value
 from smart_tests.utils.link import CIRCLECI_KEY, GITHUB_ACTIONS_KEY, JENKINS_URL_KEY, capture_links
 from smart_tests.utils.tracking import Tracking, TrackingClient
+from .commit import commit
 from ... import args4p
 from ...app import Application
-
 from ...utils import subprocess
 from ...utils.authentication import get_org_workspace
 from ...utils.commands import Command
 from ...utils.fail_fast_mode import set_fail_fast_mode, warn_and_exit_if_fail_fast_mode
 from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_datetime_with_tz, validate_key_value, validate_past_datetime
-from .commit import commit
 
 JENKINS_GIT_BRANCH_KEY = "GIT_BRANCH"
 JENKINS_GIT_LOCAL_BRANCH_KEY = "GIT_LOCAL_BRANCH"
@@ -31,10 +29,7 @@ CODE_BUILD_BUILD_ID_KEY = "CODEBUILD_BUILD_ID"
 CODE_BUILD_WEBHOOK_HEAD_REF_KEY = "CODEBUILD_WEBHOOK_HEAD_REF"
 
 
-app = typer.Typer(name="build", help="Record build information")
-
-
-@args4p.command()
+@args4p.command(help="Record build information")
 def build(
     app: Application,
     build_name: Annotated[str, typer.Option(
