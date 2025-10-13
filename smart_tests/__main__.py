@@ -45,9 +45,9 @@ def cli(
              "like CERTIFICATE_VERIFY_FAILED, at the expense of vulnerability against "
              "a possible man-in-the-middle attack. Use it as an escape hatch, but with caution."
     )] = False,
-    version: Annotated[bool | None, typer.Option(
+    version: Annotated[bool, typer.Option(
         "--version", help="Show version and exit"
-    )] = None,
+    )] = False,
 ) -> Application:
     if version:
         click.echo(f"smart-tests-cli {__version__}")

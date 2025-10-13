@@ -64,7 +64,7 @@ class Parameter:
                         else:
                             return t
 
-                    self.type = infer_type(param)
+                    self.type = infer_type()
 
                 if self.metavar is None:
                     self.metavar = self.name.upper()

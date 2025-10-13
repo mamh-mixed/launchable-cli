@@ -78,11 +78,17 @@ class Command:
                 else:
                     invoker.eat_arg(a)
 
+            r = invoker.invoke()
+
             if isinstance(invoker.command, Group):
+                # group invoked without sub-command. we want to deal with this after `invoker.invoke()`
+                # to give the parent command callbacks the opportunity to execute.
+                click.secho("Command is missing", fg='red', err=True)
                 print(invoker.command.format_help())
                 raise Exit(1)
 
-            return invoker.invoke()
+            return r
+
         except BadCmdLineException as e:
             click.secho(str(e), fg='red', err=True)
             raise Exit(1)
@@ -321,7 +327,7 @@ class Command:
                     desc_parts.append(opt.help)
 
                 # Add default value info
-                if opt.default is not None:
+                if opt.default != NO_DEFAULT:
                     desc_parts.append(f"[default: {opt.default}]")
                 elif not opt.required and opt.type != bool:
                     desc_parts.append("[optional]")
