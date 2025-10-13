@@ -67,7 +67,7 @@ class _HttpClient:
         else:
             self.session = session
 
-        self.test_runner = app.test_runner
+        self.test_runner = app.test_runner if app else None
 
     def request(
         self,
