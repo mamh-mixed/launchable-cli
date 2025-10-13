@@ -2,7 +2,6 @@ import sys
 from typing import List, Optional, Sequence, Tuple
 
 import click
-import smart_tests.args4p.typer as typer
 
 from .commands import Command
 
@@ -95,6 +94,6 @@ def _validate_record_tests(params: FailFastModeValidateParams):
 
 def _exit_if_errors(errors: List[str]):
     if errors:
-        msg = "\n".join(map(lambda x: typer.style(x, fg='red'), errors))
+        msg = "\n".join(map(lambda x: click.style(x, fg='red'), errors))
         click.echo(msg, err=True)
         sys.exit(1)
