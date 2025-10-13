@@ -41,8 +41,6 @@ def _command(
                     if isinstance(a, Parameter):
                         if a.name is None:
                             a.name = pname
-                        if a.type is None:
-                            a.type = normalize_type(args[0])
                         if isinstance(a, Option):
                             if a.option_names is None or len(a.option_names) == 0:
                                 a.option_names = [f"--{a.name.replace('_', '-')}"]
