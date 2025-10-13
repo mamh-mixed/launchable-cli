@@ -58,7 +58,12 @@ class Option(Parameter):
         super().attach_to_command(command)
 
         if self.metavar is None:
-            self.metavar = self.type.__name__.upper()
+            def type_name(t):
+                if hasattr(t, "__name__"):
+                    return t.__name__
+                else:
+                    return str(t)
+            self.metavar = type_name(self.type).upper()
         if self.type == bool and self.default is NO_DEFAULT:
             # if the flag is absent, bind the value to False, or else the function signature requires a defalut value,
             # which is silly
