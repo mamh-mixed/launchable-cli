@@ -10,6 +10,7 @@ import click
 import smart_tests.args4p.typer as typer
 from requests import HTTPError
 
+from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking
 
@@ -69,5 +70,5 @@ def parse_session(session: str) -> Tuple[str, int]:
     if match:
         return match.group(1), int(match.group(2))
     else:
-        raise ValueError(
+        raise BadCmdLineException(
             f"Invalid session ID format: {session}. Expected format: builds/{{build_name}}/test_sessions/{{test_session_id}}")

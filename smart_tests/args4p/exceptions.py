@@ -1,6 +1,8 @@
 class BadCmdLineException(Exception):
     '''
-    Indicates that arguments given by the user are invalid
+    Indicates that arguments given by the user are invalid.
+
+    The message gets printed, and the CLI exists with non-zero.
     '''
 
 

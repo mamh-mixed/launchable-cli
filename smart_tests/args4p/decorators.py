@@ -6,6 +6,7 @@ from typing import Annotated, Any, Callable, Optional, Type, get_args, get_origi
 from . import decorator
 from .argument import Argument
 from .command import Command, Group
+from .exceptions import BadConfigException
 from .option import Option, NO_DEFAULT
 from .parameter import Parameter
 
@@ -92,7 +93,7 @@ def option(
 
     def decorator(f: Callable) -> Callable:
         if len(param_decls) == 0:
-            raise ValueError("Variable name is required")
+            raise BadConfigException("Variable name is required")
 
         variable_name = param_decls[-1]
         if len(param_decls) == 1:

@@ -12,16 +12,16 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
-from .commands.compare import compare
-from .commands.detect_flakes import detect_flakes
-from .commands.inspect import inspect
-from .commands.record import record
-from .commands.stats import stats
-from .commands.subset import subset
-from .commands.verify import verify
-from .utils import logger
-from .utils.env_keys import SKIP_CERT_VERIFICATION
-from .version import __version__
+from smart_tests.commands.compare import compare
+from smart_tests.commands.detect_flakes import detect_flakes
+from smart_tests.commands.inspect import inspect
+from smart_tests.commands.record import record
+from smart_tests.commands.stats import stats
+from smart_tests.commands.subset import subset
+from smart_tests.commands.verify import verify
+from smart_tests.utils import logger
+from smart_tests.utils.env_keys import SKIP_CERT_VERIFICATION
+from smart_tests.version import __version__
 
 
 @args4p.group()
