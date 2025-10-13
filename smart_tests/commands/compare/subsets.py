@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Annotated
 
 import click
 import smart_tests.args4p.typer as typer
@@ -7,13 +7,14 @@ from tabulate import tabulate
 
 from smart_tests import args4p
 from smart_tests.app import Application
+from smart_tests.args4p.converters import path
 
 
 @args4p.command()
 def subsets(
     app: Application,
-    file_before: Path = typer.Argument(None, help="First subset file to compare"),
-    file_after: Path = typer.Argument(None, help="Second subset file to compare")
+    file_before: Annotated[Path, typer.Argument(type=path(exists=True), help="First subset file to compare")],
+    file_after: Annotated[Path, typer.Argument(type=path(exists=True), help="Second subset file to compare")]
 ):
     """
     Compare two subset files and display changes in test order positions

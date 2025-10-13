@@ -1,6 +1,6 @@
 import json
 import pathlib
-from typing import Dict, Generator, List
+from typing import Dict, Generator, List, Annotated
 
 import click
 
@@ -239,9 +239,9 @@ class ReportParser:
             return
 
 
-# This decorator is converted to Typer annotations in the function signature
 @smart_tests.record.tests
-def record_tests(client, reports):
+def record_tests(client,
+     reports: Annotated[List[str], typer.Argument(required=True, multiple=True)]):
     file_path_normalizer = FilePathNormalizer(base_path=client.base_path, no_base_path_inference=client.no_base_path_inference)
     client.parse_func = ReportParser(file_path_normalizer).parse_func
 
