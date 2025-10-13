@@ -163,17 +163,7 @@ class CliTestCase(unittest.TestCase):
         """
         Invoke CLI command and returns its result
         """
-        # Disable rich colors for testing by setting the environment variable
-        import os
-        old_no_color = os.environ.get('NO_COLOR')
-        os.environ['NO_COLOR'] = '1'
-        try:
-            return CliRunner().invoke(app=cli, args=args, catch_exceptions=False, **kwargs)
-        finally:
-            if old_no_color is None:
-                os.environ.pop('NO_COLOR', None)
-            else:
-                os.environ['NO_COLOR'] = old_no_color
+        return CliRunner().invoke(app=cli, args=args, catch_exceptions=False, **kwargs)
 
     def assert_success(self, result):
         self.assert_exit_code(result, 0)
