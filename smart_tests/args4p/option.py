@@ -37,7 +37,7 @@ class Option(Parameter):
         'args' is pointing at the next argument after 'option_name', which may be the value for this option.
         '''
 
-        if self.type == bool:
+        if self.type == bool or self.type == Optional[bool]:
             v = True
         else:
             v = args.eat(option_name)
