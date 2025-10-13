@@ -319,10 +319,29 @@ class Command:
                         lines.append(f"      {help_line}")
 
         # Options section
+        self._format_options("Options", lines)
+
+        # Commands section (for Groups)
+        if isinstance(self, Group) and self.commands:
+            lines.append("")
+            lines.append("Commands:")
+            for cmd in self.commands:
+                cmd_line = f"  {cmd.name}"
+                lines.append(cmd_line)
+
+                # Add command description from docstring
+                if cmd.callback.__doc__:
+                    # Get first line of docstring as brief description
+                    first_line = cmd.callback.__doc__.strip().split('\n')[0]
+                    lines.append(f"      {first_line}")
+
+        return '\n'.join(lines)
+
+    def _format_options(self, caption: str, lines: list[str]):
         options = [opt for opt in self.options if not opt.hidden]
         if options:
             lines.append("")
-            lines.append("Options:")
+            lines.append(f"{caption}:")
             for opt in options:
                 # Format option names
                 opt_names = ", ".join(opt.option_names)
@@ -345,7 +364,7 @@ class Command:
                     desc_parts.append(opt.help)
 
                 # Add default value info
-                if opt.default != NO_DEFAULT:
+                if opt.default != NO_DEFAULT and opt.type != bool:
                     desc_parts.append(f"[default: {opt.default}]")
                 elif not opt.required and opt.type != bool:
                     desc_parts.append("[optional]")
@@ -361,21 +380,8 @@ class Command:
                 if desc_parts:
                     lines.append(f"      {' '.join(desc_parts)}")
 
-        # Commands section (for Groups)
-        if isinstance(self, Group) and self.commands:
-            lines.append("")
-            lines.append("Commands:")
-            for cmd in self.commands:
-                cmd_line = f"  {cmd.name}"
-                lines.append(cmd_line)
-
-                # Add command description from docstring
-                if cmd.callback.__doc__:
-                    # Get first line of docstring as brief description
-                    first_line = cmd.callback.__doc__.strip().split('\n')[0]
-                    lines.append(f"      {first_line}")
-
-        return '\n'.join(lines)
+        if self.parent:
+            self.parent._format_options(f"Options (common to {self.parent.name})", lines)
 
     def __repr__(self):
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
