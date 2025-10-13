@@ -37,10 +37,11 @@ def detect_flakes(
         "--retry-threshold",
         help="Thoroughness of how \"flake\" is detected",
     )] = DetectFlakesRetryThreshold.MEDIUM,
+    test_runner: Annotated[str, typer.Argument()] = None,
 ):
     tracking_client = TrackingClient(Command.DETECT_FLAKE, app=app)
-    test_runner = app.test_runner
-    client = SmartTestsClient(app=app, tracking_client=tracking_client, test_runner=test_runner)
+    app.test_runner = test_runner
+    client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
     test_session = None
     try:
@@ -69,7 +70,7 @@ def detect_flakes(
                     params={
                         "confidence": retry_threshold.value.upper(),
                         "session-id": os.path.basename(session),
-                        "test-runner": test_runner,
+                        "test-runner": app.test_runner,
                     })
 
                 res.raise_for_status()

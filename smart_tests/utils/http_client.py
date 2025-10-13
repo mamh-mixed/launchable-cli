@@ -42,8 +42,7 @@ class DryRunResponse:
 
 
 class _HttpClient:
-    def __init__(self, base_url: str = "", session: Session | None = None,
-                 test_runner: str | None = "", app: Application | None = None):
+    def __init__(self, base_url: str = "", session: Session | None = None, app: Application | None = None):
         self.base_url = base_url or get_base_url()
         self.dry_run = bool(app and app.dry_run)
         self.skip_cert_verification = bool(app and app.skip_cert_verification)
@@ -68,7 +67,7 @@ class _HttpClient:
         else:
             self.session = session
 
-        self.test_runner = test_runner
+        self.test_runner = app.test_runner
 
     def request(
         self,
@@ -131,7 +130,7 @@ class _HttpClient:
         if compress:
             h["Content-Encoding"] = "gzip"
 
-        if self.test_runner != "":
+        if self.test_runner:
             h["User-Agent"] = h["User-Agent"] + f" TestRunner/{self.test_runner}"
 
         ctx = click.get_current_context(silent=True)

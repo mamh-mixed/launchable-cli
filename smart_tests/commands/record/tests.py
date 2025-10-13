@@ -87,16 +87,17 @@ def tests(
         help="",
         hidden=True
     )] = False,
+    test_runner: Annotated[str, typer.Argument()] = None,
     # TODO(Konboi): restore timestamp option
 ):
     logger = Logger()
 
     org, workspace = ensure_org_workspace()
 
-    test_runner = app.test_runner
+    app.test_runner = test_runner
 
     tracking_client = TrackingClient(Command.RECORD_TESTS, app=app)
-    client = SmartTestsClient(test_runner=test_runner, app=app, tracking_client=tracking_client)
+    client = SmartTestsClient(app=app, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     fail_fast_mode_validate(FailFastModeValidateParams(
@@ -111,7 +112,7 @@ def tests(
         group = _validate_group(group)
 
     tracking_client = TrackingClient(Command.RECORD_TESTS, app=app)
-    client = SmartTestsClient(test_runner=test_runner, app=app, tracking_client=tracking_client)
+    client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
     file_path_normalizer = FilePathNormalizer(
         str(base_path) if base_path else None,

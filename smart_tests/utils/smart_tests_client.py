@@ -15,11 +15,10 @@ from ..args4p.exceptions import BadCmdLineException
 
 class SmartTestsClient:
     def __init__(self, tracking_client: TrackingClient | None = None, base_url: str = "", session: Session | None = None,
-                 test_runner: str | None = "", app: Application | None = None):
+                 app: Application | None = None):
         self.http_client = _HttpClient(
             base_url=base_url,
             session=session,
-            test_runner=test_runner,
             app=app
         )
         self.tracking_client = tracking_client
@@ -132,7 +131,3 @@ class SmartTestsClient:
             self.print_exception_and_recover(e, "Failed to get workspace state")
 
         return {}
-
-    def set_test_runner(self, test_runner: str):
-        """Update the test runner name for this client."""
-        self.http_client.test_runner = test_runner

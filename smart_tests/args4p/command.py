@@ -213,9 +213,9 @@ class Command:
 
         # Group-specific checks
         if isinstance(self, Group):
-            # Groups should not have any arguments since first arg is subcommand name
-            if self.arguments:
-                raise error(f"Group command '{self.name}' cannot have arguments")
+            # Group can have up to one argument can be used to capture sub-command
+            if len(self.arguments)>1:
+                raise error(f"Group command '{self.name}' can have at most one argument to capture sub-command name")
 
             # Check for empty groups (only if this is a Group)
             if not self.commands:
@@ -504,6 +504,8 @@ class _Invoker:
         c = cast(Group, self.command).find_subcommand(name)
         i = _Invoker(c)
         i.parent = self
+        if len(self.command.arguments)>0:
+            self.eat_arg(name)      # this allows the group to see the selected sub-command as an argument
         return i
 
     def invoke(self) -> Any:

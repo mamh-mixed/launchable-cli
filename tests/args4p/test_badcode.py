@@ -208,18 +208,6 @@ class ConsistencyCheckTest(TestCase):
 
     # Group-Specific Issues
 
-    def test_group_with_arguments_rejected(self):
-        """Test that groups cannot have arguments"""
-        with self.assertRaises(BadConfigException) as e:
-            @args4p.group()
-            @args4p.argument("invalid_arg")
-            def main_group(invalid_arg: str):
-                pass
-
-            main_group()
-
-        self.assertIn("Group command 'main-group' cannot have arguments", str(e.exception))
-
     def test_empty_group(self):
         """Test that empty groups are caught"""
         with self.assertRaises(BadConfigException) as e:

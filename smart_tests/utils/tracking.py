@@ -32,11 +32,10 @@ class Tracking:
 
 class TrackingClient:
     def __init__(self, command: Command, base_url: str = "", session: Session | None = None,
-                 test_runner: str | None = "", app: Application | None = None):
+                 app: Application | None = None):
         self.http_client = _HttpClient(
             base_url=base_url,
             session=session,
-            test_runner=test_runner,
             app=app
         )
         self.command = command

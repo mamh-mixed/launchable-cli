@@ -123,7 +123,9 @@ def subset(
         "--use-case",
         hidden=True
     )] = None,
+    test_runner: Annotated[str, typer.Argument()] = None,
 ):
+    app.test_runner = test_runner
     tracking_client = TrackingClient(Command.SUBSET, app=app)
     client = SmartTestsClient(app=app, tracking_client=tracking_client)
 
@@ -317,11 +319,10 @@ def subset(
             target: Percentage | None,
             duration: Duration | None,
             confidence: Percentage | None,
-            test_runner: str,
         ):
             payload: dict[str, Any] = {
                 "testPaths": self.test_paths,
-                "testRunner": test_runner,
+                "testRunner": app.test_runner,
                 "session": {
                     # expecting just the last component, not the whole path
                     "id": os.path.basename(session_id)
@@ -397,7 +398,7 @@ def subset(
             # TODO: remove this line when API response return response
             # within 300 sec
             timeout = (5, 300)
-            payload = self.get_payload(str(session_id), target, time, confidence, str(test_runner))
+            payload = self.get_payload(str(session_id), target, time, confidence)
 
             if is_non_blocking:
                 # Create a new process for requesting a subset.

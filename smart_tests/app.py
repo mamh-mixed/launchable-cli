@@ -3,7 +3,7 @@
 #
 # From command implementations, this is available via dependency injection
 class Application:
-    # Kohsuke: I think this is used to capture the CLI profile. Translation of `getattr(ctx, 'test_runner', None)`
+    # Group commands that take the CLI profile as a sub-command shall set this parameter
     test_runner : str = None
 
     def __init__(self, dry_run: bool = False, skip_cert_verification: bool = False):
