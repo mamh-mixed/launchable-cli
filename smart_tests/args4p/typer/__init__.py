@@ -11,25 +11,7 @@ def Option(
         metavar: str = None, multiple: bool = False, hidden: bool = False
 ) -> _Option:
     '''
-    :arg option_names:
-        Zero or more option names.
-        If no option names are given, name is generated from the parameter name (e.g. `foo_bar` -> `--foo-bar`).
-    :arg help:
-        Human readable description of the option, used to render the help message
-    :arg type:
-        Type or callable that converts the string value to the desired type.
-        Defaults to the type annotation of the parameter.
-    :arg default:
-        Default value if the option is not provided.
-    :arg required:
-        Whether the option is required. Default is False.
-    :arg metavar:
-        User-friendly name for the option value, used in help messages.
-    :arg multiple:
-        Whether the option can be specified multiple times, resulting in a list of values.
-        If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
-    :arg hidden:
-        If true, this option is hidden from help messages.
+    See README.md for usage
     '''
 
     return _Option(name=None, option_names=list(option_names), help=help, type=type,
@@ -45,20 +27,7 @@ def Argument(
         default: Any = NO_DEFAULT
 ) -> _Argument:
     '''
-    :arg help:
-        Human readable description of the option, used to render the help message
-    :arg type:
-        Type or callable that converts the string value to the desired type.
-        Defaults to the type annotation of the parameter.
-    :arg default:
-        Default value if the option is not provided.
-    :arg required:
-        Whether the option is required. Default is False.
-    :arg metavar:
-        User-friendly name for the option value, used in help messages.
-    :arg multiple:
-        Whether the option can be specified multiple times, resulting in a list of values.
-        If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
+    See README.md for usage
     '''
     return _Argument(name=None, type=type, multiple=multiple, required=required, metavar=metavar, help=help, default=default)
 

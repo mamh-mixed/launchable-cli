@@ -70,25 +70,7 @@ def option(
         metavar: str = None, multiple: bool = False, hidden: bool = False
 ) -> Callable:
     '''
-    :arg param_decls:
-        Zero or more option names, followed by the variable name.
-        If no option names are given, name is generated from it (e.g. `foo_bar` -> `--foo-bar`).
-    :arg help:
-        Human readable description of the option, used to render the help message
-    :arg type:
-        Type or callable that converts the string value to the desired type.
-        Defaults to the type annotation of the parameter.
-    :arg default:
-        Default value if the option is not provided.
-    :arg required:
-        Whether the option is required. Default is False.
-    :arg metavar:
-        User-friendly name for the option value, used in help messages.
-    :arg multiple:
-        Whether the option can be specified multiple times, resulting in a list of values.
-        If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
-    :arg hidden:
-        If true, this option is hidden from help messages.
+    See README.md for usage
     '''
 
     def decorator(f: Callable) -> Callable:
@@ -128,22 +110,7 @@ def argument(
     default: Any = NO_DEFAULT
 ) -> Callable:
     '''
-    :arg name:
-        Name of the function parameter that this argument binds to.
-    :arg help:
-        Human readable description of the option, used to render the help message
-    :arg type:
-        Type or callable that converts the string value to the desired type.
-        Defaults to the type annotation of the parameter.
-    :arg default:
-        Default value if the option is not provided.
-    :arg required:
-        Whether the option is required. Default is False.
-    :arg metavar:
-        User-friendly name for the option value, used in help messages.
-    :arg multiple:
-        Whether the option can be specified multiple times, resulting in a list of values.
-        If true, the parameter type must be a list type (e.g. List[str], List[int], etc.)
+    See README.md for usage
     '''
     a = Argument(name=name, type=type, multiple=multiple, required=required, metavar=metavar, help=help, default=default)
     return lambda f: _attach(f, a)
