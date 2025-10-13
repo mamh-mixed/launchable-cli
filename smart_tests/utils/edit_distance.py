@@ -1,7 +1,7 @@
 def edit_distance(s1, s2):
     distances = range(len(s1) + 1)
     for i2, c2 in enumerate(s2):
-        distances_ = [i2+1]
+        distances_ = [i2 + 1]
         for i1, c1 in enumerate(s1):
             if c1 == c2:
                 distances_.append(distances[i1])

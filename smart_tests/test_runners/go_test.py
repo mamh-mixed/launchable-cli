@@ -4,9 +4,9 @@ import re
 from typing import Annotated, Dict, List
 
 import click
+from junitparser import TestCase, TestSuite  # type: ignore
 
 import smart_tests.args4p.typer as typer
-from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..testpath import TestPath
 from ..utils.logger import Logger

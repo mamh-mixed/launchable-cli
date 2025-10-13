@@ -1,16 +1,14 @@
-from . import attachment, build, commit, session
-
+from ... import args4p
+from ...app import Application
 from .attachment import attachment
 from .build import build
 from .commit import commit
 from .session import session
 from .tests import tests
-from ... import args4p
-from ...app import Application
 
 
 @args4p.group(help="Record test results, builds, commits, and sessions")
-def record(app :Application):
+def record(app: Application):
     return app
 
 

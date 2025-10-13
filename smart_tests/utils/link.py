@@ -2,9 +2,6 @@ import re
 from enum import Enum
 from typing import Dict, List, Mapping, Sequence, Tuple
 
-import click
-
-import smart_tests.args4p.typer as typer
 from smart_tests.args4p.exceptions import BadCmdLineException
 
 JENKINS_URL_KEY = 'JENKINS_URL'

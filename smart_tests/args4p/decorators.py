@@ -7,8 +7,8 @@ from . import decorator
 from .argument import Argument
 from .command import Command, Group
 from .exceptions import BadConfigException
-from .option import Option, NO_DEFAULT
-from .parameter import Parameter, normalize_type
+from .option import NO_DEFAULT, Option
+from .parameter import Parameter
 
 
 def _command(

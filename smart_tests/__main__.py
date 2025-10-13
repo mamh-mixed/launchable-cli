@@ -12,7 +12,6 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
-from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.commands.compare import compare
 from smart_tests.commands.detect_flakes import detect_flakes
 from smart_tests.commands.inspect import inspect
@@ -54,7 +53,6 @@ def cli(
         click.echo(f"smart-tests-cli {__version__}")
         raise typer.Exit(0)
 
-
     level = logger.get_log_level(log_level)
     # In the case of dry-run, it is forced to set the level below the AUDIT.
     # This is because the dry-run log will be output along with the audit log.
@@ -70,6 +68,7 @@ def cli(
 
     return Application(dry_run=dry_run, skip_cert_verification=skip_cert_verification)
 
+
 cli.add_command(record)
 cli.add_command(subset)
 # TODO: main.add_command(split_subset)
@@ -78,6 +77,7 @@ cli.add_command(inspect)
 cli.add_command(stats)
 cli.add_command(compare)
 cli.add_command(detect_flakes)
+
 
 def _load_test_runners():
     # load all test runners
@@ -102,10 +102,13 @@ def _load_test_runners():
             plugin = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(plugin)
 
+
 _load_test_runners()
+
 
 def main():
     cli.main()
+
 
 if __name__ == '__main__':
     main()

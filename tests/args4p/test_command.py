@@ -1,8 +1,9 @@
 from unittest import TestCase
 
 import smart_tests.args4p as args4p
-from smart_tests.args4p.exceptions import BadCmdLineException, BadConfigException
 from smart_tests.args4p.command import _maybe
+from smart_tests.args4p.exceptions import BadCmdLineException, BadConfigException
+
 
 class CommandTest(TestCase):
     def test_invocation(self):
@@ -311,7 +312,8 @@ class CommandTest(TestCase):
 
         self.assertEqual(f("hello"), "HELLO")
 
+
 class MaybeTest(TestCase):
     def test_maybe(self):
-        self.assertEqual("record", _maybe("recodr", ["record","subset","compare"]))
-        self.assertEqual(None, _maybe("unrelated", ["record","subset","compare"]))
+        self.assertEqual("record", _maybe("recodr", ["record", "subset", "compare"]))
+        self.assertEqual(None, _maybe("unrelated", ["record", "subset", "compare"]))

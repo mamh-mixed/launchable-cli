@@ -7,8 +7,7 @@ from dateutil.tz import tzlocal
 
 from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.utils.typer_types import (DATETIME_WITH_TZ, EMOJI, KEY_VALUE, DateTimeWithTimezone, Duration, Fraction,
-                                           KeyValue, Percentage, convert_to_seconds, emoji,
-                                           parse_datetime_with_timezone,
+                                           KeyValue, Percentage, convert_to_seconds, emoji, parse_datetime_with_timezone,
                                            parse_duration, parse_fraction, parse_key_value, parse_percentage,
                                            validate_datetime_with_tz, validate_key_value, validate_past_datetime)
 

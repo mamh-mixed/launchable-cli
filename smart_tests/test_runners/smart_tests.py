@@ -5,11 +5,11 @@ import types
 from typing import Annotated
 
 import click
+
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.args4p import decorator
 from smart_tests.args4p.command import Group
-
 from smart_tests.commands.detect_flakes import detect_flakes as detect_flakes_cmd
 from smart_tests.commands.record.tests import tests as record_tests_cmd
 from smart_tests.commands.subset import subset as subset_cmd
@@ -55,10 +55,10 @@ def flake_detection(f):
     return wrap(f, detect_flakes_cmd)
 
 
-@decorator
-def split_subset(f):
-    return wrap(f, split_subset_cmd)
-
+# TODO
+# @decorator
+# def split_subset(f):
+#     return wrap(f, split_subset_cmd)
 
 
 class CommonSubsetImpls:

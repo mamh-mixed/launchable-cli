@@ -10,6 +10,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.utils.commands import Command
 from smart_tests.utils.env_keys import TOKEN_KEY
 from smart_tests.utils.tracking import Tracking, TrackingClient
+
 from .. import args4p
 from ..app import Application
 from ..utils.authentication import get_org_workspace

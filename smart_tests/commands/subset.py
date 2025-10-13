@@ -5,32 +5,32 @@ import pathlib
 import re
 import subprocess
 import sys
-import click
 from enum import Enum
 from io import TextIOWrapper
 from multiprocessing import Process
 from os.path import join
 from typing import Annotated, Any, Callable, Dict, List, TextIO
 
+import click
 from tabulate import tabulate
 
-import smart_tests.args4p.typer as typer
 import smart_tests.args4p as args4p
+import smart_tests.args4p.typer as typer
 from smart_tests.utils.authentication import get_org_workspace
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
-from .test_path_writer import TestPathWriter
+
 from ..app import Application
-from ..args4p.converters import floatType, intType, fileText
+from ..args4p.converters import fileText, floatType, intType
 from ..testpath import FilePathNormalizer, TestPath
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
 from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import Duration, Percentage, parse_duration, parse_percentage
-
+from .test_path_writer import TestPathWriter
 
 # TODO: rename files and function accordingly once the PR landscape
 
@@ -392,8 +392,6 @@ def subset(
                 warn_and_exit_if_fail_fast_mode("Nothing that looks like a test file in the current git repository.")
 
         def request_subset(self) -> SubsetResult:
-            # Get test runner name from the object (set by DynamicCommandBuilder)
-            test_runner = self.test_runner
             # temporarily extend the timeout because subset API response has become slow
             # TODO: remove this line when API response return response
             # within 300 sec

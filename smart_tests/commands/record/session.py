@@ -9,7 +9,6 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
-
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.fail_fast_mode import set_fail_fast_mode

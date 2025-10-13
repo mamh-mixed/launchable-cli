@@ -1,14 +1,14 @@
 import json
 import os
 import sys
-from io import TextIOWrapper
 from pathlib import Path
 from typing import Annotated, Generator, List
 
-import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
-from ..args4p.converters import fileText, path
+import smart_tests.args4p.typer as typer
+
+from ..args4p.converters import path
 from ..testpath import TestPath
 from ..utils.logger import Logger
 from . import smart_tests

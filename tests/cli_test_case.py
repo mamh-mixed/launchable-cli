@@ -169,7 +169,7 @@ class CliTestCase(unittest.TestCase):
         self.assert_exit_code(result, 0)
 
     def assert_exit_code(self, result, expected: int):
-        self.assertEqual(result.exit_code, expected, result.stdout+'\n'+result.stderr)
+        self.assertEqual(result.exit_code, expected, result.stdout + '\n' + result.stderr)
 
     def assert_contents(self, file_path: str, content: str):
         with open(file_path) as f:

@@ -10,11 +10,12 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry  # type: ignore
 
 from smart_tests.version import __version__
+
+from ..app import Application
 from .authentication import authentication_headers
 from .env_keys import BASE_URL_KEY, SKIP_TIMEOUT_RETRY
 from .gzipgen import compress as gzipgen_compress
 from .logger import Logger
-from ..app import Application
 
 DEFAULT_BASE_URL = "https://api.mercury.launchableinc.com"
 

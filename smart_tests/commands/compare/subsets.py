@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import List, Tuple, Union, Annotated
+from typing import Annotated, List, Tuple, Union
 
 import click
-import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 
+import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
 from smart_tests.args4p.converters import path

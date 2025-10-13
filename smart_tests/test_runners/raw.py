@@ -5,9 +5,10 @@ from typing import Annotated, Generator, List
 
 import click
 import dateutil.parser
-import smart_tests.args4p.typer as typer
-from ..args4p.exceptions import BadCmdLineException
 
+import smart_tests.args4p.typer as typer
+
+from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.case_event import CaseEvent, CaseEventType
 from ..testpath import TestPath, parse_test_path, unparse_test_path
 from . import smart_tests

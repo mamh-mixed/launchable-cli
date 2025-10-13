@@ -2,7 +2,8 @@
 from typing import Any, Callable
 
 from ..argument import Argument as _Argument
-from ..option import Option as _Option, NO_DEFAULT
+from ..option import NO_DEFAULT
+from ..option import Option as _Option
 
 
 def Option(
@@ -36,5 +37,6 @@ class Exit(Exception):
     '''
     Raise this exception to exit the CLI with the given exit code
     '''
+
     def __init__(self, code: int):
         self.code = code

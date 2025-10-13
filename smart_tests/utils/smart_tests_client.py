@@ -7,10 +7,11 @@ from requests import HTTPError, Session, Timeout
 
 from smart_tests.utils.http_client import _HttpClient, _join_paths
 from smart_tests.utils.tracking import Tracking, TrackingClient  # type: ignore
-from .authentication import get_org_workspace
-from .env_keys import REPORT_ERROR_KEY
+
 from ..app import Application
 from ..args4p.exceptions import BadCmdLineException
+from .authentication import get_org_workspace
+from .env_keys import REPORT_ERROR_KEY
 
 
 class SmartTestsClient:

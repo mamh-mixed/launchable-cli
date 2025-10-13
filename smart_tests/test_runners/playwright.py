@@ -6,9 +6,9 @@ import json
 from typing import Annotated, Dict, Generator, List
 
 import click
+from junitparser import TestCase, TestSuite  # type: ignore
 
 import smart_tests.args4p.typer as typer
-from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.case_event import CaseEvent

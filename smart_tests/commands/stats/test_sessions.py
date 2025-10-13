@@ -3,11 +3,12 @@ from typing import Annotated, Any, Dict, List
 import click
 
 import smart_tests.args4p.typer as typer
+
 from ... import args4p
 from ...app import Application
-
 from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_key_value
+
 
 @args4p.command(help="View test session statistics")
 def test_sessions(

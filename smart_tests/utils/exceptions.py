@@ -2,7 +2,6 @@
 import sys
 
 import click
-import smart_tests.args4p.typer as typer
 
 from smart_tests.utils.tracking import Tracking, TrackingClient
 

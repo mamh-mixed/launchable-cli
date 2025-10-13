@@ -5,7 +5,6 @@ from typing import Annotated, List
 import click
 
 import smart_tests.args4p.typer as typer
-
 from smart_tests.test_runners import smart_tests
 from smart_tests.test_runners.nunit import nunit_parse_func
 from smart_tests.testpath import TestPath

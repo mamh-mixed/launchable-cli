@@ -3,6 +3,7 @@ from typing import Tuple
 
 import click
 import requests
+
 import smart_tests.args4p.typer as typer
 
 from .env_keys import ORGANIZATION_KEY, WORKSPACE_KEY, get_token

@@ -1,8 +1,9 @@
 import re
 from typing import Annotated, List
 
-import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
+
+import smart_tests.args4p.typer as typer
 
 from ..args4p.exceptions import BadCmdLineException
 from ..testpath import TestPath

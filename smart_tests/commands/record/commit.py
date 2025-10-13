@@ -9,6 +9,7 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
+
 from ... import args4p
 from ...app import Application
 from ...utils.commands import Command

@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from typing import Tuple
 
 import click
-import smart_tests.args4p.typer as typer
 from requests import HTTPError
 
 from smart_tests.args4p.exceptions import BadCmdLineException

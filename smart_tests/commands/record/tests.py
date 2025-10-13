@@ -6,23 +6,23 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from time import time_ns
 from typing import Annotated, Callable, Dict, Generator, List, Tuple, Union
-import smart_tests.args4p.converters as converters
-import click
 
-import smart_tests.args4p.typer as typer
+import click
 from dateutil.parser import parse
 from junitparser import JUnitXml, TestCase, TestSuite  # type: ignore  # noqa: F401
 from more_itertools import ichunked
 from tabulate import tabulate
 
+import smart_tests.args4p.converters as converters
+import smart_tests.args4p.typer as typer
 from smart_tests.utils.authentication import ensure_org_workspace
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
+
 from ... import args4p
 from ...app import Application
 from ...args4p.exceptions import BadCmdLineException
-
 from ...testpath import FilePathNormalizer, TestPathComponent, unparse_test_path
 from ...utils.commands import Command
 from ...utils.exceptions import InvalidJUnitXMLException, print_error_and_die
@@ -476,7 +476,7 @@ def tests(
 
             if duration == 0:
                 click.secho("\nTotal test duration is 0."
-                                       "\nPlease check whether the test duration times in report files are correct.", fg="yellow")
+                            "\nPlease check whether the test duration times in report files are correct.", fg="yellow")
             click.echo(
                 f"\nVisit https://app.launchableinc.com/organizations/{org}/workspaces/"
                 f"{workspace}/test-sessions/{self.test_session_id} to view uploaded test results "

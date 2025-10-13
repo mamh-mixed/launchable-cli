@@ -11,7 +11,9 @@ class NoDefault:
     '''
     pass
 
+
 NO_DEFAULT = NoDefault()
+
 
 class Option(Parameter):
     clazz = "option"

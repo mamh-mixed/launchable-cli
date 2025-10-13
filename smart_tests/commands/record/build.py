@@ -10,7 +10,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.session import KeyValue, parse_key_value
 from smart_tests.utils.link import CIRCLECI_KEY, GITHUB_ACTIONS_KEY, JENKINS_URL_KEY, capture_links
 from smart_tests.utils.tracking import Tracking, TrackingClient
-from .commit import commit
+
 from ... import args4p
 from ...app import Application
 from ...utils import subprocess
@@ -19,6 +19,7 @@ from ...utils.commands import Command
 from ...utils.fail_fast_mode import set_fail_fast_mode, warn_and_exit_if_fail_fast_mode
 from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_datetime_with_tz, validate_key_value, validate_past_datetime
+from .commit import commit
 
 JENKINS_GIT_BRANCH_KEY = "GIT_BRANCH"
 JENKINS_GIT_LOCAL_BRANCH_KEY = "GIT_LOCAL_BRANCH"
@@ -201,7 +202,7 @@ def build(
     def collect_commits():
         if not no_commit_collection:
             for w in ws:
-                commit(ctx, name=w.name, source=w.dir, max_days=max_days)
+                commit(app, name=w.name, source=w.dir, max_days=max_days)
         else:
             click.secho(
                 "Warning: Commit collection is turned off. The commit data must be collected separately.",

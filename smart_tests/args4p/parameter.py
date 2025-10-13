@@ -1,11 +1,11 @@
 import inspect
 import types
-from typing import Any, Callable, Annotated, Optional, get_origin, get_args, Union
+from typing import Annotated, Any, Callable, Optional, Union, get_args, get_origin
 
 from smart_tests.args4p.exceptions import BadConfigException
 
 
-def to_type(p :inspect.Parameter) -> Optional[type]:
+def to_type(p: inspect.Parameter) -> Optional[type]:
     '''
     Given output from inspect.signature, extract the type annotation.
     '''
@@ -21,8 +21,9 @@ def to_type(p :inspect.Parameter) -> Optional[type]:
 
     return annotation
 
+
 def normalize_type(t: type) -> type:
-    if isinstance(t,types.UnionType) or get_origin(t) is Union:
+    if isinstance(t, types.UnionType) or get_origin(t) is Union:
         # x|None is a common typing of a parameter that confuses args4p.
         # we want to normalize it to just x
         # Not sure when UnionType is used and when Union is used, but they both seem to appear
@@ -81,4 +82,3 @@ class Parameter:
                 return
 
         raise error(f"No parameter named '{self.name}' found")
-

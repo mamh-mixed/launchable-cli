@@ -6,15 +6,14 @@ import subprocess
 from typing import Annotated, Generator, List
 
 import click
-
-import smart_tests.args4p.typer as typer
 from junitparser import Properties, TestCase  # type: ignore
 
+import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent, CaseEventType, MetadataTestCase
 from smart_tests.testpath import TestPath
 
-from . import smart_tests
 from ..args4p.exceptions import BadCmdLineException
+from . import smart_tests
 
 
 # Please specify junit_family=legacy for pytest report format. if using pytest version 6 or higher.

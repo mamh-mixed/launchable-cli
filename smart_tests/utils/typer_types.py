@@ -3,7 +3,6 @@ import re
 import sys
 
 import dateutil.parser
-import smart_tests.args4p.typer as typer
 from dateutil.tz import tzlocal
 
 from smart_tests.args4p.exceptions import BadCmdLineException

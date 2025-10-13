@@ -4,6 +4,7 @@ import click
 
 import smart_tests.args4p.typer as typer
 from smart_tests.utils.session import get_session
+
 from ... import args4p
 from ...app import Application
 from ...utils.smart_tests_client import SmartTestsClient

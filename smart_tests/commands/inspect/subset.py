@@ -5,9 +5,9 @@ from http import HTTPStatus
 from typing import Annotated, List
 
 import click
+from tabulate import tabulate
 
 import smart_tests.args4p.typer as typer
-from tabulate import tabulate
 
 from ... import args4p
 from ...app import Application

@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from smart_tests.args4p.converters import path, floatType, intType, fileText
+from smart_tests.args4p.converters import fileText, floatType, intType, path
 
 
 class PathConverterTest(TestCase):

@@ -4,17 +4,17 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, List, Optional, cast, Iterable
+from typing import Any, Callable, Iterable, List, Optional, cast
 
 import click
 
+from ..utils.edit_distance import edit_distance
 from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
-from .option import Option, NO_DEFAULT
-from .parameter import Parameter, to_type, normalize_type
+from .option import NO_DEFAULT, Option
+from .parameter import Parameter, normalize_type, to_type
 from .typer import Exit
-from ..utils.edit_distance import edit_distance
 
 
 class Command:
@@ -177,7 +177,6 @@ class Command:
             if hasattr(t, '__origin__') and t.__origin__ is list and not p.multiple:
                 raise error(f"Parameter '{p.name}' is typed as List but missing multiple=True")
 
-
             # Check default value type compatibility
             if p.default != NO_DEFAULT and not isinstance(p.default, p.type):
                 raise error(
@@ -218,7 +217,7 @@ class Command:
         # Group-specific checks
         if isinstance(self, Group):
             # Group can have up to one argument can be used to capture sub-command
-            if len(self.arguments)>1:
+            if len(self.arguments) > 1:
                 raise error(f"Group command '{self.name}' can have at most one argument to capture sub-command name")
 
             # Check for empty groups (only if this is a Group)
@@ -518,7 +517,7 @@ class _Invoker:
         c = cast(Group, self.command).find_subcommand(name)
         i = _Invoker(c)
         i.parent = self
-        if len(self.command.arguments)>0:
+        if len(self.command.arguments) > 0:
             self.eat_arg(name)      # this allows the group to see the selected sub-command as an argument
         return i
 
@@ -540,13 +539,14 @@ class _Invoker:
             if o.name not in self.kwargs:
                 if o.required:
                     raise BadCmdLineException(f"Missing required option '{o.option_names[0]}' for command '{self.command.name}'")
-                if o.default  != NO_DEFAULT:
+                if o.default != NO_DEFAULT:
                     self.kwargs[o.name] = o.default
 
         if self.parent is not None:
             return self.command.callback(self.parent.invoke(), **self.kwargs)
         else:
             return self.command.callback(**self.kwargs)
+
 
 def _maybe(given: str, candidates: Iterable[str]) -> Optional[str]:
     '''

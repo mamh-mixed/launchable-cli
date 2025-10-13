@@ -103,7 +103,7 @@ class ConsistencyCheckTest(TestCase):
         """Test that incompatible default values are caught"""
         with self.assertRaises(BadConfigException) as e:
             @args4p.command()
-            @args4p.option("-p","paths")
+            @args4p.option("-p", "paths")
             def cmd(paths: List[str] = []):
                 pass
 

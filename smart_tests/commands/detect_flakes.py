@@ -6,7 +6,6 @@ import click
 
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
-
 from smart_tests.app import Application
 from smart_tests.commands.test_path_writer import TestPathWriter
 from smart_tests.testpath import unparse_test_path

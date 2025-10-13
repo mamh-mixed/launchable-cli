@@ -5,7 +5,6 @@ from typing import Annotated, Dict, List
 import click
 
 import smart_tests.args4p.typer as typer
-
 from smart_tests.utils import glob as uglob
 from smart_tests.utils.java import junit5_nested_class_path_builder
 

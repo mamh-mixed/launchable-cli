@@ -11,5 +11,5 @@ class EditDistanceTest(TestCase):
 
         test(0, "abc", "abc")
         test(2, "abc", "bac")
-        test(1, "abc","abcd")
-        test(1, "abxc","abc")
+        test(1, "abc", "abcd")
+        test(1, "abxc", "abc")
