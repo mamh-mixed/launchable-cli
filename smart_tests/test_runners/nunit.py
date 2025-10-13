@@ -128,6 +128,7 @@ def nunit_parse_func(report: str):
 def subset(
     client,
     report_xmls: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report XML files to process"
     )],
 ):
@@ -153,6 +154,7 @@ def subset(
 def record_tests(
     client,
     report_xml: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report XML files to process"
     )],
 ):

@@ -87,6 +87,7 @@ def _group_by_size(elems, max_size):
 def record_tests(
     client,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source root directories or files to process"
     )],
 ):

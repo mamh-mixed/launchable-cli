@@ -27,6 +27,7 @@ def path_builder(case: TestCase, suite: TestSuite, report_file: str) -> TestPath
 def record_tests(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import responses  # type: ignore
-from typer.testing import CliRunner
+from click.testing import CliRunner
 
-from smart_tests.__main__ import cli
+from smart_tests.__main__ import cli as main
 from smart_tests.utils.env_keys import SESSION_DIR_KEY
 from smart_tests.utils.http_client import get_base_url
 
@@ -163,13 +163,13 @@ class CliTestCase(unittest.TestCase):
         """
         Invoke CLI command and returns its result
         """
-        return CliRunner().invoke(app=cli, args=args, catch_exceptions=False, **kwargs)
+        return CliRunner().invoke(cli=main, args=args, catch_exceptions=False, **kwargs)
 
     def assert_success(self, result):
         self.assert_exit_code(result, 0)
 
     def assert_exit_code(self, result, expected: int):
-        self.assertEqual(result.exit_code, expected, result.stdout)
+        self.assertEqual(result.exit_code, expected, result.stdout+'\n'+result.stderr)
 
     def assert_contents(self, file_path: str, content: str):
         with open(file_path) as f:

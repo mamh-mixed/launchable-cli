@@ -78,6 +78,7 @@ class CommonSubsetImpls:
         def subset(
             client,
             files: Annotated[list[str], typer.Argument(
+                multiple=True,
                 help="Test files or directories to include in the subset"
             )]
         ):
@@ -124,6 +125,7 @@ class CommonRecordTestImpls:
         def record_tests(
             client,
             source_roots: Annotated[list[str], typer.Argument(
+                multiple=True,
                 help="Source directories containing test report files"
             )]
         ):

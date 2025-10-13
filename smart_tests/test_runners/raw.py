@@ -57,6 +57,7 @@ def subset(
 def record_tests(
     client,
     test_result_files: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test result files (JSON or JUnit XML)"
     )],
 ):

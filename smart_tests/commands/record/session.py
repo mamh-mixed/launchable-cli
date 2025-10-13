@@ -37,6 +37,7 @@ def session(
     flavors: Annotated[List[KeyValue], typer.Option(
         "--flavor",
         help="flavors",
+        multiple=True,
         metavar="KEY=VALUE",
         type=parse_key_value
     )] = [],
@@ -47,6 +48,7 @@ def session(
     links: Annotated[List[KeyValue], typer.Option(
         "--link",
         help="Set external link of a title and url",
+        multiple=True,
         type=parse_key_value,
     )] = [],
     is_no_build: Annotated[bool, typer.Option(

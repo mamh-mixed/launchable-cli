@@ -16,6 +16,7 @@ def test_sessions(
         help="How many days of test sessions in the past to be stat"
     )] = 7,
     flavor: Annotated[List[str], typer.Option(
+        multiple=True,
         help="flavors",
         metavar="KEY=VALUE"
     )] = [],

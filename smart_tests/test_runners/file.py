@@ -24,6 +24,7 @@ def subset(client):
 def record_tests(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

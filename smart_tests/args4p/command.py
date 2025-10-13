@@ -12,7 +12,7 @@ from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
 from .option import Option, NO_DEFAULT
-from .parameter import Parameter, to_type
+from .parameter import Parameter, to_type, normalize_type
 from .typer import Exit
 from ..utils.edit_distance import edit_distance
 
@@ -162,11 +162,17 @@ class Command:
 
             # Check if multiple=True is used correctly with List type
             if p.multiple:
-                t = to_type(fp)
+                t = normalize_type(to_type(fp))
                 if t is None:
                     raise error(f"Parameter '{p.name}' with multiple=True requires a type annotation")
                 if not (hasattr(t, '__origin__') and t.__origin__ is list):
                     raise error(f"Parameter '{p.name}' with multiple=True requires a List[T]")
+
+            # similarly, if type is List, must be multiple=True
+            t = to_type(fp)
+            if hasattr(t, '__origin__') and t.__origin__ is list and not p.multiple:
+                raise error(f"Parameter '{p.name}' is typed as List but missing multiple=True")
+
 
             # Check default value type compatibility
             if p.default != NO_DEFAULT and not isinstance(p.default, p.type):

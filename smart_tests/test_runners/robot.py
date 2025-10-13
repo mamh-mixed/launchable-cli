@@ -71,6 +71,7 @@ def parse_func(p: str) -> ET.ElementTree:
 def record_tests(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):
@@ -85,6 +86,7 @@ def record_tests(
 def subset(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

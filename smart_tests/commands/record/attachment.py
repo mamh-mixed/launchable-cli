@@ -17,6 +17,7 @@ def attachment(
         help="test session name"
     )],
     attachments: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Attachment files to upload"
     )],
 ):

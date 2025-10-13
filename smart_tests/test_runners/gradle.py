@@ -16,6 +16,7 @@ from . import smart_tests
 def subset(
     client,
     source_roots: Annotated[List[str] | None, typer.Argument(
+        multiple=True,
         help="Source root directories to scan for tests"
     )] = None,
     bare: Annotated[bool, typer.Option(
@@ -85,6 +86,7 @@ def to_class_file(class_name: str):
 def record_tests(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

@@ -46,6 +46,7 @@ def subset(client):
 def record_tests(
     client,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source root directories or files to process"
     )],
 ):

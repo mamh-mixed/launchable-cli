@@ -1,7 +1,8 @@
 from typing import Any, Optional
 
 from .exceptions import BadCmdLineException
-from .parameter import Parameter
+from .parameter import Parameter, normalize_type
+
 
 class NoDefault:
     '''
@@ -23,7 +24,7 @@ class Option(Parameter):
         self.name = name
         self.option_names = option_names
         self.help = help
-        self.type = self.normalize_type(type)
+        self.type = normalize_type(type)
         self.default = default
         self.required = required
         self.metavar = metavar

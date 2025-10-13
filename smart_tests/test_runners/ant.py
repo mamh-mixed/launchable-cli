@@ -11,6 +11,7 @@ from . import smart_tests
 def subset(
     client,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source directories to scan for test files"
     )]
 ):

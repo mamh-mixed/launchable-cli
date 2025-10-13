@@ -99,6 +99,18 @@ class ConsistencyCheckTest(TestCase):
         self.assertIn("Default value 'not_a_number'", str(e.exception))
         self.assertIn("incompatible with type 'int'", str(e.exception))
 
+    def test_type_mismatch(self):
+        """Test that incompatible default values are caught"""
+        with self.assertRaises(BadConfigException) as e:
+            @args4p.command()
+            @args4p.option("-p","paths")
+            def cmd(paths: List[str] = []):
+                pass
+
+            cmd()
+
+        self.assertIn("missing multiple=True", str(e.exception))
+
     # Option/Argument Configuration Issues
 
     def test_duplicate_option_names(self):

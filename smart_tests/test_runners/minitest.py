@@ -15,6 +15,7 @@ TEST_PATH_ORDER = {"file": 1, "class": 2, "testcase": 3}
 def record_tests(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

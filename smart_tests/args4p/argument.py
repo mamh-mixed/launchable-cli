@@ -2,16 +2,16 @@ from typing import Any, Optional
 
 from .exceptions import BadCmdLineException
 from .option import NO_DEFAULT
-from .parameter import Parameter
+from .parameter import Parameter, normalize_type
 
 
 class Argument(Parameter):
     clazz = "argument"
 
-    def __init__(self, name: Optional[str], type: type = str, multiple: bool = False,
+    def __init__(self, name: Optional[str], type: type = None, multiple: bool = False,
                  required: bool = True, metavar: str = None, help: str = None, default: Any = NO_DEFAULT):
         self.name = name
-        self.type = self.normalize_type(type)
+        self.type = normalize_type(type)
         self.multiple = multiple
         self.required = required
         self.metavar = metavar

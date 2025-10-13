@@ -8,7 +8,7 @@ from .argument import Argument
 from .command import Command, Group
 from .exceptions import BadConfigException
 from .option import Option, NO_DEFAULT
-from .parameter import Parameter
+from .parameter import Parameter, normalize_type
 
 
 def _command(
@@ -42,7 +42,7 @@ def _command(
                         if a.name is None:
                             a.name = pname
                         if a.type is None:
-                            a.type = a.normalize_type(args[0])
+                            a.type = normalize_type(args[0])
                         if isinstance(a, Option):
                             if a.option_names is None or len(a.option_names) == 0:
                                 a.option_names = [f"--{a.name.replace('_', '-')}"]

@@ -51,10 +51,12 @@ def is_file(f: str) -> bool:
 def subset(
     client,
     source_roots: Annotated[List[str] | None, typer.Argument(
+        multiple=True,
         help="Source root directories to scan for tests"
     )] = None,
     test_compile_created_file: Annotated[List[str] | None, typer.Option(
         "--test-compile-created-file",
+        multiple=True,
         help="Please run `mvn test-compile` command to create input file for this option"
     )] = None,
     is_scan_test_compile_lst: Annotated[bool, typer.Option(
@@ -137,6 +139,7 @@ def subset(
 def record_tests(
     client,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

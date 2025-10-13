@@ -43,10 +43,12 @@ def build(
     )] = None,
     repositories: Annotated[List[str], typer.Option(
         "--repo-branch-map",
+        multiple=True,
         help="Set repository name and branch name when you use --no-commit-collection option. "
              "Please use the same repository name with a commit option"
     )] = [],
     source: Annotated[List[str], typer.Option(
+        multiple=True,
         help="path to local Git workspace, optionally prefixed by a label. "
              "like --source path/to/ws or --source main=path/to/ws",
         metavar="REPO_NAME"
@@ -65,6 +67,7 @@ def build(
     )] = False,
     commits: Annotated[List[str], typer.Option(
         "--commit",
+        multiple=True,
         help="set repository name and commit hash when you use --no-commit-collection option"
     )] = [],
     timestamp: Annotated[str | None, typer.Option(
@@ -73,6 +76,7 @@ def build(
     )] = None,
     links: Annotated[List[KeyValue], typer.Option(
         "--link",
+        multiple=True,
         help="Set external link of a title and url",
         type=parse_key_value,
     )] = [],

@@ -138,6 +138,7 @@ def _pytest_formatter(test_path):
 def record_tests(
     client,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source directories containing test report files"
     )],
     json_report: Annotated[bool, typer.Option(

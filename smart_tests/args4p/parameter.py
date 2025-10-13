@@ -1,10 +1,9 @@
 import inspect
 import types
-from typing import Any, Callable, Annotated, Optional, get_origin, get_args
-
-from click import Parameter
+from typing import Any, Callable, Annotated, Optional, get_origin, get_args, Union
 
 from smart_tests.args4p.exceptions import BadConfigException
+
 
 def to_type(p :inspect.Parameter) -> Optional[type]:
     '''
@@ -21,6 +20,18 @@ def to_type(p :inspect.Parameter) -> Optional[type]:
         return get_args(annotation)[0]
 
     return annotation
+
+def normalize_type(t: type) -> type:
+    if isinstance(t,types.UnionType) or get_origin(t) is Union:
+        # x|None is a common typing of a parameter that confuses args4p.
+        # we want to normalize it to just x
+        # Not sure when UnionType is used and when Union is used, but they both seem to appear
+        args = get_args(t)
+        if len(args) == 2 and args[1] is type(None):
+            return args[0]
+
+    return t
+
 
 class Parameter:
     '''
@@ -63,7 +74,7 @@ class Parameter:
                                 return get_args(t)[0]
                             raise error(f"multiple=True requires a List[T] type annotation with parameter '{name}'")
                         else:
-                            return self.normalize_type(t)
+                            return normalize_type(t)
 
                     self.type = infer_type()
 
@@ -71,12 +82,3 @@ class Parameter:
 
         raise error(f"No parameter named '{self.name}' found")
 
-    def normalize_type(self, t: type):
-        if isinstance(t,types.UnionType):
-            # x|None is a common typing of a parameter that confuses args4p.
-            # we want to normalize it to just x
-            args = get_args(t)
-            if len(args) == 2 and args[1] is type(None):
-                return args[0]
-
-        return t

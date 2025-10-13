@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from typer.testing import CliRunner  # type: ignore
+from click.testing import CliRunner
 
 from smart_tests.__main__ import cli
 from smart_tests.version import __version__
