@@ -65,7 +65,7 @@ class Parameter:
                 # we found the parameter that matches the name
                 if self.type is None:
                     def infer_type() -> type:
-                        t = to_type(param)
+                        t = normalize_type(to_type(param))
                         if t is None:
                             raise error(f"Type annotation is missing on parameter '{name}'")
                         if self.multiple:
@@ -74,7 +74,7 @@ class Parameter:
                                 return get_args(t)[0]
                             raise error(f"multiple=True requires a List[T] type annotation with parameter '{name}'")
                         else:
-                            return normalize_type(t)
+                            return t
 
                     self.type = infer_type()
 
