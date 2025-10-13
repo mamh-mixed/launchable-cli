@@ -7,6 +7,7 @@ from typing import Annotated
 import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
+from smart_tests.args4p import decorator
 from smart_tests.args4p.command import Group
 
 from smart_tests.commands.detect_flakes import detect_flakes as detect_flakes_cmd
@@ -39,18 +40,22 @@ def wrap(f, group: Group, name=None):
     return cmd
 
 
+@decorator
 def subset(f):
     return wrap(f, subset_cmd)
 
 
 record = types.SimpleNamespace()
+# this is also meant to be used as a decorator, e.g., @record.tests
 record.tests = lambda f: wrap(f, record_tests_cmd)
 
 
+@decorator
 def flake_detection(f):
     return wrap(f, detect_flakes_cmd)
 
 
+@decorator
 def split_subset(f):
     return wrap(f, split_subset_cmd)
 
@@ -98,10 +103,6 @@ class CommonSubsetImpls:
 
             client.run()
 
-        # Register with new registry system for NestedCommand
-        registry = get_registry()
-        registry.register_subset(self.cmdname, subset)
-
         return wrap(subset, subset_cmd, self.cmdname)
 
 
@@ -127,10 +128,6 @@ class CommonRecordTestImpls:
             )]
         ):
             CommonRecordTestImpls.load_report_files(client=client, source_roots=source_roots, file_mask=file_mask)
-
-        # Register with new registry system for NestedCommand
-        registry = get_registry()
-        registry.register_record_tests(self.cmdname, record_tests)
 
         return wrap(record_tests, record_tests_cmd, self.cmdname)
 
@@ -182,7 +179,4 @@ class CommonDetectFlakesImpls:
 
             client.run()
 
-        # Register with new registry system for NestedCommand
-        registry = get_registry()
-        registry.register_detect_flakes(self.cmdname, detect_flakes)
         return wrap(detect_flakes, detect_flakes_cmd, self.cmdname)
