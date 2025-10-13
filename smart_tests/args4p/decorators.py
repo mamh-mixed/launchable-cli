@@ -6,7 +6,7 @@ from typing import Annotated, Any, Callable, Optional, Type, get_args, get_origi
 from . import decorator
 from .argument import Argument
 from .command import Command, Group
-from .option import Option
+from .option import Option, NO_DEFAULT
 from .parameter import Parameter
 
 
@@ -65,7 +65,7 @@ def group(name: Optional[str] = None, help: Optional[str] = None) -> Callable[[.
 @decorator
 def option(
         *param_decls: str,
-        help: str = None, type: type | Callable = None, default: Any = None, required: bool = False,
+        help: str = None, type: type | Callable = None, default: Any = NO_DEFAULT, required: bool = False,
         metavar: str = None, multiple: bool = False, hidden: bool = False
 ) -> Callable:
     '''
@@ -124,7 +124,7 @@ def argument(
     required: bool = True,
     metavar: str = None,
     help: str = None,
-    default: Any = None
+    default: Any = NO_DEFAULT
 ) -> Callable:
     '''
     :arg name:

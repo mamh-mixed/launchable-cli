@@ -9,7 +9,7 @@ from typing import Any, Callable, List, Optional, cast
 from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
-from .option import Option
+from .option import Option, NO_DEFAULT
 from .parameter import Parameter, to_type
 
 
@@ -114,7 +114,7 @@ class Command:
 
         # Check for required parameter with default value
         for p in self.options + self.arguments:
-            if p.required and p.default is not None:
+            if p.required and p.default != NO_DEFAULT:
                 raise error(f"'{p.name}' is marked as required but with default value '{p.default}'")
 
         # Check for uncovered function parameters
@@ -135,7 +135,7 @@ class Command:
                     raise error(f"Parameter '{p.name}' with multiple=True requires a List[T]")
 
             # Check default value type compatibility
-            if p.default is not None and not isinstance(p.default, p.type):
+            if p.default != NO_DEFAULT and not isinstance(p.default, p.type):
                 raise error(
                     f"Default value '{p.default}' for parameter '{p.name}' is incompatible with type '{p.type.__name__}'")
 
@@ -268,7 +268,7 @@ class Command:
 
                 # Add required/optional indicator and default
                 if not arg.required:
-                    if arg.default is not None:
+                    if arg.default != NO_DEFAULT:
                         arg_line += f" [default: {arg.default}]"
                     else:
                         arg_line += " [optional]"
@@ -473,14 +473,14 @@ class _Invoker:
             if a.name not in self.kwargs:
                 if a.required:
                     raise BadCmdLineException(f"Missing required argument '{a.name}' for command '{self.command.name}'")
-                else:
+                if a.default != NO_DEFAULT:
                     self.kwargs[a.name] = a.default
 
         for o in self.command.options:
             if o.name not in self.kwargs:
                 if o.required:
                     raise BadCmdLineException(f"Missing required option '{o.option_names[0]}' for command '{self.command.name}'")
-                else:
+                if o.default  != NO_DEFAULT:
                     self.kwargs[o.name] = o.default
 
         if self.parent is not None:

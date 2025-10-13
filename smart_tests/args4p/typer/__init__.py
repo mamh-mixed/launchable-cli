@@ -2,12 +2,12 @@
 from typing import Any, Callable
 
 from ..argument import Argument as _Argument
-from ..option import Option as _Option
+from ..option import Option as _Option, NO_DEFAULT
 
 
 def Option(
         *option_names: str,
-        help: str = None, type: type | Callable = None, default: Any = None, required: bool = False,
+        help: str = None, type: type | Callable = None, default: Any = NO_DEFAULT, required: bool = False,
         metavar: str = None, multiple: bool = False, hidden: bool = False
 ) -> _Option:
     '''
@@ -42,7 +42,7 @@ def Argument(
         required: bool = True,
         metavar: str = None,
         help: str = None,
-        default: Any = None
+        default: Any = NO_DEFAULT
 ) -> _Argument:
     '''
     :arg help:

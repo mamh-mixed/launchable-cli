@@ -3,6 +3,14 @@ from typing import Any, Optional
 from .exceptions import BadCmdLineException
 from .parameter import Parameter
 
+class NoDefault:
+    '''
+    If there's no default value configured for option/argument, we use `NO_DEFAULT`.
+    In contrast, `None` is a valid and very typical default value.
+    '''
+    pass
+
+NO_DEFAULT = NoDefault()
 
 class Option(Parameter):
     clazz = "option"
@@ -10,7 +18,7 @@ class Option(Parameter):
     hidden: bool
 
     def __init__(self, name: Optional[str], option_names: list[str], help: str = None, type: type = str,
-                 default: Any = None, required: bool = False, metavar: str = None, multiple: bool = False,
+                 default: Any = NO_DEFAULT, required: bool = False, metavar: str = None, multiple: bool = False,
                  hidden: bool = False):
         self.name = name
         self.option_names = option_names

@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 from .exceptions import BadCmdLineException
+from .option import NO_DEFAULT
 from .parameter import Parameter
 
 
@@ -8,7 +9,7 @@ class Argument(Parameter):
     clazz = "argument"
 
     def __init__(self, name: Optional[str], type: type = str, multiple: bool = False,
-                 required: bool = True, metavar: str = None, help: str = None, default: Any = None):
+                 required: bool = True, metavar: str = None, help: str = None, default: Any = NO_DEFAULT):
         self.name = name
         self.type = type
         self.multiple = multiple
