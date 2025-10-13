@@ -5,6 +5,8 @@
 import json
 from typing import Annotated, Dict, Generator, List
 
+import click
+
 import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 

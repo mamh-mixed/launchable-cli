@@ -3,6 +3,8 @@ import os
 import re
 from typing import Annotated, Dict, List
 
+import click
+
 import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 

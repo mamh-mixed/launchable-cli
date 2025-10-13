@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Annotated, Dict, Generator, List, cast
 from xml.etree import ElementTree as ET
 
+import click
+
 import smart_tests.args4p.typer as typer
 
 from smart_tests.testpath import FilePathNormalizer, TestPath

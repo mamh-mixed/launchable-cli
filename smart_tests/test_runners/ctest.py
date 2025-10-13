@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Annotated, List
 from xml.etree import ElementTree as ET
 
+import click
+
 import smart_tests.args4p.typer as typer
 
 from . import smart_tests

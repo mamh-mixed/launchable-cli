@@ -2,6 +2,8 @@ import glob
 import os
 from typing import Annotated, List
 
+import click
+
 import smart_tests.args4p.typer as typer
 
 from smart_tests.test_runners import smart_tests

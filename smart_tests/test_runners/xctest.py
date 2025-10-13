@@ -2,6 +2,8 @@ import html
 import xml.etree.ElementTree as ET  # type: ignore
 from typing import Annotated, List, cast
 
+import click
+
 import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite
 

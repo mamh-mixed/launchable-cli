@@ -5,6 +5,8 @@ import pathlib
 import subprocess
 from typing import Annotated, Generator, List
 
+import click
+
 import smart_tests.args4p.typer as typer
 from junitparser import Properties, TestCase  # type: ignore
 

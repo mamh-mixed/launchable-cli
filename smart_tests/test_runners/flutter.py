@@ -2,6 +2,8 @@ import json
 import pathlib
 from typing import Dict, Generator, List
 
+import click
+
 import smart_tests.args4p.typer as typer
 
 from smart_tests.commands.record.case_event import CaseEvent

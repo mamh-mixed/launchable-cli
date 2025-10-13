@@ -2,6 +2,8 @@ import glob
 import os
 from typing import Annotated, Dict, List
 
+import click
+
 import smart_tests.args4p.typer as typer
 
 from smart_tests.utils import glob as uglob

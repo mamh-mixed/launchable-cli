@@ -5,55 +5,54 @@ import types
 from typing import Annotated
 
 import smart_tests.args4p.typer as typer
+from smart_tests import args4p
+from smart_tests.args4p.command import Group
 
-from smart_tests.commands.detect_flakes import app as detect_flakes_cmd
-from smart_tests.commands.record.tests import app as record_tests_cmd
-from smart_tests.commands.subset import app as subset_cmd
-from smart_tests.utils.test_runner_registry import cmdname, create_test_runner_wrapper, get_registry
+from smart_tests.commands.detect_flakes import detect_flakes as detect_flakes_cmd
+from smart_tests.commands.record.tests import tests as record_tests_cmd
+from smart_tests.commands.subset import subset as subset_cmd
 
 
-# Legacy wrap function for CommonImpls classes
-def wrap(f, group, name=None):
-    """Legacy wrapper function for CommonImpls classes."""
+def cmdname(m):
+    """figure out the sub-command name from a test runner function"""
+
+    # a.b.cde -> cde
+    # xyz -> xyz
+    #
+    # In python module name the conventional separator is '_' but in command name,
+    # it is '-', so we do replace that
+    return m[m.rfind('.') + 1:].replace('_', '-')
+
+
+def wrap(f, group: Group, name=None):
+    """
+    Wraps a 'plugin' function into a click command and registers it to the given group.
+
+    a plugin function receives the scanner object in its first argument
+    """
     if not name:
         name = cmdname(f.__module__)
-    wrapper = create_test_runner_wrapper(f, name)
-    cmd = group.command(name=name)(wrapper)
+    d = args4p.command(name=name)
+    cmd = d(f)
+    group.add_command(cmd)
     return cmd
 
 
-# NestedCommand-only decorators (no backward compatibility)
 def subset(f):
-    """
-    Register a subset function with the test runner registry.
-
-    This stores the function for later dynamic command generation in NestedCommand.
-    """
-    test_runner_name = cmdname(f.__module__)
-    registry = get_registry()
-    registry.register_subset(test_runner_name, f)
-    return f
-
-
-def detect_flakes(f):
-    test_runner_name = cmdname(f.__module__)
-    registry = get_registry()
-    registry.register_detect_flakes(test_runner_name, f)
-    return f
+    return wrap(f, subset_cmd)
 
 
 record = types.SimpleNamespace()
+record.tests = lambda f: wrap(f, record_tests_cmd)
 
 
-def _record_tests_decorator(f):
-    """Register a record tests function with the test runner registry."""
-    test_runner_name = cmdname(f.__module__)
-    registry = get_registry()
-    registry.register_record_tests(test_runner_name, f)
-    return f
+def flake_detection(f):
+    return wrap(f, detect_flakes_cmd)
 
 
-record.tests = _record_tests_decorator
+def split_subset(f):
+    return wrap(f, split_subset_cmd)
+
 
 
 class CommonSubsetImpls:
