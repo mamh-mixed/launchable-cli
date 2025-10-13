@@ -84,7 +84,7 @@ def record_tests(
     client.run()
 
 
-def parse_build_event_json(files: List[str]) -> Generator:
+def parse_build_event_json(files: List[Path]) -> Generator:
     for file in files:
         with open(file) as f:
             for line in f:

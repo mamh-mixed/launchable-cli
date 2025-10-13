@@ -14,7 +14,7 @@ from .parameter import Parameter
 def _command(
         name: Optional[str] = None,
         help: Optional[str] = None,
-        cls: Optional[Type[Command]] = Command,
+        cls: Type[Command] = Command,
 ):
     def decorator(f: Callable) -> Command:
 
@@ -52,20 +52,20 @@ def _command(
 
 
 @decorator
-def command(name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Command]:
+def command(name: Optional[str] = None, help: Optional[str] = None) -> Callable[..., Command]:
     return _command(name, help, Command)
 
 
 @decorator
-def group(name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Group]:
+def group(name: Optional[str] = None, help: Optional[str] = None) -> Callable[..., Group]:
     return _command(name, help, Group)  # type: ignore
 
 
 @decorator
 def option(
         *param_decls: str,
-        help: str = None, type: type | Callable = None, default: Any = NO_DEFAULT, required: bool = False,
-        metavar: str = None, multiple: bool = False, hidden: bool = False
+        help: str|None = None, type: type | Callable | None = None, default: Any = NO_DEFAULT, required: bool = False,
+        metavar: str|None = None, multiple: bool = False, hidden: bool = False
 ) -> Callable:
     '''
     See README.md for usage
@@ -103,8 +103,8 @@ def argument(
     type: type | Callable = str,
     multiple: bool = False,
     required: bool = True,
-    metavar: str = None,
-    help: str = None,
+    metavar: str|None = None,
+    help: str|None = None,
     default: Any = NO_DEFAULT
 ) -> Callable:
     '''
@@ -114,7 +114,7 @@ def argument(
     return lambda f: _attach(f, a)
 
 
-def _attach(f: Callable[[...], Any], param: Parameter):
+def _attach(f: Callable[..., Any], param: Parameter):
     # depending on whether a command annotation comes before/after parameter annotations, 'f' might be
     # a naked user-defined function or a Command instance
     if isinstance(f, Command):

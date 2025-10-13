@@ -8,8 +8,8 @@ from ..option import Option as _Option
 
 def Option(
         *option_names: str,
-        help: str = None, type: type | Callable = None, default: Any = NO_DEFAULT, required: bool = False,
-        metavar: str = None, multiple: bool = False, hidden: bool = False
+        help: str | None = None, type: type | Callable | None = None, default: Any = NO_DEFAULT, required: bool = False,
+        metavar: str|None = None, multiple: bool = False, hidden: bool = False
 ) -> _Option:
     '''
     See README.md for usage
@@ -23,8 +23,8 @@ def Argument(
         type: type | Callable = str,
         multiple: bool = False,
         required: bool = True,
-        metavar: str = None,
-        help: str = None,
+        metavar: str|None = None,
+        help: str|None = None,
         default: Any = NO_DEFAULT
 ) -> _Argument:
     '''

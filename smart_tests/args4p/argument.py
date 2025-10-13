@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Callable
 
 from .exceptions import BadCmdLineException
 from .option import NO_DEFAULT
@@ -8,9 +8,9 @@ from .parameter import Parameter, normalize_type
 class Argument(Parameter):
     clazz = "argument"
 
-    def __init__(self, name: Optional[str], type: type = None, multiple: bool = False,
-                 required: bool = True, metavar: str = None, help: str = None, default: Any = NO_DEFAULT):
-        self.name = name
+    def __init__(self, name: Optional[str], type: type|Callable[...,Any]|None = None, multiple: bool = False,
+                 required: bool = True, metavar: str|None = None, help: str|None = None, default: Any = NO_DEFAULT):
+        self.name = name  # type: ignore[assignment]  # once properly constructed, name is never None
         self.type = normalize_type(type)
         self.multiple = multiple
         self.required = required

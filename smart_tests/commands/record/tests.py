@@ -87,7 +87,7 @@ def tests(
         help="",
         hidden=True
     )] = False,
-    test_runner: Annotated[str, typer.Argument()] = None,
+    test_runner: Annotated[str|None, typer.Argument()] = None,
     # TODO(Konboi): restore timestamp option
 ):
     logger = Logger()

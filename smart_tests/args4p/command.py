@@ -4,29 +4,29 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, Iterable, List, Optional, cast
+from typing import Any, Callable, List, Optional, cast, Sequence
 
 import click
 
-from ..utils.edit_distance import edit_distance
 from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
 from .option import NO_DEFAULT, Option
 from .parameter import Parameter, normalize_type, to_type
 from .typer import Exit
+from ..utils.edit_distance import edit_distance
 
 
 class Command:
-    parent: Group = None        # if this is a sub-command of another command, this is the parent command
+    parent: Group|None = None        # if this is a sub-command of another command, this is the parent command
     options: list[Option]
     arguments: list[Argument]
     name: str
     callback: Callable
-    help: str
+    help: str|None
 
-    def __init__(self, name: str, help: str, callback: Callable, params: list[Parameter]):
-        self.name = name
+    def __init__(self, name: str|None, help: str|None, callback: Callable, params: list[Parameter]):
+        self.name = name    # type: ignore[assignment]  # once properly constructed, name is never None
         self.help = help
         self.callback = callback
         self.options = []
@@ -46,9 +46,9 @@ class Command:
         param.attach_to_command(self)
         col = self.options if isinstance(param, Option) else self.arguments
         if prepend:
-            col.insert(0, param)
+            col.insert(0, param)  # type: ignore[arg-type]
         else:
-            col.append(param)
+            col.append(param)   # type: ignore[arg-type]
 
     def __call__(self, *_args: str) -> Any:
         '''
@@ -248,7 +248,7 @@ class Command:
             parts.append(program_name)
 
             # Build command path (for subcommands)
-            command_path = []
+            command_path: List[str] = []
             current = self
             while current.parent is not None:
                 command_path.insert(0, current.name)
@@ -410,7 +410,7 @@ class Group(Command):
         c.parent = self
 
     @decorator
-    def command(self, name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Command]:
+    def command(self, name: Optional[str] = None, help: Optional[str] = None) -> Callable[..., Command]:
         from .decorators import _command
 
         def decorator(f: Callable) -> Command:
@@ -420,7 +420,7 @@ class Group(Command):
         return decorator
 
     @decorator
-    def group(self, name: Optional[str] = None, help: Optional[str] = None) -> Callable[[...], Group]:
+    def group(self, name: Optional[str] = None, help: Optional[str] = None) -> Callable[..., Group]:
         from .decorators import _command
 
         def decorator(f: Callable) -> Group:
@@ -471,7 +471,7 @@ class _Invoker:
     This class builds up data needed to invoke a command
     '''
     command: Command
-    parent: _Invoker = None
+    parent: _Invoker|None = None
     kwargs: dict[str, Any]
 
     nargs = 0  # number of arguments consumed, used to identify the processor of the next argument
@@ -495,7 +495,7 @@ class _Invoker:
         self.nargs += 1
 
     def eat_options(self, option_name: str, args: ArgList):
-        inv = self
+        inv: _Invoker|None = self
         option_names = []
         while inv is not None:
             for o in inv.command.options:
@@ -548,7 +548,7 @@ class _Invoker:
             return self.command.callback(**self.kwargs)
 
 
-def _maybe(given: str, candidates: Iterable[str]) -> Optional[str]:
+def _maybe(given: str, candidates: Sequence[str]) -> Optional[str]:
     '''
     Typo recovery suggestion. Find the best match from the given candidates,
     but only if it's close enough.

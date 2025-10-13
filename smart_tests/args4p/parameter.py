@@ -22,7 +22,7 @@ def to_type(p: inspect.Parameter) -> Optional[type]:
     return annotation
 
 
-def normalize_type(t: type) -> type:
+def normalize_type(t) -> type:
     if isinstance(t, types.UnionType) or get_origin(t) is Union:
         # x|None is a common typing of a parameter that confuses args4p.
         # we want to normalize it to just x
@@ -45,8 +45,8 @@ class Parameter:
 
     multiple: bool  # True if this argument can appear multiple times
     required: bool  # True if this argument is required
-    metavar: str  # the name to use in help messages for the argument value
-    help: str  # the help message for this argument
+    metavar: str|None  # the name to use in help messages for the argument value
+    help: str|None  # the help message for this argument
     default: Any  # the default value if the argument/option is not provided
     clazz: str  # "argument" or "option"
 

@@ -6,7 +6,7 @@ Exposed from the args4p package.
 """
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional, IO
 
 
 def path(exists: bool = False,
@@ -31,7 +31,7 @@ def path(exists: bool = False,
     return convert
 
 
-def floatType(min: float = None, max: float = None) -> Callable[[str], float]:
+def floatType(min: Optional[float] = None, max: Optional[float] = None) -> Callable[[str], float]:
     '''
       Use it as @option(type=floatType(...)) to convert an option value/argument to a float.
     '''
@@ -49,7 +49,7 @@ def floatType(min: float = None, max: float = None) -> Callable[[str], float]:
     return convert
 
 
-def intType(min: int = None, max: int = None) -> Callable[[str], int]:
+def intType(min: Optional[int] = None, max: Optional[int] = None) -> Callable[[str], int]:
     '''
       Use it as @option(type=intType(...)) to convert an option value/argument to an int.
     '''
@@ -67,10 +67,10 @@ def intType(min: int = None, max: int = None) -> Callable[[str], int]:
     return convert
 
 
-def fileText(mode: str = "r") -> Callable[[str], TextIOWrapper]:
+def fileText(mode: str = "r") -> Callable[[str], IO]:
     '''
       Open a file specified by argument/option for reading/writing
     '''
-    def convert(value: str) -> TextIOWrapper:
+    def convert(value: str) -> IO:
         return open(value, mode)
     return convert
