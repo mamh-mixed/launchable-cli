@@ -71,6 +71,10 @@ class Command:
                 if a in ["--help", "-h"]:
                     print(invoker.command.format_help())
                     raise Exit(0)
+                if a.startswith("--") and '=' in a:
+                    # --long-format=value
+                    a, val = a.split('=', 1)
+                    args.insert_front(val)
 
                 invoker.eat_options(a, args)
             elif isinstance(invoker.command, Group):
@@ -458,6 +462,9 @@ class ArgList:
 
     def has_more(self) -> bool:
         return len(self.args) > 0
+
+    def insert_front(self, arg):
+        self.args.insert(0, arg)
 
 
 class _Invoker:
