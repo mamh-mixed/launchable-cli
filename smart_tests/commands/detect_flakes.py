@@ -24,6 +24,13 @@ class DetectFlakesRetryThreshold(str, Enum):
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
 
+    @staticmethod
+    def from_str(value: str) -> "DetectFlakesRetryThreshold":
+        for member in DetectFlakesRetryThreshold:
+            if member.value.lower() == value.lower():
+                return member
+        raise ValueError(f"Invalid value for DetectFlakesRetryThreshold: {value}")
+
 
 @args4p.group(help="Detect flaky tests")
 def detect_flakes(
@@ -36,6 +43,7 @@ def detect_flakes(
     retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
         "--retry-threshold",
         help="Thoroughness of how \"flake\" is detected",
+        type=DetectFlakesRetryThreshold.from_str
     )] = DetectFlakesRetryThreshold.MEDIUM,
     test_runner: Annotated[str, typer.Argument()] = None,
 ):
@@ -90,4 +98,4 @@ def detect_flakes(
                 else:
                     click.echo(ignorable_error(e), err=True)
 
-    FlakeDetection().run()
+    return FlakeDetection()
