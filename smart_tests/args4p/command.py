@@ -6,11 +6,14 @@ import re
 import sys
 from typing import Any, Callable, List, Optional, cast
 
+import click
+
 from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
 from .option import Option, NO_DEFAULT
 from .parameter import Parameter, to_type
+from .typer import Exit
 
 
 class Command:
@@ -51,30 +54,38 @@ class Command:
         Given the command line arguments, parse them, bind them to the user function parameters,
         and invoke the function. This method returns the return value of the user function.
         '''
-        self.check_consistency()
+        try:
+            self.check_consistency()
 
-        invoker = _Invoker(self)
-        args = ArgList(list(_args))
+            invoker = _Invoker(self)
+            args = ArgList(list(_args))
 
-        while args.has_more():
-            a = args.eat(None)
-            if a == "--":
-                # everything after this is a positional argument
-                while args.has_more():
-                    invoker.eat_arg(args.eat(None))
-            elif a.startswith("-"):
-                # Handle built-in help options
-                if a in ["--help", "-h"]:
-                    print(invoker.command.format_help())
-                    return 0
+            while args.has_more():
+                a = args.eat(None)
+                if a == "--":
+                    # everything after this is a positional argument
+                    while args.has_more():
+                        invoker.eat_arg(args.eat(None))
+                elif a.startswith("-"):
+                    # Handle built-in help options
+                    if a in ["--help", "-h"]:
+                        print(invoker.command.format_help())
+                        raise Exit(0)
 
-                invoker.eat_options(a, args)
-            elif isinstance(invoker.command, Group):
-                invoker = invoker.sub_command(a)
-            else:
-                invoker.eat_arg(a)
+                    invoker.eat_options(a, args)
+                elif isinstance(invoker.command, Group):
+                    invoker = invoker.sub_command(a)
+                else:
+                    invoker.eat_arg(a)
 
-        return invoker.invoke()
+            if isinstance(invoker.command, Group):
+                print(invoker.command.format_help())
+                raise Exit(1)
+
+            return invoker.invoke()
+        except BadCmdLineException as e:
+            click.secho(str(e), fg='red', err=True)
+            raise Exit(1)
 
     def check_consistency(self):
         """
