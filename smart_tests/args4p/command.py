@@ -89,6 +89,21 @@ class Command:
 
         return r
 
+    def main(self, args=sys.argv[1:], prog_name=None):
+        '''
+        Use this Command as the main entry point for a script.
+
+        prog_name parameter is a hack to reuse click.CliRunner
+        '''
+        try:
+            self(*args)
+            sys.exit(0)
+        except Exit as e:
+            sys.exit(e.code)
+        except BadCmdLineException as e:
+            click.secho(str(e), fg='red', err=True)
+            sys.exit(1)
+
     def check_consistency(self):
         """
         Validate that the command configuration is consistent and well-formed.

@@ -105,14 +105,7 @@ def _load_test_runners():
 _load_test_runners()
 
 def main():
-    try:
-        cli(*sys.argv[1:])
-        sys.exit(0)
-    except typer.Exit as e:
-        sys.exit(e.code)
-    except BadCmdLineException as e:
-        click.secho(str(e), fg='red', err=True)
-        sys.exit(1)
+    cli.main()
 
 if __name__ == '__main__':
     main()
