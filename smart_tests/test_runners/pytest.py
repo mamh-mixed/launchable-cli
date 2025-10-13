@@ -43,7 +43,9 @@ from ..args4p.exceptions import BadCmdLineException
 def subset(
     client,
     source_roots: Annotated[List[str] | None, typer.Argument(
-        help="Source root directories for pytest test collection"
+        help="Source root directories for pytest test collection",
+        multiple=True,
+        required=False,
     )] = None,
 ):
     def _add_testpaths(lines: List[str]):
