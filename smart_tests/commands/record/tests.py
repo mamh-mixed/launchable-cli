@@ -8,7 +8,7 @@ from time import time_ns
 from typing import Annotated, Callable, Dict, Generator, List, Tuple, Union
 
 import click
-from dateutil.parser import parse
+from dateutil.parser import parse, ParserError
 from junitparser import JUnitXml, TestCase, TestSuite  # type: ignore  # noqa: F401
 from more_itertools import ichunked
 from tabulate import tabulate
@@ -19,7 +19,7 @@ from smart_tests.utils.authentication import ensure_org_workspace
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
-
+from .case_event import CaseEvent, CaseEventType
 from ... import args4p
 from ...app import Application
 from ...args4p.exceptions import BadCmdLineException
@@ -30,7 +30,6 @@ from ...utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_
                                      set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
 from ...utils.logger import Logger
 from ...utils.smart_tests_client import SmartTestsClient
-from .case_event import CaseEvent, CaseEventType
 
 GROUP_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
 RESERVED_GROUP_NAMES = ["group", "groups", "nogroup", "nogroups"]
@@ -524,8 +523,7 @@ def parse_launchable_timeformat(t: str) -> datetime.datetime:
     # e.g) "2021-04-01T09:35:47.934+00:00"
     try:
         return parse(t)
-    except Exception as e:
-        Logger().error(f"parse time error {str(e)}. time: {t}")
+    except ParserError:
         return INVALID_TIMESTAMP
 
 
