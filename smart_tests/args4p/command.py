@@ -83,6 +83,8 @@ class Command:
                 invoker.eat_arg(a)
 
         r = invoker.invoke()
+        if r is None:
+            r = 0  # if no return value is provided, assume success
 
         if isinstance(invoker.command, Group):
             # group invoked without sub-command. we want to deal with this after `invoker.invoke()`
