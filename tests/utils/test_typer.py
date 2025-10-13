@@ -5,6 +5,7 @@ from unittest import TestCase
 import smart_tests.args4p.typer as typer
 from dateutil.tz import tzlocal
 
+from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.utils.typer_types import (DATETIME_WITH_TZ, KEY_VALUE, convert_to_seconds,
                                            validate_datetime_with_tz, validate_key_value)
 
@@ -28,7 +29,7 @@ class KeyValueTypeTest(TestCase):
         self.assertEqual(validate_key_value('a=b'), ('a', 'b'))
         self.assertEqual(validate_key_value('key:value'), ('key', 'value'))
 
-        with self.assertRaises(typer.BadParameter):
+        with self.assertRaises(BadCmdLineException):
             validate_key_value('invalid')
 
         # Test the parser class

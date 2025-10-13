@@ -87,7 +87,7 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
         A list of dictionaries, where each dictionary contains the validated title, URL, and kind for each link.
 
     Raises:
-        typer.BadParameter: If an invalid kind is provided or URL doesn't match with the specified kind.
+        BadCmdLineException: If an invalid kind is provided or URL doesn't match with the specified kind.
     """
     links = []
     for k, url in link_options:

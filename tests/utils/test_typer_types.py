@@ -3,11 +3,12 @@ import sys
 from datetime import timezone
 from unittest import TestCase
 
-import smart_tests.args4p.typer as typer
 from dateutil.tz import tzlocal
 
+from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.utils.typer_types import (DATETIME_WITH_TZ, EMOJI, KEY_VALUE, DateTimeWithTimezone, Duration, Fraction,
-                                           KeyValue, Percentage, convert_to_seconds, emoji, parse_datetime_with_timezone,
+                                           KeyValue, Percentage, convert_to_seconds, emoji,
+                                           parse_datetime_with_timezone,
                                            parse_duration, parse_fraction, parse_key_value, parse_percentage,
                                            validate_datetime_with_tz, validate_key_value, validate_past_datetime)
 
@@ -33,7 +34,7 @@ class PercentageTest(TestCase):
         try:
             # Test Windows behavior
             sys.platform = "win32"
-            with self.assertRaises(typer.BadParameter) as cm:
+            with self.assertRaises(BadCmdLineException) as cm:
                 parse_percentage("50")
             msg = str(cm.exception)
             self.assertIn("Expected percentage like 50% but got '50'", msg)
@@ -41,7 +42,7 @@ class PercentageTest(TestCase):
 
             # Test non-Windows behavior
             sys.platform = "linux"
-            with self.assertRaises(typer.BadParameter) as cm:
+            with self.assertRaises(BadCmdLineException) as cm:
                 parse_percentage("50")
             msg = str(cm.exception)
             self.assertIn("Expected percentage like 50% but got '50'", msg)
@@ -50,7 +51,7 @@ class PercentageTest(TestCase):
             sys.platform = orig_platform
 
     def test_parse_invalid_percentage_non_numeric(self):
-        with self.assertRaises(typer.BadParameter) as cm:
+        with self.assertRaises(BadCmdLineException) as cm:
             parse_percentage("abc%")
         msg = str(cm.exception)
         self.assertIn("Expected percentage like 50% but got 'abc%'", msg)
@@ -121,7 +122,7 @@ class KeyValueTest(TestCase):
         self.assertEqual(kv.value, "value=extra")
 
     def test_parse_key_value_invalid(self):
-        with self.assertRaises(typer.BadParameter) as cm:
+        with self.assertRaises(BadCmdLineException) as cm:
             parse_key_value("invalid")
         msg = str(cm.exception)
         self.assertIn("Expected a key-value pair formatted as --option key=value, but got 'invalid'", msg)
@@ -157,13 +158,13 @@ class FractionTest(TestCase):
         self.assertEqual(frac.denominator, 2)
 
     def test_parse_fraction_invalid(self):
-        with self.assertRaises(typer.BadParameter) as cm:
+        with self.assertRaises(BadCmdLineException) as cm:
             parse_fraction("invalid")
         msg = str(cm.exception)
         self.assertIn("Expected fraction like 1/2 but got 'invalid'", msg)
 
     def test_parse_fraction_invalid_numbers(self):
-        with self.assertRaises(typer.BadParameter):
+        with self.assertRaises(BadCmdLineException):
             parse_fraction("a/b")
 
 
@@ -191,7 +192,7 @@ class DateTimeWithTimezoneTest(TestCase):
         self.assertEqual(dt_obj.dt.utcoffset(), timezone.utc.utcoffset(None))
 
     def test_parse_datetime_invalid(self):
-        with self.assertRaises(typer.BadParameter) as cm:
+        with self.assertRaises(BadCmdLineException) as cm:
             parse_datetime_with_timezone("invalid")
         msg = str(cm.exception)
         self.assertIn("Expected datetime like 2023-10-01T12:00:00 but got 'invalid'", msg)
@@ -224,13 +225,13 @@ class DateTimeWithTimezoneTest(TestCase):
 
         # Test with future datetime
         future_dt = datetime.datetime(2030, 1, 1, tzinfo=tzlocal())
-        with self.assertRaises(typer.BadParameter) as cm:
+        with self.assertRaises(BadCmdLineException) as cm:
             validate_past_datetime(future_dt)
         msg = str(cm.exception)
         self.assertIn("The provided timestamp must be in the past", msg)
 
         # Test with non-datetime object
-        with self.assertRaises(typer.BadParameter) as cm:
+        with self.assertRaises(BadCmdLineException) as cm:
             validate_past_datetime("not a datetime")
         msg = str(cm.exception)
         self.assertIn("Expected a datetime object", msg)
