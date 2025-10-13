@@ -24,6 +24,3 @@ class TyperTest(TestCase):
 
         r = cli("cmd1", "--foo", "--baz", "3")
         self.assertEqual("exit code", r)
-
-
-TyperTest().test_invocation()
