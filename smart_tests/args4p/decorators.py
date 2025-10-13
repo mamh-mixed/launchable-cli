@@ -17,36 +17,7 @@ def _command(
         cls: Type[Command] = Command,
 ):
     def decorator(f: Callable) -> Command:
-
-        if name is not None:
-            cmd_name = name
-        else:
-            cmd_name = f.__name__.lower().replace("_", "-")
-
-        try:
-            params = f.__args4p_params__  # type: ignore
-        except AttributeError:
-            # if __args4p_params__ doesn't exist that's OK
-            params = []
-        else:
-            del f.__args4p_params__  # type: ignore
-            params = reversed(params)
-
-        # pick up parameters declared in annotations
-        sig = inspect.signature(f)
-        for pname, param in sig.parameters.items():
-            if get_origin(param.annotation) == Annotated:
-                args = get_args(param.annotation)
-                for a in args:
-                    if isinstance(a, Parameter):
-                        if a.name is None:
-                            a.name = pname
-                        if isinstance(a, Option):
-                            if a.option_names is None or len(a.option_names) == 0:
-                                a.option_names = [f"--{a.name.replace('_', '-')}"]
-                        params.append(a)
-
-        return cls(name=cmd_name, help=help, callback=f, params=params)
+        return cls(name=name, help=help, callback=f)
 
     return decorator
 

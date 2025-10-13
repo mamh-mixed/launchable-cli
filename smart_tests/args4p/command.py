@@ -4,7 +4,7 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, List, Optional, Sequence, cast
+from typing import Any, Callable, List, Optional, Sequence, cast, get_origin, Annotated, get_args
 
 import click
 
@@ -25,14 +25,39 @@ class Command:
     callback: Callable
     help: str | None
 
-    def __init__(self, name: str | None, help: str | None, callback: Callable, params: list[Parameter]):
-        self.name = name    # type: ignore[assignment]  # once properly constructed, name is never None
+    def __init__(self, callback: Callable, name: str | None = None, help: str | None = None, params: Sequence[Parameter] = ()):
+        self.name = name or callback.__name__.lower().replace("_", "-")
         self.help = help
         self.callback = callback
+
+        params = list(params)
+        try:
+            params += reversed(callback.__args4p_params__)  # type: ignore
+        except AttributeError:
+            # if __args4p_params__ doesn't exist that's OK
+            pass
+        else:
+            del callback.__args4p_params__  # type: ignore
+
         self.options = []
         self.arguments = []
         for p in params:
             self.add_param(p)
+
+        # pick up parameters declared in annotations
+        sig = inspect.signature(callback)
+        for pname, param in sig.parameters.items():
+            if get_origin(param.annotation) == Annotated:
+                args = get_args(param.annotation)
+                for a in args:
+                    if isinstance(a, Parameter):
+                        if a.name is None:
+                            a.name = pname
+                        if isinstance(a, Option):
+                            if a.option_names is None or len(a.option_names) == 0:
+                                a.option_names = [f"--{a.name.replace('_', '-')}"]
+                        self.add_param(a)
+
 
     def add_param(self, param: Parameter, prepend: bool = False):
         '''
@@ -401,8 +426,8 @@ class Group(Command):
     '''
     commands: List[Command]
 
-    def __init__(self, name: str, help: str, callback: Callable, params: list[Parameter]):
-        super().__init__(name, help, callback, params)
+    def __init__(self, name: str|None, help: str|None, callback: Callable, params: Sequence[Parameter]=()):
+        super().__init__(callback, name, help, params)
         self.commands = []
 
     def add_command(self, c: Command):

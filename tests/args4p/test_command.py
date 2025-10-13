@@ -1,7 +1,9 @@
+from typing import Annotated
 from unittest import TestCase
 
 import smart_tests.args4p as args4p
-from smart_tests.args4p.command import _maybe
+from smart_tests.args4p import typer
+from smart_tests.args4p.command import _maybe, Command
 from smart_tests.args4p.exceptions import BadCmdLineException, BadConfigException
 
 
@@ -311,6 +313,19 @@ class CommandTest(TestCase):
             return p1
 
         self.assertEqual(f("hello"), "HELLO")
+
+    def test_constructor(self):
+        class Foo:
+            def __init__(self, name: Annotated[str,typer.Option()]):
+                self.name = name
+
+        # note @args4p.option won't work with this, because that decorator applies to
+        # Foo.__init__ and not Foo
+        cmd = Command(callback=Foo)
+
+        f = cmd("--name", "alpha")
+        self.assertIsInstance(f, Foo)
+        self.assertEqual(f.name, "alpha")
 
 
 class MaybeTest(TestCase):
