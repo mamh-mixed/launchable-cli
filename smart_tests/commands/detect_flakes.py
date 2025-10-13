@@ -25,7 +25,7 @@ class DetectFlakesRetryThreshold(str, Enum):
     HIGH = "HIGH"
 
 
-@args4p.command(help="Detect flaky tests")
+@args4p.group(help="Detect flaky tests")
 def detect_flakes(
     app: Application,
     session: Annotated[str, typer.Option(

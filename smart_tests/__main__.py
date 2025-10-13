@@ -8,22 +8,20 @@ from os.path import basename, dirname, join
 from typing import Annotated
 
 import click
+
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
-
 from smart_tests.app import Application
-
-from .commands import compare, detect_flakes, inspect, record, stats, subset, verify
+from .commands.compare import compare
+from .commands.detect_flakes import detect_flakes
+from .commands.inspect import inspect
+from .commands.record import record
+from .commands.stats import stats
+from .commands.subset import subset
+from .commands.verify import verify
 from .utils import logger
 from .utils.env_keys import SKIP_CERT_VERIFICATION
 from .version import __version__
-
-
-
-def version_callback(value: bool):
-    if value:
-        click.echo(f"smart-tests-cli {__version__}")
-        raise typer.Exit(0)
 
 
 @args4p.group()
@@ -48,9 +46,14 @@ def main(
              "a possible man-in-the-middle attack. Use it as an escape hatch, but with caution."
     )] = False,
     version: Annotated[bool | None, typer.Option(
-        "--version", help="Show version and exit", callback=version_callback, is_eager=True
+        "--version", help="Show version and exit"
     )] = None,
 ) -> Application:
+    if version:
+        click.echo(f"smart-tests-cli {__version__}")
+        raise typer.Exit(0)
+
+
     level = logger.get_log_level(log_level)
     # In the case of dry-run, it is forced to set the level below the AUDIT.
     # This is because the dry-run log will be output along with the audit log.
@@ -68,7 +71,7 @@ def main(
 
 main.add_command(record)
 main.add_command(subset)
-main.add_command(split_subset)
+# TODO: main.add_command(split_subset)
 main.add_command(verify)
 main.add_command(inspect)
 main.add_command(stats)
