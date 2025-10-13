@@ -269,10 +269,11 @@ class Command:
                         parts.append(f"[{a.metavar}...]")
                     else:
                         parts.append(f"[{a.metavar}]")
-
-            # Add subcommand placeholder for groups
             if isinstance(self, Group):
-                parts.append("COMMAND [ARGS]...")
+                if len(self.arguments) == 0:
+                    # Add subcommand placeholder for groups
+                    parts.append("COMMAND")
+                parts.append("...")
 
             return " ".join(parts)
 
