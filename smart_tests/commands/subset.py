@@ -5,7 +5,9 @@ import pathlib
 import re
 import subprocess
 import sys
+import click
 from enum import Enum
+from io import TextIOWrapper
 from multiprocessing import Process
 from os.path import join
 from typing import Annotated, Any, Callable, Dict, List, TextIO
@@ -21,6 +23,7 @@ from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 from .test_path_writer import TestPathWriter
 from ..app import Application
+from ..args4p.converters import floatType, intType, fileText
 from ..testpath import FilePathNormalizer, TestPath
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
@@ -101,16 +104,16 @@ def subset(
     )] = False,
     ignore_flaky_tests_above: Annotated[float | None, typer.Option(
         help="Ignore flaky tests above the value set by this option. You can confirm flaky scores in WebApp",
-        min=0.0, max=1.0
+        type=floatType(min=0.0, max=1.0)
     )] = None,
     prioritize_tests_failed_within_hours: Annotated[int | None, typer.Option(
         help="Prioritize tests that failed within the specified hours; maximum 720 hours (= 24 hours * 30 days)",
-        min=0, max=24 * 30
+        type=intType(min=0, max=24 * 30)
     )] = None,
-    prioritized_tests_mapping_file: Annotated[typer.FileText | None, typer.Option(
+    prioritized_tests_mapping_file: Annotated[TextIOWrapper | None, typer.Option(
         "--prioritized-tests-mapping",
         help="Prioritize tests based on test mapping file",
-        mode="r"
+        type=fileText(mode="r")
     )] = None,
     is_get_tests_from_guess: Annotated[bool, typer.Option(
         "--get-tests-from-guess",
@@ -131,7 +134,7 @@ def subset(
     ))
 
     def warn(msg: str):
-        click.echo(typer.style("Warning: " + msg, fg="yellow"), err=True)
+        click.secho("Warning: " + msg, fg="yellow", err=True)
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.WARNING_ERROR,
             stack_trace=msg

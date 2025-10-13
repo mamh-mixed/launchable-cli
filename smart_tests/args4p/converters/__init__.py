@@ -4,8 +4,9 @@ for common scenarios.
 
 Exposed from the args4p package.
 """
+from io import TextIOWrapper
 from pathlib import Path
-from typing import Callable
+from typing import Callable, TextIO
 
 
 def path(exists: bool = False,
@@ -29,3 +30,44 @@ def path(exists: bool = False,
 
     return convert
 
+def floatType(min: float = None, max: float = None) -> Callable[[str], float]:
+    '''
+      Use it as @option(type=floatType(...)) to convert an option value/argument to a float.
+    '''
+    def convert(value: str) -> float:
+        try:
+            f = float(value)
+        except ValueError:
+            raise ValueError(f'\'{value}\' is not a valid float')
+        if min is not None and f < min:
+            raise ValueError(f'\'{value}\' cannot be smaller than {min}')
+        if max is not None and f > max:
+            raise ValueError(f'\'{value}\' cannot be larger than {max}')
+        return f
+
+    return convert
+
+def intType(min: int = None, max: int = None) -> Callable[[str], int]:
+    '''
+      Use it as @option(type=intType(...)) to convert an option value/argument to an int.
+    '''
+    def convert(value: str) -> int:
+        try:
+            i = int(value)
+        except ValueError:
+            raise ValueError(f'\'{value}\' is not a valid integer')
+        if min is not None and i < min:
+            raise ValueError(f'\'{value}\' cannot be smaller than {min}')
+        if max is not None and i > max:
+            raise ValueError(f'\'{value}\' cannot be larger than {max}')
+        return i
+
+    return convert
+
+def fileText(mode :str = "r") -> Callable[[str], TextIOWrapper]:
+    '''
+      Open a file specified by argument/option for reading/writing
+    '''
+    def convert(value: str) -> TextIOWrapper:
+        return open(value, mode)
+    return convert
