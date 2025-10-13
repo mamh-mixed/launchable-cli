@@ -43,7 +43,8 @@ def detect_flakes(
     retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
         "--retry-threshold",
         help="Thoroughness of how \"flake\" is detected",
-        type=DetectFlakesRetryThreshold.from_str
+        type=DetectFlakesRetryThreshold.from_str,
+        metavar="low|medium|high"
     )] = DetectFlakesRetryThreshold.MEDIUM,
     test_runner: Annotated[str, typer.Argument()] = None,
 ):
