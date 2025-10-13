@@ -4,7 +4,7 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, List, Optional, cast
+from typing import Any, Callable, List, Optional, cast, Iterable
 
 import click
 
@@ -14,6 +14,7 @@ from .exceptions import BadCmdLineException, BadConfigException
 from .option import Option, NO_DEFAULT
 from .parameter import Parameter, to_type
 from .typer import Exit
+from ..utils.edit_distance import edit_distance
 
 
 class Command:
@@ -406,8 +407,11 @@ class Group(Command):
         for c in self.commands:
             if c.name == name:
                 return c
-        # TODO: typo look up, etc
-        raise BadCmdLineException(f"Unknown command: {name}")
+        msg = f"Unknown command: {name}"
+        maybe = _maybe(name, [c.name for c in self.commands])
+        if maybe:
+            msg += f" (did you mean '{maybe}'?)"
+        raise BadCmdLineException(msg)
 
 
 class ArgList:
@@ -463,15 +467,22 @@ class _Invoker:
 
     def eat_options(self, option_name: str, args: ArgList):
         inv = self
+        option_names = []
         while inv is not None:
             for o in inv.command.options:
                 if option_name in o.option_names:
                     inv.kwargs[o.name] = o.append(inv.kwargs.get(o.name), option_name, args)
                     return
+                else:
+                    option_names += o.option_names
             inv = inv.parent
 
         # TODO: typo look up, etc
-        raise BadCmdLineException(f"No such option '{option_name}' for '{self.command.name}' command")
+        msg = f"No such option '{option_name}' for '{self.command.name}' command"
+        maybe = _maybe(option_name, option_names)
+        if maybe:
+            msg += f" (did you mean '{maybe}'?)"
+        raise BadCmdLineException(msg)
 
     def sub_command(self, name: str) -> _Invoker:
         c = cast(Group, self.command).find_subcommand(name)
@@ -504,3 +515,14 @@ class _Invoker:
             return self.command.callback(self.parent.invoke(), **self.kwargs)
         else:
             return self.command.callback(**self.kwargs)
+
+def _maybe(given: str, candidates: Iterable[str]) -> Optional[str]:
+    '''
+    Typo recovery suggestion. Find the best match from the given candidates,
+    but only if it's close enough.
+    '''
+    c = min(candidates, key=lambda c: edit_distance(given, c))
+    if edit_distance(c, given) <= 4:
+        return c
+    else:
+        return None
