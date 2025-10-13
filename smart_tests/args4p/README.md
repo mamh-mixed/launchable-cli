@@ -2,7 +2,7 @@
 
 ## Option/argument annotations
 
-To control how args4p passes option/argument values to your function, you can either use the `@args4p.option` or `@args4p.argument` decorators, or use the `Option` and `Argument` classes in type annotations.
+To control how args4p passes option/argument values to your function, you can either use the `@args4p.option` or `@args4p.argument` decorators, or use the `Option` and `Argument` in parameter annotations.
 
     @args4p.option('-v', 'verbose', ...)
     @args4p.command
@@ -52,3 +52,52 @@ If this parameter is omitted, the type is inferred from the type annotation of t
 **multiple**: Whether the option/argument can be specified multiple times. Default is `False`. If true, the parameter type must be a list type (e.g. `List[str]`)
 
 **hidden**: If true, this option is hidden from help messages.
+
+## Group (sub-commands)
+This library encourages organizing a complex CLI through sub-commands,
+ala `git`, like this:
+
+```
+@args4p.group
+@args4p.option('-v', 'verbose', ...)
+def cli(verbose: bool):
+    return {'verbose': verbose}
+
+@cli.command   # NOT args4p.command
+@args4p.argument('name')
+def subcmd1(parent, name):
+    if parent.verbose:
+        print(f"Hello {name}")
+```
+
+Sub-commands receive the result of the parent command as its first argument. This allows you to pass options to the parent command and access them in the sub-command.
+
+A particularly useful idiom is to create a group out of a class initializer, like this:
+
+```
+class App:
+    def __init__(self, verbose: Annotated[bool,Option('-v')]):
+        self.verbose = verbose
+
+cli=Group(App)
+
+@cli.command   # NOT args4p.command
+@args4p.argument('name')
+def subcmd1(app: App, name):
+    if app.verbose:
+        print(f"Hello {name}")
+```
+
+(Note that decorators won't work with this idiom, so you have to use annotations.)
+
+
+Alternatively, use `Group.add_command` to add a top-level command as a sub-command to a group.
+
+```
+@args4p.command
+def subcmd2(...):
+    ...
+
+cli.add_command(subcmd2)
+```
+

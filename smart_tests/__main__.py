@@ -1,17 +1,11 @@
 import importlib
 import importlib.util
-import logging
-import os
 import sys
 from glob import glob
 from os.path import basename, dirname, join
-from typing import Annotated
 
-import click
-
-import smart_tests.args4p.typer as typer
-from smart_tests import args4p
 from smart_tests.app import Application
+from smart_tests.args4p.command import Group
 from smart_tests.commands.compare import compare
 from smart_tests.commands.detect_flakes import detect_flakes
 from smart_tests.commands.inspect import inspect
@@ -19,56 +13,8 @@ from smart_tests.commands.record import record
 from smart_tests.commands.stats import stats
 from smart_tests.commands.subset import subset
 from smart_tests.commands.verify import verify
-from smart_tests.utils import logger
-from smart_tests.utils.env_keys import SKIP_CERT_VERIFICATION
-from smart_tests.version import __version__
 
-
-@args4p.group()
-def cli(
-    log_level: Annotated[str, typer.Option(
-        help="Set logger's log level (CRITICAL, ERROR, WARNING, AUDIT, INFO, DEBUG)."
-    )] = logger.LOG_LEVEL_DEFAULT_STR,
-    plugin_dir: Annotated[str | None, typer.Option(
-        "--plugins",
-        help="Directory to load plugins from"
-    )] = None,
-    dry_run: Annotated[bool, typer.Option(
-        help="Dry-run mode. No data is sent to the server. However, sometimes "
-             "GET requests without payload data or side effects could be sent."
-             "note: Since the dry run log is output together with the AUDIT log, "
-             "even if the log-level is set to warning or higher, the log level will "
-             "be forced to be set to AUDIT."
-    )] = False,
-    skip_cert_verification: Annotated[bool, typer.Option(
-        help="Skip the SSL certificate check. This lets you bypass system setup issues "
-             "like CERTIFICATE_VERIFY_FAILED, at the expense of vulnerability against "
-             "a possible man-in-the-middle attack. Use it as an escape hatch, but with caution."
-    )] = False,
-    version: Annotated[bool, typer.Option(
-        "--version", help="Show version and exit"
-    )] = False,
-) -> Application:
-    if version:
-        click.echo(f"smart-tests-cli {__version__}")
-        raise typer.Exit(0)
-
-    level = logger.get_log_level(log_level)
-    # In the case of dry-run, it is forced to set the level below the AUDIT.
-    # This is because the dry-run log will be output along with the audit log.
-    if dry_run and level > logger.LOG_LEVEL_AUDIT:
-        level = logger.LOG_LEVEL_AUDIT
-
-    if not skip_cert_verification:
-        skip_cert_verification = (os.environ.get(SKIP_CERT_VERIFICATION) is not None)
-
-    logging.basicConfig(level=level)
-
-    # plugin_dir is processed earlier. If we do it here, it's too late
-
-    return Application(dry_run=dry_run, skip_cert_verification=skip_cert_verification)
-
-
+cli=Group(name="cli", callback=Application)
 cli.add_command(record)
 cli.add_command(subset)
 # TODO: main.add_command(split_subset)

@@ -426,7 +426,7 @@ class Group(Command):
     '''
     commands: List[Command]
 
-    def __init__(self, name: str|None, help: str|None, callback: Callable, params: Sequence[Parameter]=()):
+    def __init__(self, callback: Callable, name: str|None = None, help: str|None = None, params: Sequence[Parameter]=()):
         super().__init__(callback, name, help, params)
         self.commands = []
 
