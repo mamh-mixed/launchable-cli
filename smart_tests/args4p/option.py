@@ -23,7 +23,7 @@ class Option(Parameter):
         self.name = name
         self.option_names = option_names
         self.help = help
-        self.type = type
+        self.type = self.normalize_type(type)
         self.default = default
         self.required = required
         self.metavar = metavar

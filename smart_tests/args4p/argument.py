@@ -11,7 +11,7 @@ class Argument(Parameter):
     def __init__(self, name: Optional[str], type: type = str, multiple: bool = False,
                  required: bool = True, metavar: str = None, help: str = None, default: Any = NO_DEFAULT):
         self.name = name
-        self.type = type
+        self.type = self.normalize_type(type)
         self.multiple = multiple
         self.required = required
         self.metavar = metavar

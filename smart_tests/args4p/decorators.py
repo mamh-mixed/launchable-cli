@@ -42,7 +42,7 @@ def _command(
                         if a.name is None:
                             a.name = pname
                         if a.type is None:
-                            a.type = args[0]
+                            a.type = a.normalize_type(args[0])
                         if isinstance(a, Option):
                             if a.option_names is None or len(a.option_names) == 0:
                                 a.option_names = [f"--{a.name.replace('_', '-')}"]

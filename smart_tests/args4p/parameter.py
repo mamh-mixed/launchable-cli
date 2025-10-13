@@ -1,4 +1,5 @@
 import inspect
+import types
 from typing import Any, Callable, Annotated, Optional, get_origin, get_args
 
 from click import Parameter
@@ -62,10 +63,20 @@ class Parameter:
                                 return get_args(t)[0]
                             raise error(f"multiple=True requires a List[T] type annotation with parameter '{name}'")
                         else:
-                            return t
+                            return self.normalize_type(t)
 
                     self.type = infer_type()
 
                 return
 
         raise error(f"No parameter named '{self.name}' found")
+
+    def normalize_type(self, t: type):
+        if isinstance(t,types.UnionType):
+            # x|None is a common typing of a parameter that confuses args4p.
+            # we want to normalize it to just x
+            args = get_args(t)
+            if len(args) == 2 and args[1] is type(None):
+                return args[0]
+
+        return t
