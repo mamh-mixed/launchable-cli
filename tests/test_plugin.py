@@ -5,8 +5,7 @@ from unittest import mock
 import responses  # type: ignore
 
 from smart_tests.utils.http_client import get_base_url
-
-from .cli_test_case import CliTestCase
+from tests.cli_test_case import CliTestCase
 
 
 class PluginTest(CliTestCase):
