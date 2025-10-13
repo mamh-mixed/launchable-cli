@@ -4,6 +4,7 @@ from typing import Annotated, List
 import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
+from ..args4p.exceptions import BadCmdLineException
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -46,7 +47,7 @@ def record_tests(
 
         filepath = find_filename()
         if not filepath:
-            raise typer.BadParameter(
+            raise BadCmdLineException(
                 "No file name found in %s."
                 "Perl prove profile is made to take Junit report produced by "
                 "TAP::Formatter::JUnit (https://github.com/bleargh45/TAP-Formatter-JUnit), "

@@ -21,6 +21,7 @@ from smart_tests.utils.session import get_session, parse_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 from ... import args4p
 from ...app import Application
+from ...args4p.exceptions import BadCmdLineException
 
 from ...testpath import FilePathNormalizer, TestPathComponent, unparse_test_path
 from ...utils.commands import Command
@@ -40,12 +41,12 @@ def _validate_group(value):
         return ""
 
     if str(value).lower() in RESERVED_GROUP_NAMES:
-        raise typer.BadParameter(f"{value} is reserved name.")
+        raise BadCmdLineException(f"{value} is reserved name.")
 
     if GROUP_NAME_RULE.match(value):
         return value
     else:
-        raise typer.BadParameter("group option supports only alphabet(a-z, A-Z), number(0-9), '-', and '_'")
+        raise BadCmdLineException("group option supports only alphabet(a-z, A-Z), number(0-9), '-', and '_'")
 
 
 @args4p.group(help="Record test results")

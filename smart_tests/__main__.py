@@ -71,7 +71,7 @@ get_registry().set_on_register_callback(_on_test_runner_registered)
 def version_callback(value: bool):
     if value:
         click.echo(f"smart-tests-cli {__version__}")
-        raise typer.Exit()
+        raise typer.Exit(0)
 
 
 @args4p.group()

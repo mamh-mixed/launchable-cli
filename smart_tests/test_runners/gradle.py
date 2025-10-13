@@ -6,6 +6,7 @@ import click
 import smart_tests.args4p.typer as typer
 
 from smart_tests.utils.java import junit5_nested_class_path_builder
+from ..args4p.exceptions import BadCmdLineException
 
 from ..utils.file_name_pattern import jvm_test_pattern
 from . import smart_tests
@@ -44,7 +45,7 @@ def subset(
         source_roots = []
     else:
         if len(source_roots) == 0:
-            raise typer.BadParameter("Error: Missing argument 'SOURCE_ROOTS...'")
+            raise BadCmdLineException("Error: Missing argument 'SOURCE_ROOTS...'")
 
     # Only scan if we have source roots
     for root in source_roots:

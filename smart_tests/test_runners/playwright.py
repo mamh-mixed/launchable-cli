@@ -10,6 +10,7 @@ import click
 import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
+from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.case_event import CaseEvent
 from ..testpath import TestPath
 from . import smart_tests
@@ -41,7 +42,7 @@ def record_tests(
         """
         filepath = suite.name
         if not filepath:
-            raise typer.BadParameter("No file name found in %s" % report_file)
+            raise BadCmdLineException("No file name found in %s" % report_file)
 
         test_path = [client.make_file_path_component(filepath)]
         if case.name:

@@ -14,6 +14,7 @@ from smart_tests.commands.record.case_event import CaseEvent, CaseEventType, Met
 from smart_tests.testpath import TestPath
 
 from . import smart_tests
+from ..args4p.exceptions import BadCmdLineException
 
 
 # Please specify junit_family=legacy for pytest report format. if using pytest version 6 or higher.
@@ -64,7 +65,7 @@ def subset(
             result = subprocess.run(command, stdout=subprocess.PIPE, universal_newlines=True)
             _add_testpaths(result.stdout.split(os.linesep))
         except FileNotFoundError:
-            raise typer.BadParameter("pytest command not found. Please check the path.")
+            raise BadCmdLineException("pytest command not found. Please check the path.")
 
     client.formatter = _pytest_formatter
     client.run()

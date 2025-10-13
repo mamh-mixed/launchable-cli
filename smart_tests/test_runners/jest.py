@@ -6,6 +6,7 @@ from junitparser import TestCase, TestSuite  # type: ignore
 from smart_tests.testpath import TestPath
 
 from . import smart_tests
+from ..args4p.exceptions import BadCmdLineException
 
 
 def path_builder(case: TestCase, suite: TestSuite, report_file: str) -> TestPath:
@@ -39,7 +40,7 @@ def record_tests(
 @smart_tests.subset
 def subset(client):
     if client.base_path is None:
-        raise typer.BadParameter("Please specify base path")
+        raise BadCmdLineException("Please specify base path")
 
     for line in client.stdin():
         if len(line.strip()) and not line.startswith(">"):

@@ -6,6 +6,8 @@ import dateutil.parser
 import smart_tests.args4p.typer as typer
 from dateutil.tz import tzlocal
 
+from smart_tests.args4p.exceptions import BadCmdLineException
+
 
 class Percentage:
     def __init__(self, value: float):
@@ -33,7 +35,7 @@ def parse_percentage(value: str) -> Percentage:
     msg = "Expected percentage like 50% but got '{}'".format(value)
     if missing_percent and sys.platform.startswith("win"):
         msg += " ('%' is a special character in batch files, so please write '50%%' to pass in '50%')"
-    raise typer.BadParameter(msg)
+    raise BadCmdLineException(msg)
 
 
 class Duration:
@@ -51,7 +53,7 @@ def parse_duration(value: str) -> Duration:
     try:
         return Duration(convert_to_seconds(value))
     except ValueError:
-        raise typer.BadParameter("Expected duration like 3600, 30m, 1h15m but got '{}'".format(value))
+        raise BadCmdLineException("Expected duration like 3600, 30m, 1h15m but got '{}'".format(value))
 
 
 class KeyValue:
@@ -84,10 +86,10 @@ def parse_key_value(value: str) -> KeyValue:
         if delimiter in value:
             kv = value.split(delimiter, 1)
             if len(kv) != 2:
-                raise typer.BadParameter(error_message.format(value))
+                raise BadCmdLineException(error_message.format(value))
             return KeyValue(kv[0].strip(), kv[1].strip())
 
-    raise typer.BadParameter(error_message.format(value))
+    raise BadCmdLineException(error_message.format(value))
 
 
 class Fraction:
@@ -118,7 +120,7 @@ def parse_fraction(value: str) -> Fraction:
     except ValueError:
         pass
 
-    raise typer.BadParameter("Expected fraction like 1/2 but got '{}'".format(value))
+    raise BadCmdLineException("Expected fraction like 1/2 but got '{}'".format(value))
 
 
 class DateTimeWithTimezone:
@@ -139,7 +141,7 @@ def parse_datetime_with_timezone(value: str) -> DateTimeWithTimezone:
             dt = dt.replace(tzinfo=tzlocal())
         return DateTimeWithTimezone(dt)
     except ValueError:
-        raise typer.BadParameter("Expected datetime like 2023-10-01T12:00:00 but got '{}'".format(value))
+        raise BadCmdLineException("Expected datetime like 2023-10-01T12:00:00 but got '{}'".format(value))
 
 
 def convert_to_seconds(s: str) -> float:
@@ -215,11 +217,11 @@ def validate_past_datetime(dt_value: datetime.datetime):
         return dt_value
 
     if not isinstance(dt_value, datetime.datetime):
-        raise typer.BadParameter("Expected a datetime object.")
+        raise BadCmdLineException("Expected a datetime object.")
 
     now = datetime.datetime.now(tz=tzlocal())
     if dt_value > now:
-        raise typer.BadParameter("The provided timestamp must be in the past.")
+        raise BadCmdLineException("The provided timestamp must be in the past.")
 
     return dt_value
 

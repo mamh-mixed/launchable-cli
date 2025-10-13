@@ -5,6 +5,7 @@ from typing import Annotated, Generator, List
 
 import dateutil.parser
 import smart_tests.args4p.typer as typer
+from ..args4p.exceptions import BadCmdLineException
 
 from ..commands.record.case_event import CaseEvent, CaseEventType
 from ..testpath import TestPath, parse_test_path, unparse_test_path
@@ -26,10 +27,10 @@ def subset(
     """
 
     if not client.is_get_tests_from_previous_sessions and test_path_file is None:
-        raise typer.BadParameter("Missing argument 'TEST_PATH_FILE'.")
+        raise BadCmdLineException("Missing argument 'TEST_PATH_FILE'.")
 
     if client.is_output_exclusion_rules:
-        raise typer.BadParameter(
+        raise BadCmdLineException(
             "Don't need to use `--output-exclusion-rules` option. Please use `--rest` option and use it for exclusion"
         )
 

@@ -6,6 +6,7 @@ from typing import Annotated, List
 import smart_tests.args4p.typer as typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
+from ..args4p.exceptions import BadCmdLineException
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -40,7 +41,7 @@ def record_tests(
 
         filepath = find_filename()
         if not filepath:
-            raise typer.BadParameter(
+            raise BadCmdLineException(
                 "No file name found in %s" % report_file)
 
         # default test path in `subset` expects to have this file name
