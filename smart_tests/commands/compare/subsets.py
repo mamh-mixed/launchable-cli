@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Tuple, Union
 
+import click
 import smart_tests.args4p.typer as typer
 from tabulate import tabulate
 

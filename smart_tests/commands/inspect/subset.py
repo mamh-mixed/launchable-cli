@@ -114,8 +114,8 @@ def subset(
         res = client.request("get", f"subset/{subset_id}")
 
         if res.status_code == HTTPStatus.NOT_FOUND:
-            click.echo(typer.style(
-                f"Subset {subset_id} not found. Check subset ID and try again.", fg='yellow'), err=True)
+            click.secho(
+                f"Subset {subset_id} not found. Check subset ID and try again.", fg='yellow', err=True)
             sys.exit(1)
 
         res.raise_for_status()

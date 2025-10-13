@@ -1,6 +1,7 @@
 import sys
 from typing import List, Optional, Sequence, Tuple
 
+import click
 import smart_tests.args4p.typer as typer
 
 from .commands import Command
@@ -23,9 +24,7 @@ def is_fail_fast_mode() -> bool:
 
 def warn_and_exit_if_fail_fast_mode(message: str):
     color = 'red' if is_fail_fast_mode() else 'yellow'
-    message = typer.style(message, fg=color)
-
-    click.echo(message, err=True)
+    click.secho(message, fg=color, err=True)
     if is_fail_fast_mode():
         sys.exit(1)
 

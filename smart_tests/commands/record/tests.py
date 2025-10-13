@@ -473,8 +473,8 @@ def tests(
             click.echo(tabulate(rows, header, tablefmt="github", floatfmt=".2f"))
 
             if duration == 0:
-                click.echo(typer.style("\nTotal test duration is 0."
-                                       "\nPlease check whether the test duration times in report files are correct.", "yellow"))
+                click.secho("\nTotal test duration is 0."
+                                       "\nPlease check whether the test duration times in report files are correct.", "yellow")
             click.echo(
                 f"\nVisit https://app.launchableinc.com/organizations/{org}/workspaces/"
                 f"{workspace}/test-sessions/{self.test_session_id} to view uploaded test results "

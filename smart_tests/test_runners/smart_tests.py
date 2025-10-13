@@ -4,6 +4,7 @@ import sys
 import types
 from typing import Annotated
 
+import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.args4p.command import Group

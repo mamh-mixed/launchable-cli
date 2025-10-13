@@ -1,6 +1,7 @@
 from os.path import join
 from typing import Callable, Dict, List
 
+import click
 import smart_tests.args4p.typer as typer
 
 from ..app import Application

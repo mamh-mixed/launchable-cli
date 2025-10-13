@@ -1,6 +1,7 @@
 from typing import Annotated, List
 from xml.etree import ElementTree as ET
 
+import click
 import smart_tests.args4p.typer as typer
 
 from smart_tests.commands.record.case_event import CaseEvent

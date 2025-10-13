@@ -1,6 +1,7 @@
 import os
 from typing import Tuple
 
+import click
 import requests
 import smart_tests.args4p.typer as typer
 
