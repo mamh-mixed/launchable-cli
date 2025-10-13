@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 import responses  # type: ignore
 from typer.testing import CliRunner
 
-from smart_tests.__main__ import main
+from smart_tests.__main__ import cli
 from smart_tests.utils.env_keys import SESSION_DIR_KEY
 from smart_tests.utils.http_client import get_base_url
 
@@ -168,7 +168,7 @@ class CliTestCase(unittest.TestCase):
         old_no_color = os.environ.get('NO_COLOR')
         os.environ['NO_COLOR'] = '1'
         try:
-            return CliRunner().invoke(app=main, args=args, catch_exceptions=False, **kwargs)
+            return CliRunner().invoke(app=cli, args=args, catch_exceptions=False, **kwargs)
         finally:
             if old_no_color is None:
                 os.environ.pop('NO_COLOR', None)

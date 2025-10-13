@@ -25,7 +25,7 @@ from .version import __version__
 
 
 @args4p.group()
-def main(
+def cli(
     log_level: Annotated[str, typer.Option(
         help="Set logger's log level (CRITICAL, ERROR, WARNING, AUDIT, INFO, DEBUG)."
     )] = logger.LOG_LEVEL_DEFAULT_STR,
@@ -69,14 +69,14 @@ def main(
 
     return Application(dry_run=dry_run, skip_cert_verification=skip_cert_verification)
 
-main.add_command(record)
-main.add_command(subset)
+cli.add_command(record)
+cli.add_command(subset)
 # TODO: main.add_command(split_subset)
-main.add_command(verify)
-main.add_command(inspect)
-main.add_command(stats)
-main.add_command(compare)
-main.add_command(detect_flakes)
+cli.add_command(verify)
+cli.add_command(inspect)
+cli.add_command(stats)
+cli.add_command(compare)
+cli.add_command(detect_flakes)
 
 def _load_test_runners():
     # load all test runners
@@ -103,9 +103,12 @@ def _load_test_runners():
 
 _load_test_runners()
 
-if __name__ == '__main__':
+def main():
     try:
-        main(sys.argv)
+        cli(*sys.argv[1:])
         sys.exit(0)
     except typer.Exit as e:
-        sys.exit(e.exit_code)
+        sys.exit(e.code)
+
+if __name__ == '__main__':
+    main()
