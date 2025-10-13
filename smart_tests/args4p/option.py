@@ -54,6 +54,16 @@ class Option(Parameter):
         else:
             return v
 
+    def attach_to_command(self, command):  # typing command makes reference circular
+        super().attach_to_command(command)
+
+        if self.metavar is None:
+            self.metavar = self.type.__name__.upper()
+        if self.type == bool and self.default is NO_DEFAULT:
+            # if the flag is absent, bind the value to False, or else the function signature requires a defalut value,
+            # which is silly
+            self.default = False
+
     def __repr__(self):
         return (f"Option(name={self.name!r}, option_names={self.option_names!r}, help={self.help!r}, "
                 f"type={self.type.__name__!r}, default={self.default!r}, required={self.required!r}, "

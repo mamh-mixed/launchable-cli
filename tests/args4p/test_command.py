@@ -276,7 +276,7 @@ class CommandTest(TestCase):
 
         # Test no flags
         flag_cmd()
-        self.assertIsNone(received["verbose"])
+        self.assertFalse(received["verbose"])
         self.assertFalse(received["quiet"])
 
     def test_bad_config_exception(self):
@@ -292,7 +292,7 @@ class CommandTest(TestCase):
         @args4p.command()
         @args4p.option("--opt", "opt")
         @args4p.argument("args", multiple=True)
-        def f(opt: str, args: list[str]):
+        def f(args: list[str], opt: str = None):
             return {"opt": opt, "args": args}
 
         r = f("--opt", "value", "--", "--not-an-opt", "positional")

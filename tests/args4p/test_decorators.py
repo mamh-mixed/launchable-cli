@@ -117,7 +117,7 @@ class DecoratorTest(TestCase):
         self.assertEqual(f("--debug"), "debug: True")
 
         # Test flag absent
-        self.assertEqual(f(), "debug: None")
+        self.assertEqual(f(), "debug: False")
 
     def test_argument_decorator_basic(self):
         """Test basic @argument decorator"""

@@ -84,7 +84,7 @@ class ConsistencyCheckTest(TestCase):
 
             cmd()
 
-        self.assertIn("multiple=True requires a List[T] type annotation", str(e.exception))
+        self.assertIn("Type annotation is missing on parameter 'items' in function 'cmd'", str(e.exception))
 
     def test_default_value_type_mismatch(self):
         """Test that incompatible default values are caught"""

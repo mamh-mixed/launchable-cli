@@ -55,44 +55,39 @@ class Command:
         Given the command line arguments, parse them, bind them to the user function parameters,
         and invoke the function. This method returns the return value of the user function.
         '''
-        try:
-            self.check_consistency()
+        self.check_consistency()
 
-            invoker = _Invoker(self)
-            args = ArgList(list(_args))
+        invoker = _Invoker(self)
+        args = ArgList(list(_args))
 
-            while args.has_more():
-                a = args.eat(None)
-                if a == "--":
-                    # everything after this is a positional argument
-                    while args.has_more():
-                        invoker.eat_arg(args.eat(None))
-                elif a.startswith("-"):
-                    # Handle built-in help options
-                    if a in ["--help", "-h"]:
-                        print(invoker.command.format_help())
-                        raise Exit(0)
+        while args.has_more():
+            a = args.eat(None)
+            if a == "--":
+                # everything after this is a positional argument
+                while args.has_more():
+                    invoker.eat_arg(args.eat(None))
+            elif a.startswith("-"):
+                # Handle built-in help options
+                if a in ["--help", "-h"]:
+                    print(invoker.command.format_help())
+                    raise Exit(0)
 
-                    invoker.eat_options(a, args)
-                elif isinstance(invoker.command, Group):
-                    invoker = invoker.sub_command(a)
-                else:
-                    invoker.eat_arg(a)
+                invoker.eat_options(a, args)
+            elif isinstance(invoker.command, Group):
+                invoker = invoker.sub_command(a)
+            else:
+                invoker.eat_arg(a)
 
-            r = invoker.invoke()
+        r = invoker.invoke()
 
-            if isinstance(invoker.command, Group):
-                # group invoked without sub-command. we want to deal with this after `invoker.invoke()`
-                # to give the parent command callbacks the opportunity to execute.
-                click.secho("Command is missing", fg='red', err=True)
-                print(invoker.command.format_help())
-                raise Exit(1)
-
-            return r
-
-        except BadCmdLineException as e:
-            click.secho(str(e), fg='red', err=True)
+        if isinstance(invoker.command, Group):
+            # group invoked without sub-command. we want to deal with this after `invoker.invoke()`
+            # to give the parent command callbacks the opportunity to execute.
+            click.secho("Command is missing", fg='red', err=True)
+            print(invoker.command.format_help())
             raise Exit(1)
+
+        return r
 
     def check_consistency(self):
         """
@@ -129,6 +124,12 @@ class Command:
             if p.name in decorator_param_names:
                 raise error(f"Duplicate parameter name '{p.name}' found in command '{self.name}' decorators")
             decorator_param_names.add(p.name)
+
+        # Check boolean option conflicts
+        for p in self.options:
+            if p.type == bool:
+                if p.required:
+                    raise error(f"It makes no sense to require a boolean option '{p.name}'")
 
         # Check for required parameter with default value
         for p in self.options + self.arguments:
@@ -170,12 +171,6 @@ class Command:
             for opt_name in p.option_names:
                 if not re.match(r'^-[a-zA-Z]$|^--[a-zA-Z][-a-zA-Z0-9]*$', opt_name):
                     raise error(f"Invalid option name '{opt_name}'")
-
-        # Check boolean option conflicts
-        for p in self.options:
-            if p.type == bool:
-                if p.required:
-                    raise error(f"It makes no sense to require a boolean option '{p.name}'")
 
         # Check argument ordering (required after optional)
         found_optional = False
@@ -521,6 +516,10 @@ def _maybe(given: str, candidates: Iterable[str]) -> Optional[str]:
     Typo recovery suggestion. Find the best match from the given candidates,
     but only if it's close enough.
     '''
+
+    if len(candidates) == 0:
+        return None  # min() doesn't work if arg is empty
+
     c = min(candidates, key=lambda c: edit_distance(given, c))
     if edit_distance(c, given) <= 4:
         return c

@@ -12,6 +12,7 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
+from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.commands.compare import compare
 from smart_tests.commands.detect_flakes import detect_flakes
 from smart_tests.commands.inspect import inspect
@@ -109,6 +110,9 @@ def main():
         sys.exit(0)
     except typer.Exit as e:
         sys.exit(e.code)
+    except BadCmdLineException as e:
+        click.secho(str(e), fg='red', err=True)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

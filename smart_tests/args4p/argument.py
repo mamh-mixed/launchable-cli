@@ -37,3 +37,9 @@ class Argument(Parameter):
             return existing
         else:
             return v
+
+    def attach_to_command(self, command):  # typing command makes reference circular
+        super().attach_to_command(command)
+
+        if self.metavar is None:
+            self.metavar = str(self.name).upper()
