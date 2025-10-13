@@ -87,6 +87,7 @@ def subset(
     client,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
+        required=False,
         help="Test report files to process"
     )],
 ):

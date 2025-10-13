@@ -17,6 +17,7 @@ from . import smart_tests
 def subset(
     client,
     test_path_file: Annotated[str | None, typer.Argument(
+        required=False,
         help="File containing test paths, one per line"
     )] = None,
 ):

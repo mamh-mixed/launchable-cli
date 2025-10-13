@@ -12,6 +12,7 @@ def subset(
     client,
     source_roots: Annotated[List[str], typer.Argument(
         multiple=True,
+        required=False,
         help="Source directories to scan for test files"
     )]
 ):

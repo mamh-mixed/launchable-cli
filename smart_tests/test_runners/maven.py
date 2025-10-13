@@ -52,6 +52,7 @@ def subset(
     client,
     source_roots: Annotated[List[str] | None, typer.Argument(
         multiple=True,
+        required=False,
         help="Source root directories to scan for tests"
     )] = None,
     test_compile_created_file: Annotated[List[str] | None, typer.Option(

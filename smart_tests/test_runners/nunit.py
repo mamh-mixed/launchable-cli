@@ -129,6 +129,7 @@ def subset(
     client,
     report_xmls: Annotated[List[str], typer.Argument(
         multiple=True,
+        required=False,
         help="Test report XML files to process"
     )],
 ):

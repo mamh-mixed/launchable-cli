@@ -79,6 +79,7 @@ class CommonSubsetImpls:
             client,
             files: Annotated[list[str], typer.Argument(
                 multiple=True,
+                required=False,
                 help="Test files or directories to include in the subset"
             )]
         ):
