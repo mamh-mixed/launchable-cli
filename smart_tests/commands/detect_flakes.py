@@ -45,7 +45,7 @@ def detect_flakes(
         type=DetectFlakesRetryThreshold.from_str,
         metavar="low|medium|high"
     )] = DetectFlakesRetryThreshold.MEDIUM,
-    test_runner: Annotated[str|None, typer.Argument()] = None,
+    test_runner: Annotated[str | None, typer.Argument()] = None,
 ):
     tracking_client = TrackingClient(Command.DETECT_FLAKE, app=app)
     app.test_runner = test_runner

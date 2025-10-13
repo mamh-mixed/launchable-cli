@@ -293,7 +293,7 @@ class CommandTest(TestCase):
         @args4p.command()
         @args4p.option("--opt", "opt")
         @args4p.argument("args", multiple=True)
-        def f(args: list[str], opt: str|None = None):
+        def f(args: list[str], opt: str | None = None):
             return {"opt": opt, "args": args}
 
         r = f("--opt", "value", "--", "--not-an-opt", "positional")

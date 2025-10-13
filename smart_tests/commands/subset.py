@@ -123,7 +123,7 @@ def subset(
         "--use-case",
         hidden=True
     )] = None,
-    test_runner: Annotated[str|None, typer.Argument()] = None,
+    test_runner: Annotated[str | None, typer.Argument()] = None,
 ):
     app.test_runner = test_runner
     tracking_client = TrackingClient(Command.SUBSET, app=app)

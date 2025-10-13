@@ -45,8 +45,8 @@ class Parameter:
 
     multiple: bool  # True if this argument can appear multiple times
     required: bool  # True if this argument is required
-    metavar: str|None  # the name to use in help messages for the argument value
-    help: str|None  # the help message for this argument
+    metavar: str | None  # the name to use in help messages for the argument value
+    help: str | None  # the help message for this argument
     default: Any  # the default value if the argument/option is not provided
     clazz: str  # "argument" or "option"
 

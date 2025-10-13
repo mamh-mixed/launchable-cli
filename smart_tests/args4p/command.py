@@ -4,28 +4,28 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, List, Optional, cast, Sequence
+from typing import Any, Callable, List, Optional, Sequence, cast
 
 import click
 
+from ..utils.edit_distance import edit_distance
 from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
 from .option import NO_DEFAULT, Option
 from .parameter import Parameter, normalize_type, to_type
 from .typer import Exit
-from ..utils.edit_distance import edit_distance
 
 
 class Command:
-    parent: Group|None = None        # if this is a sub-command of another command, this is the parent command
+    parent: Group | None = None        # if this is a sub-command of another command, this is the parent command
     options: list[Option]
     arguments: list[Argument]
     name: str
     callback: Callable
-    help: str|None
+    help: str | None
 
-    def __init__(self, name: str|None, help: str|None, callback: Callable, params: list[Parameter]):
+    def __init__(self, name: str | None, help: str | None, callback: Callable, params: list[Parameter]):
         self.name = name    # type: ignore[assignment]  # once properly constructed, name is never None
         self.help = help
         self.callback = callback
@@ -471,7 +471,7 @@ class _Invoker:
     This class builds up data needed to invoke a command
     '''
     command: Command
-    parent: _Invoker|None = None
+    parent: _Invoker | None = None
     kwargs: dict[str, Any]
 
     nargs = 0  # number of arguments consumed, used to identify the processor of the next argument
@@ -495,7 +495,7 @@ class _Invoker:
         self.nargs += 1
 
     def eat_options(self, option_name: str, args: ArgList):
-        inv: _Invoker|None = self
+        inv: _Invoker | None = self
         option_names = []
         while inv is not None:
             for o in inv.command.options:

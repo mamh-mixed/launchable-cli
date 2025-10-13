@@ -4,9 +4,8 @@ for common scenarios.
 
 Exposed from the args4p package.
 """
-from io import TextIOWrapper
 from pathlib import Path
-from typing import Callable, Optional, IO
+from typing import IO, Callable, Optional
 
 
 def path(exists: bool = False,
