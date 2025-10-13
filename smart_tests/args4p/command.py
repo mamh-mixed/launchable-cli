@@ -10,7 +10,7 @@ from . import decorator
 from .argument import Argument
 from .exceptions import BadCmdLineException, BadConfigException
 from .option import Option
-from .parameter import Parameter
+from .parameter import Parameter, to_type
 
 
 class Command:
@@ -128,10 +128,10 @@ class Command:
 
             # Check if multiple=True is used correctly with List type
             if p.multiple:
-                annotation = fp.annotation
-                if annotation == inspect.Parameter.empty:
+                t = to_type(fp)
+                if t is None:
                     raise error(f"Parameter '{p.name}' with multiple=True requires a type annotation")
-                if not (hasattr(annotation, '__origin__') and annotation.__origin__ is list):
+                if not (hasattr(t, '__origin__') and t.__origin__ is list):
                     raise error(f"Parameter '{p.name}' with multiple=True requires a List[T]")
 
             # Check default value type compatibility

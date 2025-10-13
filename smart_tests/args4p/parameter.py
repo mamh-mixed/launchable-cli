@@ -1,8 +1,25 @@
 import inspect
-from typing import Any, Callable
+from typing import Any, Callable, Annotated, Optional, get_origin, get_args
+
+from click import Parameter
 
 from smart_tests.args4p.exceptions import BadConfigException
 
+def to_type(p :inspect.Parameter) -> Optional[type]:
+    '''
+    Given output from inspect.signature, extract the type annotation.
+    '''
+    annotation = p.annotation
+    if annotation == inspect.Parameter.empty:
+        return None
+
+    # we expect a List[something] and we want to extract 'something'
+
+    origin = get_origin(annotation)
+    if origin is Annotated:
+        return get_args(annotation)[0]
+
+    return annotation
 
 class Parameter:
     '''
@@ -35,18 +52,19 @@ class Parameter:
             if name == self.name:
                 # we found the parameter that matches the name
                 if self.type is None:
-                    def infer_type(annotation) -> type:
+                    def infer_type() -> type:
+                        t = to_type(param)
+                        if t is None:
+                            raise error(f"Type annotation is missing on parameter '{name}'")
                         if self.multiple:
                             # we expect a List[something] and we want to extract 'something'
-                            if getattr(annotation, '__origin__', None) is list:
-                                return annotation.__args__[0]
+                            if get_origin(t) is list:
+                                return get_args(t)[0]
                             raise error(f"multiple=True requires a List[T] type annotation with parameter '{name}'")
                         else:
-                            if annotation == inspect.Parameter.empty:
-                                raise error(f"Type annotation is missing on parameter '{name}'")
-                            return annotation
+                            return t
 
-                    self.type = infer_type(param.annotation)
+                    self.type = infer_type(param)
 
                 if self.metavar is None:
                     self.metavar = self.name.upper()
