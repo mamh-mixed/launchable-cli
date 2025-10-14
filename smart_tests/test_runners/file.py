@@ -8,6 +8,7 @@ from junitparser import TestCase, TestSuite  # type: ignore
 import smart_tests.args4p.typer as typer
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
@@ -24,7 +25,7 @@ def subset(client: Subset):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report files to process"

@@ -6,6 +6,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.testpath import TestPath
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from . import smart_tests
 
@@ -26,7 +27,7 @@ def path_builder(case: TestCase, suite: TestSuite, report_file: str) -> TestPath
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report files to process"

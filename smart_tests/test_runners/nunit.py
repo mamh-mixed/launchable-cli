@@ -5,6 +5,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent
 from smart_tests.testpath import TestPath, parse_test_path, unparse_test_path
 
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from . import smart_tests
 
@@ -153,7 +154,7 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     report_xml: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report XML files to process"

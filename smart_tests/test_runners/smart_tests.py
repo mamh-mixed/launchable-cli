@@ -12,6 +12,7 @@ from smart_tests.args4p import decorator
 from smart_tests.args4p.command import Group
 from smart_tests.commands.detect_flakes import DetectFlakes
 from smart_tests.commands.detect_flakes import detect_flakes as detect_flakes_cmd
+from smart_tests.commands.record.tests import RecordTests
 from smart_tests.commands.record.tests import tests as record_tests_cmd
 from smart_tests.commands.subset import Subset
 from smart_tests.commands.subset import subset as subset_cmd
@@ -126,7 +127,7 @@ class CommonRecordTestImpls:
         """
 
         def record_tests(
-            client,
+            client: RecordTests,
             source_roots: Annotated[list[str], typer.Argument(
                 multiple=True,
                 help="Source directories containing test report files"
@@ -137,7 +138,7 @@ class CommonRecordTestImpls:
         return wrap(record_tests, record_tests_cmd, self.cmdname)
 
     @classmethod
-    def load_report_files(cls, client, source_roots, file_mask="*.xml"):
+    def load_report_files(cls, client: RecordTests, source_roots, file_mask="*.xml"):
         # client type: RecordTests in def launchable.commands.record.tests.tests
         # Accept both file names and GLOB patterns
         # Simple globs like '*.xml' can be dealt with by shell, but

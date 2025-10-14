@@ -8,6 +8,7 @@ from junitparser import TestCase, TestSuite  # type: ignore
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from ..testpath import TestPath
 from ..utils.logger import Logger
@@ -45,7 +46,7 @@ def subset(client: Subset):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     source_roots: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Source root directories or files to process"

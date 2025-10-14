@@ -6,6 +6,7 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent
 
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from . import smart_tests
 
@@ -120,7 +121,7 @@ def parse_func(p: str):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report files to process"

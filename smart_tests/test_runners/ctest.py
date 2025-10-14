@@ -10,6 +10,7 @@ import click
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from . import smart_tests
 
@@ -86,7 +87,7 @@ def _group_by_size(elems, max_size):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     source_roots: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Source root directories or files to process"

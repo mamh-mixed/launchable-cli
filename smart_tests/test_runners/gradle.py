@@ -7,6 +7,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.utils.java import junit5_nested_class_path_builder
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from ..utils.file_name_pattern import jvm_test_pattern
 from . import smart_tests
@@ -85,7 +86,7 @@ def to_class_file(class_name: str):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report files to process"

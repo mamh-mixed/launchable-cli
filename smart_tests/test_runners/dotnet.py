@@ -5,6 +5,7 @@ from typing import Annotated, List
 import click
 
 import smart_tests.args4p.typer as typer
+from smart_tests.commands.record.tests import RecordTests
 from smart_tests.commands.subset import Subset
 from smart_tests.test_runners import smart_tests
 from smart_tests.test_runners.nunit import nunit_parse_func
@@ -79,7 +80,7 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     files: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report files to process"

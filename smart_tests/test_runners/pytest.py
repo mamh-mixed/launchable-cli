@@ -13,6 +13,7 @@ from smart_tests.commands.record.case_event import CaseEvent, CaseEventType, Met
 from smart_tests.testpath import TestPath
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from . import smart_tests
 
@@ -138,7 +139,7 @@ def _pytest_formatter(test_path):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     source_roots: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Source directories containing test report files"

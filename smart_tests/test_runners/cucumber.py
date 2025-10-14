@@ -14,6 +14,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.testpath import FilePathNormalizer, TestPath
 
 from ..commands.record.case_event import CaseEvent, CaseEventType
+from ..commands.record.tests import RecordTests
 from . import smart_tests
 
 subset = smart_tests.CommonSubsetImpls(__name__).scan_files('*_feature')
@@ -24,7 +25,7 @@ REPORT_FILE_PREFIX = "TEST-"
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Test report files to process"

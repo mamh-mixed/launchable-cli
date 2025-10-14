@@ -8,6 +8,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent
 from smart_tests.testpath import FilePathNormalizer
 
+from ..commands.record.tests import RecordTests
 from . import smart_tests
 
 FLUTTER_FILE_EXT = "_test.dart"
@@ -239,7 +240,7 @@ class ReportParser:
 
 
 @smart_tests.record.tests
-def record_tests(client,
+def record_tests(client: RecordTests,
                  reports: Annotated[List[str], typer.Argument(required=True, multiple=True)]):
     file_path_normalizer = FilePathNormalizer(base_path=client.base_path, no_base_path_inference=client.no_base_path_inference)
     client.parse_func = ReportParser(file_path_normalizer).parse_func
