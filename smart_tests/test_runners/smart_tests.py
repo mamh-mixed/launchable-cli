@@ -10,6 +10,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.args4p import decorator
 from smart_tests.args4p.command import Group
+from smart_tests.commands.detect_flakes import DetectFlakes
 from smart_tests.commands.detect_flakes import detect_flakes as detect_flakes_cmd
 from smart_tests.commands.record.tests import tests as record_tests_cmd
 from smart_tests.commands.subset import Subset
@@ -175,7 +176,7 @@ class CommonDetectFlakesImpls:
         self._separator = separator
 
     def detect_flakes(self):
-        def detect_flakes(client):
+        def detect_flakes(client: DetectFlakes):
             if self._formatter:
                 client.formatter = self._formatter
             if self._separator:
