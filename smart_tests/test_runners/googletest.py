@@ -1,5 +1,6 @@
 import re
 
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -9,7 +10,7 @@ def make_test_path(cls, case) -> TestPath:
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     cls = ''
     class_pattern = re.compile(r'^([^\.]+)\.')
     case_pattern = re.compile(r'^  ([^ ]+)')

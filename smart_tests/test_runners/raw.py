@@ -10,13 +10,14 @@ import smart_tests.args4p.typer as typer
 
 from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.case_event import CaseEvent, CaseEventType
+from ..commands.subset import Subset
 from ..testpath import TestPath, parse_test_path, unparse_test_path
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     test_path_file: Annotated[str | None, typer.Argument(
         required=False,
         help="File containing test paths, one per line"

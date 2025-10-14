@@ -13,6 +13,7 @@ from smart_tests.commands.record.case_event import CaseEvent, CaseEventType, Met
 from smart_tests.testpath import TestPath
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -40,7 +41,7 @@ from . import smart_tests
 #
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     source_roots: Annotated[List[str] | None, typer.Argument(
         help="Source root directories for pytest test collection",
         multiple=True,

@@ -8,6 +8,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.utils import glob as uglob
 from smart_tests.utils.java import junit5_nested_class_path_builder
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 # Surefire has the default inclusion pattern
@@ -48,7 +49,7 @@ def is_file(f: str) -> bool:
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     source_roots: Annotated[List[str] | None, typer.Argument(
         multiple=True,
         required=False,

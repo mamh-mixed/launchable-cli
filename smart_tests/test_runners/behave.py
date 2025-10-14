@@ -4,6 +4,7 @@ from xml.etree import ElementTree as ET
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -46,7 +47,7 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     for t in client.stdin():
         if 0 < t.find(".feature"):
             paths = os.path.split(t)

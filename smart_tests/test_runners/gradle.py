@@ -7,13 +7,14 @@ import smart_tests.args4p.typer as typer
 from smart_tests.utils.java import junit5_nested_class_path_builder
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.subset import Subset
 from ..utils.file_name_pattern import jvm_test_pattern
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     source_roots: Annotated[List[str] | None, typer.Argument(
         multiple=True,
         required=False,

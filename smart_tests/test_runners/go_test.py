@@ -8,13 +8,14 @@ from junitparser import TestCase, TestSuite  # type: ignore
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from ..utils.logger import Logger
 from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     logger = Logger()
 
     # NOTE: This should be using package name + test function name to specify

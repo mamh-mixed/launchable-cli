@@ -14,7 +14,7 @@ from smart_tests.commands.stats import stats
 from smart_tests.commands.subset import subset
 from smart_tests.commands.verify import verify
 
-cli=Group(name="cli", callback=Application)
+cli = Group(name="cli", callback=Application)
 cli.add_command(record)
 cli.add_command(subset)
 # TODO: main.add_command(split_subset)

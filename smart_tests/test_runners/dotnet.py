@@ -5,13 +5,14 @@ from typing import Annotated, List
 import click
 
 import smart_tests.args4p.typer as typer
+from smart_tests.commands.subset import Subset
 from smart_tests.test_runners import smart_tests
 from smart_tests.test_runners.nunit import nunit_parse_func
 from smart_tests.testpath import TestPath
 
 
 # main subset logic
-def do_subset(client, bare):
+def do_subset(client: Subset, bare):
     if bare:
         separator = "\n"
         prefix = ""
@@ -56,7 +57,7 @@ def do_subset(client, bare):
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     bare: Annotated[bool, typer.Option(
         "--bare",
         help="outputs class names alone"

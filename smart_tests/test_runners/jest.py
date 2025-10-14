@@ -6,6 +6,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.testpath import TestPath
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -39,7 +40,7 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     if client.base_path is None:
         raise BadCmdLineException("Please specify base path")
 

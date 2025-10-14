@@ -7,6 +7,7 @@ from junitparser import TestCase, TestSuite
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -53,7 +54,7 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     if not client.is_get_tests_from_previous_sessions or not client.is_output_exclusion_rules:
         click.secho(
             "XCTest profile only supports the subset with `--get-tests-from-previous-sessions` and `--output-exclusion-rules` options",  # noqa: E501

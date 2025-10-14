@@ -3,13 +3,14 @@ from typing import Annotated, List
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from ..utils.file_name_pattern import jvm_test_pattern
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     source_roots: Annotated[List[str], typer.Argument(
         multiple=True,
         required=False,

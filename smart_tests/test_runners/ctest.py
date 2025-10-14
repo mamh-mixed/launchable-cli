@@ -10,12 +10,13 @@ import click
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     file: Annotated[str, typer.Argument(
         help="JSON file to process"
     )],

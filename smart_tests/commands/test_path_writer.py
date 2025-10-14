@@ -12,21 +12,20 @@ class TestPathWriter(object):
     base_path_explicitly_set: bool = False  # Track if base_path was explicitly provided
 
     def __init__(self, app: Application):
-        self._formatter: Callable[[TestPath], str] = TestPathWriter.default_formatter
+        self._formatter: Callable[[TestPath], str] = self.default_formatter
         self._separator = "\n"
         self._same_bin_formatter: Callable[[str], Dict[str, str]] | None = None
         self.app = app
 
-    @classmethod
-    def default_formatter(cls, x: TestPath):
+    def default_formatter(self, x: TestPath):
         """default formatter that's in line with to_test_path(str)"""
         file_name = x[0]['name']
         # Only prepend base_path if it was explicitly set via --base option
         # Auto-inferred base paths should not affect output formatting
-        if cls.base_path and cls.base_path_explicitly_set:
+        if self.base_path and self.base_path_explicitly_set:
             # default behavior consistent with default_path_builder's relative
             # path handling
-            file_name = join(str(cls.base_path), file_name)
+            file_name = join(str(self.base_path), file_name)
         return file_name
 
     @property

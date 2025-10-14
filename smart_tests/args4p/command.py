@@ -4,7 +4,7 @@ import inspect
 import os
 import re
 import sys
-from typing import Any, Callable, List, Optional, Sequence, cast, get_origin, Annotated, get_args
+from typing import Annotated, Any, Callable, List, Optional, Sequence, cast, get_args, get_origin
 
 import click
 
@@ -57,7 +57,6 @@ class Command:
                             if a.option_names is None or len(a.option_names) == 0:
                                 a.option_names = [f"--{a.name.replace('_', '-')}"]
                         self.add_param(a)
-
 
     def add_param(self, param: Parameter, prepend: bool = False):
         '''
@@ -426,7 +425,7 @@ class Group(Command):
     '''
     commands: List[Command]
 
-    def __init__(self, callback: Callable, name: str|None = None, help: str|None = None, params: Sequence[Parameter]=()):
+    def __init__(self, callback: Callable, name: str | None = None, help: str | None = None, params: Sequence[Parameter] = ()):
         super().__init__(callback, name, help, params)
         self.commands = []
 

@@ -9,6 +9,7 @@ from junitparser import TestCase, TestSuite  # type: ignore
 import smart_tests.args4p.typer as typer
 
 from ..args4p.converters import path
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from ..utils.logger import Logger
 from . import smart_tests
@@ -19,7 +20,7 @@ def make_test_path(pkg, target) -> TestPath:
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     # Read targets from stdin, which generally looks like //foo/bar:zot
     for label in client.stdin():
         # //foo/bar:zot -> //foo/bar & zot

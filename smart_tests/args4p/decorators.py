@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import inspect
-from typing import Annotated, Any, Callable, Optional, Type, get_args, get_origin
+from typing import Any, Callable, Optional, Type
 
 from . import decorator
 from .argument import Argument

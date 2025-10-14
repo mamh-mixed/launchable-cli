@@ -12,6 +12,7 @@ from smart_tests.args4p import decorator
 from smart_tests.args4p.command import Group
 from smart_tests.commands.detect_flakes import detect_flakes as detect_flakes_cmd
 from smart_tests.commands.record.tests import tests as record_tests_cmd
+from smart_tests.commands.subset import Subset
 from smart_tests.commands.subset import subset as subset_cmd
 
 
@@ -76,7 +77,7 @@ class CommonSubsetImpls:
         :param pattern: file masks that identify test files, such as '*_spec.rb'
         """
         def subset(
-            client,
+            client: Subset,
             files: Annotated[list[str], typer.Argument(
                 multiple=True,
                 required=False,

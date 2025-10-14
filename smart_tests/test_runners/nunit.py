@@ -5,6 +5,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent
 from smart_tests.testpath import TestPath, parse_test_path, unparse_test_path
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 # common code between 'subset' & 'record tests' to build up test path from
@@ -125,7 +126,7 @@ def nunit_parse_func(report: str):
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     report_xmls: Annotated[List[str], typer.Argument(
         multiple=True,
         required=False,

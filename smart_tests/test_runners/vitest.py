@@ -3,6 +3,7 @@ from typing import Annotated, List, cast
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -39,7 +40,7 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))

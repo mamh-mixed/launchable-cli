@@ -6,6 +6,7 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 # https://source.android.com/docs/compatibility/cts/command-console-v2
@@ -136,7 +137,7 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     """
     Beta: Produces test list from previous test sessions for Compatibility Test Suite (CTS). Supports only CTS v2
     """

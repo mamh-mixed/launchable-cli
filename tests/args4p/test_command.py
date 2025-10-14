@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import smart_tests.args4p as args4p
 from smart_tests.args4p import typer
-from smart_tests.args4p.command import _maybe, Command
+from smart_tests.args4p.command import Command, _maybe
 from smart_tests.args4p.exceptions import BadCmdLineException, BadConfigException
 
 
@@ -316,7 +316,7 @@ class CommandTest(TestCase):
 
     def test_constructor(self):
         class Foo:
-            def __init__(self, name: Annotated[str,typer.Option()]):
+            def __init__(self, name: Annotated[str, typer.Option()]):
                 self.name = name
 
         # note @args4p.option won't work with this, because that decorator applies to

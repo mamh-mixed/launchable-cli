@@ -100,4 +100,3 @@ def subcmd2(...):
 
 cli.add_command(subcmd2)
 ```
-

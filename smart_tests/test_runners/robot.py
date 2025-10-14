@@ -6,6 +6,7 @@ from junitparser import JUnitXml  # type: ignore
 
 import smart_tests.args4p.typer as typer
 
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -85,7 +86,7 @@ def record_tests(
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     reports: Annotated[List[str], typer.Argument(
         multiple=True,
         required=False,

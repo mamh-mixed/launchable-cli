@@ -8,12 +8,13 @@ from junitparser import TestCase, TestSuite  # type: ignore
 import smart_tests.args4p.typer as typer
 
 from ..args4p.exceptions import BadCmdLineException
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))
