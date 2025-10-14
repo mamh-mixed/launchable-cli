@@ -46,7 +46,9 @@ class PathConverterTest(TestCase):
                 self.assertIn("is a file", str(ctx.exception))
                 self.assertIn("directory is expected", str(ctx.exception))
             finally:
-                Path(tmp_path).unlink()
+                # On Windows, somehow we can't delete the file, so we skip it.
+                # Path(tmp_path).unlink()
+                pass
 
     def test_path_dir_okay_validation(self):
         """Test dir_okay validation"""
