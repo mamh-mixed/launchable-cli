@@ -42,6 +42,7 @@ class CliTestCase(unittest.TestCase):
         if not hasattr(self, 'test_files_dir'):
             self.test_files_dir = self.get_test_files_dir()
 
+        responses.reset()
         responses.add(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
