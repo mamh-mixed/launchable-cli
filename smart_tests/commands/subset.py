@@ -9,7 +9,7 @@ from enum import Enum
 from io import TextIOWrapper
 from multiprocessing import Process
 from os.path import join
-from typing import Annotated, Any, Callable, Dict, List, TextIO
+from typing import Annotated, Any, Callable, Dict, Iterable, List
 
 import click
 from tabulate import tabulate
@@ -90,8 +90,10 @@ class Subset(TestPathWriter):
 
     # output_handler: Callable[[
     #   List[TestPathLike], List[TestPathLike]], None]
-    # exclusion_output_handler: Callable[[List[TestPathLike],
-    # List[TestPathLike], bool], None]]
+
+    # (Kohsuke) function that takes (subset,rest) and output the rest part, I think.
+    # I'm actually not entirely sure what this pluggability does
+    exclusion_output_handler: Callable[[List[TestPath], List[TestPath]], None]
 
     def __init__(
             self,
@@ -285,12 +287,17 @@ class Subset(TestPathWriter):
         else:
             self.test_paths.append(self.to_test_path(rel_base_path(path)))
 
-    def stdin(self) -> TextIO | List:
+    def stdin(self) -> Iterable[str]:
         """
         Returns sys.stdin, but after ensuring that it's connected to something reasonable.
 
         This prevents a typical problem where users think CLI is hanging because
         they didn't feed anything from stdin
+
+        HACK(Kohsuke): When is_get_tests_from_previous_sessions was added, that flag should have
+        selected the code path that doesn't use stdin. But instead, for some reasons the change
+        was made to make stdin() return empty list. Until we fix that, this function is returning
+        Iterable[str], so that we can return [] as "empty stdin".
         """
 
         # To avoid the cli continue to wait from stdin
@@ -345,7 +352,7 @@ class Subset(TestPathWriter):
                 if path:
                     self.test_paths.append(self.to_test_path(path))
 
-    def get_payload(self):
+    def get_payload(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "testPaths": self.test_paths,
             "testRunner": self.app.test_runner,

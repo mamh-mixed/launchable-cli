@@ -38,7 +38,7 @@ def subset(
         with Path(file).open() as json_file:
             data = json.load(json_file)
     else:
-        data = json.loads(client.stdin())
+        data = json.loads(client.stdin())   # type: ignore  # TODO
 
     for test in data['tests']:
         case = test['name']
@@ -52,7 +52,7 @@ def subset(
         client.run()
     else:
         client.formatter = lambda x: f"^{x[0]['name']}$"
-        client.seperator = '|'
+        client.separator = '|'
         client.run()
 
 

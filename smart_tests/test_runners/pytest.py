@@ -3,7 +3,7 @@ import json
 import os
 import pathlib
 import subprocess
-from typing import Annotated, Generator, List
+from typing import Annotated, Generator, Iterable, List
 
 import click
 from junitparser import Properties, TestCase  # type: ignore
@@ -49,7 +49,7 @@ def subset(
         required=False,
     )] = None,
 ):
-    def _add_testpaths(lines: List[str]):
+    def _add_testpaths(lines: Iterable[str]):
         for line in lines:
             line = line.rstrip()
             # When an empty line comes, it's done.

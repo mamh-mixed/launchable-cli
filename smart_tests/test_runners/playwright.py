@@ -3,7 +3,7 @@
 # https://playwright.dev/
 #
 import json
-from typing import Annotated, Dict, Generator, List
+from typing import Annotated, Dict, List
 
 import click
 from junitparser import TestCase, TestSuite  # type: ignore
@@ -11,7 +11,7 @@ from junitparser import TestCase, TestSuite  # type: ignore
 import smart_tests.args4p.typer as typer
 
 from ..args4p.exceptions import BadCmdLineException
-from ..commands.record.case_event import CaseEvent
+from ..commands.record.case_event import CaseEvent, CaseEventGenerator
 from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
 from ..testpath import TestPath
@@ -175,7 +175,7 @@ class JSONReportParser:
     def __init__(self, client):
         self.client = client
 
-    def parse_func(self, report_file: str) -> Generator[CaseEvent, None, None]:
+    def parse_func(self, report_file: str) -> CaseEventGenerator:
         data: Dict[str, Dict]
         with open(report_file, 'r') as json_file:
             try:

@@ -1,11 +1,11 @@
 import json
 import pathlib
-from typing import Annotated, Dict, Generator, List
+from typing import Annotated, Dict, List
 
 import click
 
 import smart_tests.args4p.typer as typer
-from smart_tests.commands.record.case_event import CaseEvent
+from smart_tests.commands.record.case_event import CaseEvent, CaseEventGenerator
 from smart_tests.testpath import FilePathNormalizer
 
 from ..commands.record.tests import RecordTests
@@ -122,7 +122,7 @@ class ReportParser:
 
         return events
 
-    def parse_func(self, report_file: str) -> Generator[CaseEvent, None, None]:
+    def parse_func(self, report_file: str) -> CaseEventGenerator:
         # TODO: Support cases that include information about `flutter pub get`
         # see detail: https://github.com/launchableinc/examples/actions/runs/11884312142/job/33112309450
         if not pathlib.Path(report_file).exists():

@@ -11,10 +11,16 @@ class TestPathWriter(object):
     base_path: str | None = None
     base_path_explicitly_set: bool = False  # Track if base_path was explicitly provided
 
+    # string to write between different test paths
+    separator: str = "\n"
+
+    # pluggable logic to convert TestPath to a printable form
+    formatter: Callable[[TestPath], str]
+
     def __init__(self, app: Application):
-        self._formatter: Callable[[TestPath], str] = self.default_formatter
-        self._separator = "\n"
+        self.formatter = self.default_formatter
         self._same_bin_formatter: Callable[[str], Dict[str, str]] | None = None
+        self.separator = "\n"
         self.app = app
 
     def default_formatter(self, x: TestPath):
@@ -27,26 +33,6 @@ class TestPathWriter(object):
             # path handling
             file_name = join(str(self.base_path), file_name)
         return file_name
-
-    @property
-    def formatter(self) -> Callable[[TestPath], str]:
-        """
-        This function, if supplied, is used to format test names
-        from the format Launchable uses to the format test runners expect.
-        """
-        return self._formatter
-
-    @formatter.setter
-    def formatter(self, v: Callable[[TestPath], str]):
-        self._formatter = v
-
-    @property
-    def separator(self) -> str:
-        return self._separator
-
-    @separator.setter
-    def separator(self, s: str):
-        self._separator = s
 
     def write_file(self, file: str, test_paths: List[TestPath]):
         open(file, "w+", encoding="utf-8").write(

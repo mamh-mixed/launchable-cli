@@ -30,7 +30,7 @@ from ...utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_
                                      set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
 from ...utils.logger import Logger
 from ...utils.smart_tests_client import SmartTestsClient
-from .case_event import CaseEvent, CaseEventType
+from .case_event import CaseEvent, CaseEventGenerator, CaseEventType, DataBuilder, TestPathBuilder
 
 GROUP_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
 RESERVED_GROUP_NAMES = ["group", "groups", "nogroup", "nogroups"]
@@ -49,17 +49,19 @@ def _validate_group(value):
         raise BadCmdLineException("group option supports only alphabet(a-z, A-Z), number(0-9), '-', and '_'")
 
 
+ParseFunc = Callable[[str], CaseEventGenerator]
+
+
 class RecordTests:
     # The most generic form of parsing, where a path to a test report
     # is turned into a generator by using CaseEvent.create()
-    ParseFunc = Callable[[str], Generator[CaseEventType, None, None]]
 
     # A common mechanism to build ParseFunc by building JUnit XML report in-memory (or build it the usual way
     # and patch it to fix things up). This is handy as some libraries
     # produce invalid / broken JUnit reports
     JUnitXmlParseFunc = Callable[[str], ET.Element | ET.ElementTree]
 
-    path_builder: CaseEvent.TestPathBuilder
+    path_builder: TestPathBuilder
 
     parse_func: ParseFunc
 
@@ -73,7 +75,7 @@ class RecordTests:
 
     # This function, if supplied, is used to build a test path
     # that uniquely identifies a test case
-    metadata_builder: CaseEvent.DataBuilder
+    metadata_builder: DataBuilder
 
     # setter only property that sits on top of the parse_func property
     def set_junitxml_parse_func(self, f: JUnitXmlParseFunc):
@@ -213,8 +215,8 @@ class RecordTests:
             build_name, test_session_id = parse_session(session)
             exit(0)
 
-        self.reports = []
-        self.skipped_reports = []
+        self.reports: List[str] = []
+        self.skipped_reports: List[str] = []
         self.path_builder = CaseEvent.default_path_builder(self.file_path_normalizer)
         self.junitxml_parse_func = None
         self.check_timestamp = True
