@@ -254,7 +254,3 @@ class ConsistencyCheckTest(TestCase):
             main_group("bad-sub")  # Should catch the error in subcommand
 
         self.assertIn("No parameter named 'nonexistent' found in function 'bad_sub'", str(e.exception))
-
-
-if __name__ == "__main__":
-    ConsistencyCheckTest().test_required_with_default_conflict()

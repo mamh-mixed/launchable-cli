@@ -1,5 +1,4 @@
 import os
-import unittest
 from unittest import mock
 
 import responses  # type: ignore
@@ -23,7 +22,3 @@ class AntTest(CliTestCase):
                           str(self.test_files_dir) + "/junitreport/TESTS-TestSuites.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
-
-
-if __name__ == '__main__':
-    unittest.main()

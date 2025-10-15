@@ -202,8 +202,3 @@ class FileTextConverterTest(TestCase):
             result.close()
         finally:
             Path(tmp_path).unlink()
-
-
-if __name__ == "__main__":
-    import unittest
-    unittest.main()

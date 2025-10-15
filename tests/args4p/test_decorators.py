@@ -292,8 +292,3 @@ class DecoratorTest(TestCase):
         self.assertTrue(arg.required)
         self.assertEqual(arg.metavar, "FILE")
         self.assertEqual(arg.help, "Input files to process")
-
-
-if __name__ == "__main__":
-    import unittest
-    unittest.main()

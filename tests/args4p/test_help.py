@@ -64,8 +64,3 @@ class HelpGenerationTest(TestCase):
         self.assertIn("[default: 3]", help_text)
         self.assertIn("--tags STR", help_text)
         self.assertIn("(multiple)", help_text)
-
-
-if __name__ == "__main__":
-    import unittest
-    unittest.main()
