@@ -44,7 +44,7 @@ def _load_test_runners():
     if plugin_dir:
         for f in glob(join(plugin_dir, '*.py')):
             spec = importlib.util.spec_from_file_location(
-                f"launchable.plugins.{basename(f)[:-3]}", f)
+                f"smart_tests.plugins.{basename(f)[:-3]}", f)
             plugin = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(plugin)
 
