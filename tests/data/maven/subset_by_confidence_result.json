@@ -12,5 +12,6 @@
   },
   "goal": {"type": "subset-by-confidence", "percentage": 0.9},
   "ignoreNewTests": false,
+  "getTestsFromGuess": false,
   "getTestsFromPreviousSessions": false
 }
