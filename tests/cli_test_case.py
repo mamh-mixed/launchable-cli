@@ -43,6 +43,9 @@ class CliTestCase(unittest.TestCase):
         if not hasattr(self, 'test_files_dir'):
             self.test_files_dir = self.get_test_files_dir()
 
+        # not to use cached configuration between tests
+        responses.reset()
+
         responses.add(
             responses.POST,
             "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions".format(
