@@ -8,10 +8,7 @@ public class JSFileChange {
   private int linesDeleted;
 
   /**
-   * File status marker, like 'M', 'A', 'D' that represents the operation.
-   *
-   * <p>"R" (rename) and "C" (copy) are special case because they are accompanied by the confidence
-   * level, such as "R100".
+   * File status marker. Valid values are ADD, MODIFY, DELETE, RENAME, COPY.
    */
   private String status;
 
