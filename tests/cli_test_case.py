@@ -164,13 +164,20 @@ class CliTestCase(unittest.TestCase):
         """
         Invoke CLI command and returns its result
         """
-        return CliRunner().invoke(cli=main, args=args, catch_exceptions=False, **kwargs)
+
+        # for CliRunner kwargs
+        mix_stderr = True
+        if 'mix_stderr' in kwargs:
+            mix_stderr = kwargs['mix_stderr']
+            del kwargs['mix_stderr']
+
+        return CliRunner(mix_stderr=mix_stderr).invoke(cli=main, args=args, catch_exceptions=False, **kwargs)
 
     def assert_success(self, result):
         self.assert_exit_code(result, 0)
 
     def assert_exit_code(self, result, expected: int):
-        self.assertEqual(result.exit_code, expected, result.stdout + '\n' + result.stderr)
+        self.assertEqual(result.exit_code, expected, result.output)
 
     def assert_contents(self, file_path: str, content: str):
         with open(file_path) as f:
