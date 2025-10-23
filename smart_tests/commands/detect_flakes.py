@@ -38,7 +38,8 @@ class DetectFlakes(TestPathWriter):
             session: Annotated[str, typer.Option(
                 "--session",
                 help="In the format builds/<build-name>/test_sessions/<test-session-id>",
-                metavar="SESSION"
+                metavar="SESSION",
+                required=True
             )],
             retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
                 "--retry-threshold",

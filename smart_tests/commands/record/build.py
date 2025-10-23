@@ -36,7 +36,8 @@ def build(
     build_name: Annotated[str, typer.Option(
         "--build",
         help="build name",
-        metavar="BUILD_NAME"
+        metavar="BUILD_NAME",
+        required=True
     )],
     branch: Annotated[str | None, typer.Option(
         "--branch",

@@ -26,12 +26,14 @@ def session(
     app: Application,
     build_name: Annotated[str, typer.Option(
         "--build",
-        help="build name"
+        help="build name",
+        required=True
     )],
     test_suite: Annotated[str, typer.Option(
         "--test-suite",
         help="Set test suite name. A test suite is a collection of test sessions. Setting a test suite allows you to "
-             "manage data over test sessions and lineages."
+             "manage data over test sessions and lineages.",
+        required=True
     )],
     flavors: Annotated[List[KeyValue], typer.Option(
         "--flavor",

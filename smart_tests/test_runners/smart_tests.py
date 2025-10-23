@@ -84,7 +84,7 @@ class CommonSubsetImpls:
                 multiple=True,
                 required=False,
                 help="Test files or directories to include in the subset"
-            )]
+            )] = []
         ):
             # client type: Optimize in def lauchable.commands.subset.subset
             def parse(fname: str):

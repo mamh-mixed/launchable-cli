@@ -101,7 +101,8 @@ class Subset(TestPathWriter):
             session: Annotated[str, typer.Option(
                 "--session",
                 help="In the format builds/<build-name>/test_sessions/<test-session-id>",
-                metavar="SESSION"
+                metavar="SESSION",
+                required=True
             )],
             target: Annotated[Percentage | None, typer.Option(
                 type=parse_percentage,

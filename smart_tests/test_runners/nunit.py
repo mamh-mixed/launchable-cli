@@ -132,7 +132,7 @@ def subset(
         multiple=True,
         required=False,
         help="Test report XML files to process"
-    )],
+    )] = [],
 ):
     """
     Parse an XML file produced from NUnit --explore option to list up all the viable test cases

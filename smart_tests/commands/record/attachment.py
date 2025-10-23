@@ -15,7 +15,8 @@ def attachment(
     app: Application,
     session: Annotated[str, typer.Option(
         "--session",
-        help="test session name"
+        help="test session name",
+        required=True
     )],
     attachments: Annotated[List[str], typer.Argument(
         multiple=True,

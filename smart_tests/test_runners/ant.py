@@ -15,7 +15,7 @@ def subset(
         multiple=True,
         required=False,
         help="Source directories to scan for test files"
-    )]
+    )] = []
 ):
     def file2test(f: str):
         if jvm_test_pattern.match(f):

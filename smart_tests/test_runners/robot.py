@@ -92,7 +92,7 @@ def subset(
         multiple=True,
         required=False,
         help="Test report files to process"
-    )],
+    )] = [],
 ):
     for r in reports:
         xml = JUnitXml.fromfile(r, parse_func)

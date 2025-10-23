@@ -127,7 +127,8 @@ class RecordTests:
             app: Application,
             session: Annotated[str, typer.Option(
                 "--session",
-                help="In the format builds/<build-name>/test_sessions/<test-session-id>"
+                help="In the format builds/<build-name>/test_sessions/<test-session-id>",
+                required=True
             )],
             base_path: Annotated[Path | None, typer.Option(
                 "--base",
