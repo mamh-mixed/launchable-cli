@@ -54,7 +54,7 @@ class Option(Parameter):
             try:
                 v = self.type(v)
             except ValueError as e:
-                raise BadCmdLineException(f"Invalid value '{v}' for option '{option_name}'") from e
+                raise BadCmdLineException(f"Invalid value '{v}' for option '{option_name}': {str(e)}") from e
 
         if self.multiple:
             if existing is None:
