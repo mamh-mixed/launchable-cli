@@ -532,7 +532,6 @@ class _Invoker:
                     option_names += o.option_names
             inv = inv.parent
 
-        # TODO: typo look up, etc
         msg = f"No such option '{option_name}' for '{self.command.name}' command"
         maybe = _maybe(option_name, option_names)
         if maybe:
