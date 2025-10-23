@@ -131,7 +131,7 @@ class ConsistencyCheckTest(TestCase):
         """Test that invalid option name formats are caught"""
         with self.assertRaises(BadConfigException) as e:
             @args4p.command()
-            @args4p.option("invalid_option_name", "param")
+            @args4p.option("invalid_option_name", "param", default="hello")
             def cmd(param: str):
                 pass
 
@@ -162,6 +162,19 @@ class ConsistencyCheckTest(TestCase):
             cmd()
 
         self.assertIn("'name' is marked as required but with default value", str(e.exception))
+
+    def test_optional_without_default_value(self):
+        """Test that optional (non-required) parameters must have a default value"""
+        with self.assertRaises(BadConfigException) as e:
+            @args4p.command()
+            @args4p.option("--name", "name")
+            def cmd(name: str):  # No default value for an option, either in signature nor the option declaration
+                pass
+
+            cmd()
+
+        # This should fail because 'name' is optional but has no default value
+        self.assertIn("Parameter 'name'", str(e.exception))
 
     # Argument Ordering Issues
 
