@@ -13,7 +13,7 @@ class TyperTest(TestCase):
             return "cli called"
 
         @cli.command()
-        def cmd1(parent_output: str, bar: Annotated[int, typer.Option("--baz")]):
+        def cmd1(parent_output: str, bar: Annotated[int, typer.Option("--baz")] = 0):
             self.assertEqual(parent_output, "cli called")
             self.assertEqual(bar, 3)
             return "exit code"

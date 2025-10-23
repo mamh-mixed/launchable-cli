@@ -36,7 +36,7 @@ class DecoratorTest(TestCase):
         """Test basic @option decorator"""
         @args4p.command()
         @args4p.option("--verbose", "verbose")
-        def cmd_with_opt(verbose: str):
+        def cmd_with_opt(verbose: str = ""):
             return f"verbose: {verbose}"
 
         # Option should be attached to command
@@ -52,7 +52,7 @@ class DecoratorTest(TestCase):
         """Test @option decorator with multiple option names"""
         @args4p.command()
         @args4p.option("-v", "--verbose", "verbose")
-        def f(verbose: str):
+        def f(verbose: str = ""):
             return f"verbose: {verbose}"
 
         opt = f.options[0]
@@ -78,7 +78,7 @@ class DecoratorTest(TestCase):
     def test_option_decorator_with_type(self):
         """Test @option decorator with type specification"""
         @args4p.command()
-        @args4p.option("--count", "count", type=int)
+        @args4p.option("--count", "count", type=int, default=0)
         def f(count: int):
             return count * 2
 
@@ -170,7 +170,8 @@ class DecoratorTest(TestCase):
         @args4p.option("--output", "output", default="stdout")
         @args4p.argument("input_file")
         @args4p.argument("extra_args", multiple=True, required=False)
-        def complex_cmd(input_file: str, extra_args: list[str], verbose: bool, output: str):
+        def complex_cmd(verbose: bool, output: str,
+                        input_file: str, extra_args: list[str] = []):
             result = f"Processing {input_file}"
             if verbose:
                 result += f" with output to {output}"

@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from unittest import TestCase
 
 import smart_tests.args4p as args4p
@@ -17,7 +17,7 @@ class CommandTest(TestCase):
 
         @cli.command()
         @args4p.option("--bar", "bar")
-        def cmd1(parent_output: str, bar: int):
+        def cmd1(parent_output: str, bar: int = 0):
             self.assertEqual(parent_output, "cli called")
             self.assertEqual(bar, 3)
             return "exit code"
@@ -87,7 +87,7 @@ class CommandTest(TestCase):
         captured = {}
 
         @args4p.command()
-        @args4p.option("--name", "name")
+        @args4p.option("--name", "name", default="")
         @args4p.option("--count", "count", type=int, default=10)
         @args4p.option("--verbose", "verbose", type=bool)
         def multi_opt(name: str, count: int, verbose: bool):
@@ -167,7 +167,7 @@ class CommandTest(TestCase):
 
         @args4p.command()
         @args4p.option("--item", "items", multiple=True)
-        def collect_items(items: list[str]):
+        def collect_items(items: list[str] = []):
             nonlocal collected
             collected = items or []
 
@@ -214,12 +214,12 @@ class CommandTest(TestCase):
 
         @args4p.group()
         @args4p.option("--global", "global_opt")
-        def main(global_opt: str):
+        def main(global_opt: Optional[str] = None):
             captured["global"] = global_opt
 
         @main.command()
         @args4p.option("--local", "local_opt")
-        def sub(context, local_opt: str):
+        def sub(context, local_opt: Optional[str] = None):
             captured["local"] = local_opt
 
         main("--global", "g_value", "sub", "--local", "l_value")
@@ -234,7 +234,7 @@ class CommandTest(TestCase):
         @args4p.option("--count", "count", type=int)
         @args4p.option("--rate", "rate", type=float)
         @args4p.argument("name")
-        def typed_cmd(name: str, count: int, rate: float):
+        def typed_cmd(name: str, count: int = 0, rate: float = 0):
             nonlocal received
             received = {"name": name, "count": count, "rate": rate}
 
@@ -316,7 +316,7 @@ class CommandTest(TestCase):
 
     def test_constructor(self):
         class Foo:
-            def __init__(self, name: Annotated[str, typer.Option()]):
+            def __init__(self, name: Annotated[str, typer.Option(required=True)]):
                 self.name = name
 
         # note @args4p.option won't work with this, because that decorator applies to

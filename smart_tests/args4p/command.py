@@ -209,7 +209,8 @@ class Command:
                     f"Default value '{p.default}' for parameter '{p.name}' is incompatible with type '{p.type.__name__}'")
 
             if not p.required and p.default == NO_DEFAULT and fp.default == inspect.Parameter.empty:
-                raise error(f"Parameter '{p.name}' is optional but has no default value")
+                if p.type != bool:  # boolean parameters get implicit default value of False
+                    raise error(f"Parameter '{p.name}' is optional but has no default value")
 
         # Check for duplicate option names
         all_option_names = set()

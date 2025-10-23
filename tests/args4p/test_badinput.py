@@ -89,7 +89,7 @@ class BadInputTest(TestCase):
         """Test error message for unknown long option"""
         @args4p.command()
         @args4p.option("--known", "known")
-        def cmd(known: str):
+        def cmd(known: str = ""):
             pass
 
         with self.assertRaises(BadCmdLineException) as e:
@@ -205,7 +205,7 @@ class BadInputTest(TestCase):
         """Test error message when option expects int but gets non-numeric string"""
         @args4p.command()
         @args4p.option("--count", "count", type=int)
-        def cmd(count: int):
+        def cmd(count: int = 0):
             pass
 
         with self.assertRaises(BadCmdLineException) as e:
@@ -233,7 +233,7 @@ class BadInputTest(TestCase):
         """Test error message when option expects float but gets invalid string"""
         @args4p.command()
         @args4p.option("--ratio", "ratio", type=float)
-        def cmd(ratio: float):
+        def cmd(ratio: float = 0):
             pass
 
         with self.assertRaises(BadCmdLineException) as e:
@@ -253,7 +253,7 @@ class BadInputTest(TestCase):
 
         @args4p.command()
         @args4p.option("--count", "count", type=positive_int)
-        def cmd(count: int):
+        def cmd(count: int = 0):
             pass
 
         with self.assertRaises(BadCmdLineException) as e:
@@ -270,7 +270,7 @@ class BadInputTest(TestCase):
         """Test error when option expects a value but none is provided"""
         @args4p.command()
         @args4p.option("--config", "config")
-        def cmd(config: str):
+        def cmd(config: str = ""):
             pass
 
         with self.assertRaises(BadCmdLineException) as e:
