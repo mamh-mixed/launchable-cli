@@ -13,6 +13,21 @@ from tests.cli_test_case import CliTestCase
 class CodeceptjsTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_record_test_codeceptjs(self):
+        result = self.cli(
+            "record",
+            "tests",
+            "--session",
+            self.session,
+            "codeceptjs",
+            str(self.test_files_dir.joinpath("codeceptjs-result.xml")),
+        )
+
+        self.assert_success(result)
+        self.assert_record_tests_payload("record_test_result.json")
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
     def test_subset(self):
         """Test basic subset functionality with multiple test files"""
         pipe = "test/example_test.js\ntest/login_test.js\n"
@@ -50,7 +65,9 @@ class CodeceptjsTest(CliTestCase):
         # Verify the output is valid JSON
         output = result.output.strip()
         output_json = json.loads(output)
-        self.assertEqual(output_json["tests"], ['test/example_test.js', 'test/login_test.js'])
+        self.assertEqual(
+            output_json["tests"], ["test/example_test.js", "test/login_test.js"]
+        )
 
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
@@ -100,7 +117,7 @@ class CodeceptjsTest(CliTestCase):
             # Verify the output is valid JSON with "tests" key
             output = result.output.strip()
             output_json = json.loads(output)
-            self.assertEqual(output_json["tests"], ['test/example_test.js'])
+            self.assertEqual(output_json["tests"], ["test/example_test.js"])
 
             # Verify rest file was created and contains valid JSON
             self.assertTrue(
@@ -108,7 +125,7 @@ class CodeceptjsTest(CliTestCase):
             )
             with open(rest_file_path, "r") as f:
                 rest_json = json.load(f)
-                self.assertEqual(rest_json["tests"], ['test/other_test.js'])
+                self.assertEqual(rest_json["tests"], ["test/other_test.js"])
         finally:
             # Cleanup
             if Path(rest_file_path).exists():
@@ -152,7 +169,7 @@ class CodeceptjsTest(CliTestCase):
         # Verify the output is valid JSON
         output = result.output.strip()
         output_json = json.loads(output)
-        self.assertEqual(output_json["tests"], ['test/single_test.js'])
+        self.assertEqual(output_json["tests"], ["test/single_test.js"])
 
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
@@ -195,4 +212,7 @@ class CodeceptjsTest(CliTestCase):
         # Verify the output is valid JSON
         output = result.output.strip()
         output_json = json.loads(output)
-        self.assertEqual(output_json["tests"], ['test/example_test.js', 'test/login_test.js', 'test/signup_test.js'])
+        self.assertEqual(
+            output_json["tests"],
+            ["test/example_test.js", "test/login_test.js", "test/signup_test.js"],
+        )
