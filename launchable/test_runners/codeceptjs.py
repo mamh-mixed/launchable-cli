@@ -26,16 +26,6 @@ def subset(client):
     client.run()
 
 
-@click.argument("reports", required=True, nargs=-1)
-@launchable.record.tests
-def record_tests(client, reports):
-    client.path_builder = launchable.CommonRecordTestImpls.create_file_path_builder(
-        client
-    )
-
-    for r in reports:
-        client.report(r)
-    client.run()
-
+record_tests = launchable.CommonRecordTestImpls(__name__).file_profile_report_files()
 
 split_subset = launchable.CommonSplitSubsetImpls(__name__).split_subset()
