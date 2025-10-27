@@ -10,6 +10,8 @@ from . import launchable
 @launchable.subset
 def subset(client):
     def handler(output: List[TestPath], rests: List[TestPath]):
+        # The output would be something like this:
+        # {"tests": ["test/example_test.js", "test/login_test.js"]}
         if client.rest:
             with open(client.rest, "w+", encoding="utf-8") as f:
                 f.write(json.dumps({"tests": [client.formatter(t) for t in rests]}))
