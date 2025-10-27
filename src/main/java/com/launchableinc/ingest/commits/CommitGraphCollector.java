@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
+import java.util.Collections;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.http.Header;
@@ -534,7 +535,11 @@ public class CommitGraphCollector {
         }
       }
 
-      for (VirtualFile f : treeReceiver.response()) {
+      // Note(Konboi): To balance the order, since words like "test" and "spec" tend to appear
+      // toward the end in alphabetical sorting.
+      List<VirtualFile> files = new ArrayList<>(treeReceiver.response());
+      Collections.shuffle(files);
+      for (VirtualFile f : files) {
         fileReceiver.accept(f);
         filesSent++;
       }
