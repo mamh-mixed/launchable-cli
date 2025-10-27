@@ -4,11 +4,14 @@ import sys
 import types
 
 import click
+from junitparser import TestCase, TestSuite  # type: ignore
 
 from launchable.commands.detect_flakes import detect_flakes as detect_flakes_cmd
 from launchable.commands.record.tests import tests as record_tests_cmd
 from launchable.commands.split_subset import split_subset as split_subset_cmd
 from launchable.commands.subset import subset as subset_cmd
+
+from ..testpath import TestPath
 
 
 def cmdname(m):
@@ -112,6 +115,38 @@ class CommonRecordTestImpls:
             CommonRecordTestImpls.load_report_files(client=client, source_roots=source_roots, file_mask=file_mask)
 
         return wrap(record_tests, record_tests_cmd, self.cmdname)
+
+    @staticmethod
+    def create_file_path_builder(client):
+        """
+        Creates a path builder that puts the file name first, which is consistent with the subset command
+        """
+
+        def path_builder(
+            case: TestCase, suite: TestSuite, report_file: str
+        ) -> TestPath:
+            def find_filename():
+                """look for what looks like file names from test reports"""
+                for e in [case, suite]:
+                    for a in ["file", "filepath"]:
+                        filepath = e._elem.attrib.get(a)
+                        if filepath:
+                            return filepath
+                return None  # failing to find a test name
+
+            filepath = find_filename()
+            if not filepath:
+                raise click.ClickException("No file name found in %s" % report_file)
+
+            # default test path in `subset` expects to have this file name
+            test_path = [client.make_file_path_component(filepath)]
+            if suite.name:
+                test_path.append({"type": "testsuite", "name": suite.name})
+            if case.name:
+                test_path.append({"type": "testcase", "name": case.name})
+            return test_path
+
+        return path_builder
 
     @classmethod
     def load_report_files(cls, client, source_roots, file_mask="*.xml"):

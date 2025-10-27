@@ -4,8 +4,12 @@
       "type": "case",
       "testPath": [
         {
-          "type": "class",
-          "name": "Visit homepage"
+          "type": "file",
+          "name": "/Users/ono-max/src/github.com/cloudbees-oss/smart-tests-integration-examples/codeceptjs/tests/website_test.js"
+        },
+        {
+          "type": "testsuite",
+          "name": "Basic Tests"
         },
         {
           "type": "testcase",
@@ -22,8 +26,12 @@
       "type": "case",
       "testPath": [
         {
-          "type": "class",
-          "name": "Visit form page"
+          "type": "file",
+          "name": "/Users/ono-max/src/github.com/cloudbees-oss/smart-tests-integration-examples/codeceptjs/tests/website_test.js"
+        },
+        {
+          "type": "testsuite",
+          "name": "Basic Tests"
         },
         {
           "type": "testcase",
