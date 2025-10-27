@@ -1,0 +1,53 @@
+{
+  "events": [
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "/Users/ono-max/src/github.com/cloudbees-oss/smart-tests-integration-examples/codeceptjs/tests/website_test.js"
+        },
+        {
+          "type": "testsuite",
+          "name": "Basic Tests"
+        },
+        {
+          "type": "testcase",
+          "name": "Basic Tests: Visit homepage"
+        }
+      ],
+      "duration": 0.194,
+      "status": 0,
+      "stdout": "",
+      "stderr": "expected web application to include \"Test Pagee\"\n\n      + expected - actual\n\n      -Test Page Welcome\n      +Test Pagee\n      ",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "/Users/ono-max/src/github.com/cloudbees-oss/smart-tests-integration-examples/codeceptjs/tests/website_test.js"
+        },
+        {
+          "type": "testsuite",
+          "name": "Basic Tests"
+        },
+        {
+          "type": "testcase",
+          "name": "Basic Tests: Visit form page"
+        }
+      ],
+      "duration": 0.127,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    }
+  ],
+  "testRunner": "codeceptjs",
+  "group": "",
+  "noBuild": false,
+  "flavors": [],
+  "testSuite": ""
+}
