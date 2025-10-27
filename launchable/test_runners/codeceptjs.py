@@ -20,7 +20,8 @@ def subset(client):
 
     # read lines as test file names
     for t in client.stdin():
-        client.test_path(t.rstrip("\n"))
+        if t.rstrip("\n"):
+            client.test_path(t.rstrip("\n"))
     client.output_handler = handler
 
     client.run()
