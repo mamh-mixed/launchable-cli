@@ -3,18 +3,24 @@ import json
 import sys
 from typing import Annotated, Generator, List
 
+import click
 import dateutil.parser
-import typer
 
+import smart_tests.args4p.typer as typer
+
+from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.case_event import CaseEvent, CaseEventType
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..testpath import TestPath, parse_test_path, unparse_test_path
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     test_path_file: Annotated[str | None, typer.Argument(
+        required=False,
         help="File containing test paths, one per line"
     )] = None,
 ):
@@ -26,10 +32,10 @@ def subset(
     """
 
     if not client.is_get_tests_from_previous_sessions and test_path_file is None:
-        raise typer.BadParameter("Missing argument 'TEST_PATH_FILE'.")
+        raise BadCmdLineException("Missing argument 'TEST_PATH_FILE'.")
 
     if client.is_output_exclusion_rules:
-        raise typer.BadParameter(
+        raise BadCmdLineException(
             "Don't need to use `--output-exclusion-rules` option. Please use `--rest` option and use it for exclusion"
         )
 
@@ -53,8 +59,9 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     test_result_files: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test result files (JSON or JUnit XML)"
     )],
 ):
@@ -172,6 +179,10 @@ def record_tests(
     TestPath should look like 'class={classname}#testcase={testcase}'.
     """
 
+    def fail(msg):
+        click.secho(msg, fg='red', err=True)
+        raise typer.Exit(1)
+
     def parse_json(test_result_file: str) -> Generator[CaseEventType, None, None]:
         with open(test_result_file, 'r') as f:
             doc = json.load(f)
@@ -180,9 +191,9 @@ def record_tests(
             test_path_components: TestPath = case.get('testPathComponents', None)
             test_path: str = case.get('testPath', None)
             if test_path_components is None and test_path is None:
-                raise ValueError("Missing testPath or testPathComponents field in the test case.")
+                fail("Missing testPath or testPathComponents field in the test case.")
             if test_path_components and test_path:
-                raise ValueError("Specifying both testPath and testPathComponents fields is invalid.")
+                fail("Specifying both testPath and testPathComponents fields is invalid.")
             if test_path:
                 test_path_components = parse_test_path(test_path)
             status = case['status']
@@ -191,16 +202,16 @@ def record_tests(
                 try:
                     duration_secs = float(duration_secs)
                 except ValueError:
-                    raise ValueError(f"The duration of {test_path_components} in {test_result_file} isn't a valid format (was {duration_secs}). Make sure set a valid duration")  # noqa
+                    fail(f"The duration of {test_path_components} in {test_result_file} isn't a valid format (was {duration_secs}). Make sure set a valid duration")  # noqa
 
             created_at = case.get('createdAt', default_created_at)
 
             if status not in CaseEvent.STATUS_MAP:
-                raise ValueError(
+                fail(
                     f"The status of {test_path_components} should be one of {list(CaseEvent.STATUS_MAP.keys())} (was {status})")
 
             if duration_secs < 0:
-                raise ValueError(f"The duration of {test_path_components} should be positive (was {duration_secs})")
+                fail(f"The duration of {test_path_components} should be positive (was {duration_secs})")
             dateutil.parser.parse(created_at)
             metadata = case.get('data', None)
 

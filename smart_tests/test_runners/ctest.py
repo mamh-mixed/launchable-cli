@@ -6,14 +6,18 @@ from pathlib import Path
 from typing import Annotated, List
 from xml.etree import ElementTree as ET
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
+
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     file: Annotated[str, typer.Argument(
         help="JSON file to process"
     )],
@@ -34,7 +38,7 @@ def subset(
         with Path(file).open() as json_file:
             data = json.load(json_file)
     else:
-        data = json.loads(client.stdin())
+        data = json.loads(client.stdin())   # type: ignore  # TODO
 
     for test in data['tests']:
         case = test['name']
@@ -48,7 +52,7 @@ def subset(
         client.run()
     else:
         client.formatter = lambda x: f"^{x[0]['name']}$"
-        client.seperator = '|'
+        client.separator = '|'
         client.run()
 
 
@@ -83,8 +87,9 @@ def _group_by_size(elems, max_size):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source root directories or files to process"
     )],
 ):
@@ -97,7 +102,7 @@ def record_tests(
             else:
                 client.report(t)
         if not match:
-            typer.echo(f"No matches found: {root}", err=True)
+            click.echo(f"No matches found: {root}", err=True)
 
     def parse_func(p: str) -> ET.ElementTree:
         """

@@ -4,12 +4,9 @@ import os
 import platform
 from typing import IO, BinaryIO, Dict, Tuple, Union
 
-import click
-import typer
 from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry  # type: ignore
-from typer import Context
 
 from smart_tests.version import __version__
 
@@ -45,8 +42,7 @@ class DryRunResponse:
 
 
 class _HttpClient:
-    def __init__(self, base_url: str = "", session: Session | None = None,
-                 test_runner: str | None = "", app: Application | None = None):
+    def __init__(self, base_url: str = "", session: Session | None = None, app: Application | None = None):
         self.base_url = base_url or get_base_url()
         self.dry_run = bool(app and app.dry_run)
         self.skip_cert_verification = bool(app and app.skip_cert_verification)
@@ -71,7 +67,7 @@ class _HttpClient:
         else:
             self.session = session
 
-        self.test_runner = test_runner
+        self.test_runner = app.test_runner if app else None
 
     def request(
         self,
@@ -134,38 +130,10 @@ class _HttpClient:
         if compress:
             h["Content-Encoding"] = "gzip"
 
-        if self.test_runner != "":
+        if self.test_runner:
             h["User-Agent"] = h["User-Agent"] + f" TestRunner/{self.test_runner}"
 
-        ctx = click.get_current_context(silent=True)
-        if ctx:
-            h["User-Agent"] = h["User-Agent"] + f" Command/{format_context(ctx)}"
-
         return {**h, **authentication_headers()}
-
-
-def format_context(ctx: typer.Context) -> str:
-    """
-    So that our CSMs can better understand how the users are invoking us,
-    capture the implicit command invocations and PID. This way we can correlate
-    the server side log with what each client session is doing.
-
-    When commands like `record tests` internally invoke `record session`, so long as it goes through
-    `context.invoke()` it appears in the nested context chain
-    """
-    cmds = []
-
-    """
-    The cts.parent method will return click.Context or None.
-    Cannot overwrite ctx with ctx.parent directly (it will fail the type check).
-    Therefore defined a _ctx and use it.
-    """
-    _ctx: Context | None = ctx
-    while _ctx:
-        if _ctx.command.name:
-            cmds.append(_ctx.command.name)
-        _ctx = _ctx.parent  # type: ignore
-    return '%s(%s)' % ('>'.join(cmds), os.getpid())
 
 
 def _file_to_generator(f: IO, chunk_size=4096):

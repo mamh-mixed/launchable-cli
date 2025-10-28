@@ -58,7 +58,8 @@ class XCTestTest(CliTestCase):
 
         result = self.cli('subset', 'xctest', '--session', self.session,
                           '--get-tests-from-previous-sessions',
-                          '--output-exclusion-rules')
+                          '--output-exclusion-rules',
+                          mix_stderr=False)
 
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')

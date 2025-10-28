@@ -1,6 +1,6 @@
 import datetime
 import sys
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Generator
 
 import dateutil.parser
 from dateutil.tz import tzlocal
@@ -13,6 +13,13 @@ from ...testpath import FilePathNormalizer, TestPath
 POSSIBLE_RESULTS = (Failure, Error, Skipped)
 
 CaseEventType = Dict[str, str]
+CaseEventGenerator = Generator[CaseEventType, None, None]
+
+# function that computes TestPath from a test case
+# The 3rd argument is the report file path
+TestPathBuilder = Callable[[TestCase, TestSuite, str], TestPath]
+
+DataBuilder = Callable[[TestCase], Dict[str, Any] | None]
 
 
 class CaseEvent:
@@ -26,12 +33,6 @@ class CaseEvent:
         'TEST_PASSED': TEST_PASSED,
         'TEST_FAILED': TEST_FAILED,
     }
-
-    # function that computes TestPath from a test case
-    # The 3rd argument is the report file path
-    TestPathBuilder = Callable[[TestCase, TestSuite, str], TestPath]
-
-    DataBuilder = Callable[[TestCase], Dict[str, Any] | None]
 
     @staticmethod
     def default_path_builder(

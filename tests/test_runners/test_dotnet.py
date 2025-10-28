@@ -62,22 +62,24 @@ class DotnetTest(CliTestCase):
             'subset', 'dotnet',
             '--session', self.session,
             '--target', '25%',
-            '--get-tests-from-previous-sessions')
+            '--get-tests-from-previous-sessions',
+            mix_stderr=False)
         self.assert_success(result)
 
         output = "FullyQualifiedName=rocket_car_dotnet.ExampleTest.TestSub|FullyQualifiedName=rocket_car_dotnet.ExampleTest.TestMul\n"  # noqa: E501
-        self.assertEqual(result.stdout, output)
+        self.assertEqual(result.output, output)
 
         result = self.cli(
             'subset', 'dotnet',
             '--session', self.session,
             '--target', '25%',
             '--get-tests-from-previous-sessions',
-            '--output-exclusion-rules')
+            '--output-exclusion-rules',
+            mix_stderr=False)
         self.assert_success(result)
 
         output = "FullyQualifiedName!=rocket_car_dotnet.ExampleTest.TestAdd&FullyQualifiedName!=rocket_car_dotnet.ExampleTest.TestDiv\n"  # noqa: E501
-        self.assertEqual(result.stdout, output)
+        self.assertEqual(result.output, output)
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
@@ -130,11 +132,12 @@ class DotnetTest(CliTestCase):
             '--session', self.session,
             '--target', '25%',
             '--get-tests-from-previous-sessions',
-            '--bare')
+            '--bare',
+            mix_stderr=False)
         self.assert_success(result)
 
         output = "rocket_car_dotnet.ExampleTest.TestSub\nrocket_car_dotnet.ExampleTest.TestMul\n"
-        self.assertEqual(result.stdout, output)
+        self.assertEqual(result.output, output)
 
         result = self.cli(
             'subset', 'dotnet',
@@ -142,11 +145,12 @@ class DotnetTest(CliTestCase):
             '--target', '25%',
             '--get-tests-from-previous-sessions',
             '--output-exclusion-rules',
-            '--bare')
+            '--bare',
+            mix_stderr=False)
         self.assert_success(result)
 
         output = "rocket_car_dotnet.ExampleTest.TestAdd\nrocket_car_dotnet.ExampleTest.TestDiv\n"
-        self.assertEqual(result.stdout, output)
+        self.assertEqual(result.output, output)
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})

@@ -383,7 +383,7 @@ class BuildTest(CliTestCase):
             "--repo-branch-map",
             ".=main")
         self.assert_exit_code(result, 1)
-        self.assertIn("--no-commit-collection must be specified when --repo-branch-map is used", result.stderr)
+        self.assertIn("--no-commit-collection must be specified when --repo-branch-map is used", result.stdout)
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})

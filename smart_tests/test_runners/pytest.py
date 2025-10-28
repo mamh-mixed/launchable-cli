@@ -3,14 +3,18 @@ import json
 import os
 import pathlib
 import subprocess
-from typing import Annotated, Generator, List
+from typing import Annotated, Generator, Iterable, List
 
-import typer
+import click
 from junitparser import Properties, TestCase  # type: ignore
 
+import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent, CaseEventType, MetadataTestCase
 from smart_tests.testpath import TestPath
 
+from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -38,12 +42,14 @@ from . import smart_tests
 #
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     source_roots: Annotated[List[str] | None, typer.Argument(
-        help="Source root directories for pytest test collection"
+        help="Source root directories for pytest test collection",
+        multiple=True,
+        required=False,
     )] = None,
 ):
-    def _add_testpaths(lines: List[str]):
+    def _add_testpaths(lines: Iterable[str]):
         for line in lines:
             line = line.rstrip()
             # When an empty line comes, it's done.
@@ -62,7 +68,7 @@ def subset(
             result = subprocess.run(command, stdout=subprocess.PIPE, universal_newlines=True)
             _add_testpaths(result.stdout.split(os.linesep))
         except FileNotFoundError:
-            raise typer.BadParameter("pytest command not found. Please check the path.")
+            raise BadCmdLineException("pytest command not found. Please check the path.")
 
     client.formatter = _pytest_formatter
     client.run()
@@ -133,8 +139,9 @@ def _pytest_formatter(test_path):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source directories containing test report files"
     )],
     json_report: Annotated[bool, typer.Option(
@@ -181,7 +188,7 @@ def record_tests(
                 client.report(t)
 
         if not match:
-            typer.echo(f"No matches found: {root}", err=True)
+            click.echo(f"No matches found: {root}", err=True)
             return
 
     if json_report:

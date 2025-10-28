@@ -2,15 +2,18 @@ import glob
 import os
 from typing import Annotated, List
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
+from smart_tests.commands.record.tests import RecordTests
+from smart_tests.commands.subset import Subset
 from smart_tests.test_runners import smart_tests
 from smart_tests.test_runners.nunit import nunit_parse_func
 from smart_tests.testpath import TestPath
 
 
 # main subset logic
-def do_subset(client, bare):
+def do_subset(client: Subset, bare):
     if bare:
         separator = "\n"
         prefix = ""
@@ -45,7 +48,7 @@ def do_subset(client, bare):
             with open(client.rest, "w+", encoding="utf-8") as fp:
                 fp.write(client.separator.join(formatter(t) for t in subset_tests))
 
-        typer.echo(client.separator.join(formatter(t) for t in rest_tests))
+        click.echo(client.separator.join(formatter(t) for t in rest_tests))
 
     client.separator = separator
     client.formatter = formatter
@@ -55,7 +58,7 @@ def do_subset(client, bare):
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     bare: Annotated[bool, typer.Option(
         "--bare",
         help="outputs class names alone"
@@ -65,10 +68,10 @@ def subset(
     Alpha: Supports only Zero Input Subsetting
     """
     if not client.is_get_tests_from_previous_sessions:
-        typer.secho(
+        click.secho(
             "The dotnet profile only supports Zero Input Subsetting.\nMake sure to use "
             "`--get-tests-from-previous-sessions` option",
-            fg=typer.colors.RED,
+            fg='red',
             err=True)
         raise typer.Exit(1)
 
@@ -77,8 +80,9 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     files: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):
@@ -94,7 +98,7 @@ def record_tests(
             else:
                 client.report(t)
         if not match:
-            typer.echo(f"No matches found: {file}", err=True)
+            click.echo(f"No matches found: {file}", err=True)
 
     # Note: we support only Nunit test report format now.
     # If we need to support another format e.g) JUnit, trc, then we'll add a option

@@ -9,5 +9,4 @@ class GzippenTest(TestCase):
         """Basic sanity test of """
         encoded = b''.join(compress([b'Hello', b' ', b'world']))
         msg = gzip.decompress(encoded)
-        print(msg)
         self.assertEqual(msg, b'Hello world')

@@ -1,26 +1,27 @@
 from typing import Annotated, Any, Dict, List
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
+
+from ... import args4p
+from ...app import Application
 from ...utils.smart_tests_client import SmartTestsClient
 from ...utils.typer_types import validate_key_value
 
-app = typer.Typer(name="test-sessions", help="View test session statistics")
 
-
-@app.command()
+@args4p.command(help="View test session statistics")
 def test_sessions(
-    ctx: typer.Context,
+    app: Application,
     days: Annotated[int, typer.Option(
         help="How many days of test sessions in the past to be stat"
     )] = 7,
     flavor: Annotated[List[str], typer.Option(
+        multiple=True,
         help="flavors",
         metavar="KEY=VALUE"
     )] = [],
 ):
-    app = ctx.obj
-
     # Parse flavors
     parsed_flavors = [validate_key_value(f) for f in flavor]
 
@@ -38,7 +39,7 @@ def test_sessions(
     try:
         res = client.request('get', '/stats/test-sessions', params=params)
         res.raise_for_status()
-        typer.echo(res.text)
+        click.echo(res.text)
 
     except Exception as e:
         client.print_exception_and_recover(e, "Warning: the service failed to get stat.")

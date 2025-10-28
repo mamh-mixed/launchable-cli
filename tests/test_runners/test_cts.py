@@ -57,7 +57,8 @@ armeabi-v7a CtsAbiOverrideHostTestCases
             "30%",
             "--session",
             self.session,
-            input=pipe)
+            input=pipe,
+            mix_stderr=False)
         self.assert_success(result)
 
         output = "--include-filter \"CtsAbiOverrideHostTestCases[instant]\"\n--include-filter \"CtsAbiOverrideHostTestCases\"\n"
@@ -72,7 +73,8 @@ armeabi-v7a CtsAbiOverrideHostTestCases
             "--session",
             self.session,
             "--output-exclusion-rules",
-            input=pipe)
+            input=pipe,
+            mix_stderr=False)
 
         self.assert_success(result)
 

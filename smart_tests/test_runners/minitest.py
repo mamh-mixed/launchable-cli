@@ -1,8 +1,10 @@
 from typing import Annotated, List
 
-import typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
+import smart_tests.args4p.typer as typer
+
+from ..commands.record.tests import RecordTests
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -13,8 +15,9 @@ TEST_PATH_ORDER = {"file": 1, "class": 2, "testcase": 3}
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

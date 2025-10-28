@@ -1,10 +1,11 @@
 import re
 
+from ..commands.subset import Subset
 from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     prev_cls_name = None
     pattern = re.compile(r'^INSTRUMENTATION_STATUS: class=(.+)$')
     for line in client.stdin():

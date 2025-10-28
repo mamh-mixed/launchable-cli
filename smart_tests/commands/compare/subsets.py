@@ -1,17 +1,20 @@
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Annotated, List, Tuple, Union
 
-import typer
+import click
 from tabulate import tabulate
 
-app = typer.Typer()
+import smart_tests.args4p.typer as typer
+from smart_tests import args4p
+from smart_tests.app import Application
+from smart_tests.args4p.converters import path
 
 
-@app.callback(invoke_without_command=True)
+@args4p.command()
 def subsets(
-    ctx: typer.Context,
-    file_before: Path = typer.Argument(None, help="First subset file to compare"),
-    file_after: Path = typer.Argument(None, help="Second subset file to compare")
+    app: Application,
+    file_before: Annotated[Path, typer.Argument(type=path(exists=True), help="First subset file to compare")],
+    file_after: Annotated[Path, typer.Argument(type=path(exists=True), help="Second subset file to compare")]
 ):
     """
     Compare two subset files and display changes in test order positions
@@ -52,4 +55,4 @@ def subsets(
         (before, after, f"{diff:+}" if isinstance(diff, int) else diff, test)
         for before, after, diff, test in rows
     ]
-    typer.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))
+    click.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))

@@ -3,16 +3,20 @@ import os
 import re
 from typing import Annotated, Dict, List
 
-import typer
+import click
 from junitparser import TestCase, TestSuite  # type: ignore
 
+import smart_tests.args4p.typer as typer
+
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from ..utils.logger import Logger
 from . import smart_tests
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     logger = Logger()
 
     # NOTE: This should be using package name + test function name to specify
@@ -42,8 +46,9 @@ def subset(client):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     source_roots: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Source root directories or files to process"
     )],
 ):
@@ -57,7 +62,7 @@ def record_tests(
                 client.report(t)
 
         if not match:
-            typer.echo(f"No matches found: {root}", err=True)
+            click.echo(f"No matches found: {root}", err=True)
             return
 
     default_path_builder = client.path_builder

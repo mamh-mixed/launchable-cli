@@ -2,13 +2,14 @@ import os
 from enum import Enum
 from typing import Annotated
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
 from smart_tests.app import Application
+from smart_tests.args4p.command import Group
 from smart_tests.commands.test_path_writer import TestPathWriter
 from smart_tests.testpath import unparse_test_path
 from smart_tests.utils.commands import Command
-from smart_tests.utils.dynamic_commands import DynamicCommandBuilder, extract_callback_options
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.session import get_session
@@ -22,85 +23,83 @@ class DetectFlakesRetryThreshold(str, Enum):
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
 
-
-app = typer.Typer(name="detect-flakes", help="Detect flaky tests")
-
-
-@app.callback()
-def detect_flakes(
-    ctx: typer.Context,
-    session: Annotated[str, typer.Option(
-        "--session",
-        help="In the format builds/<build-name>/test_sessions/<test-session-id>",
-        metavar="SESSION"
-    )],
-    retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
-        "--retry-threshold",
-        help="Thoroughness of how \"flake\" is detected",
-        case_sensitive=False,
-        show_default=True,
-    )] = DetectFlakesRetryThreshold.MEDIUM,
-):
-    app = ctx.obj
-    tracking_client = TrackingClient(Command.DETECT_FLAKE, app=app)
-    test_runner = getattr(ctx, 'test_runner', None)
-    client = SmartTestsClient(app=app, tracking_client=tracking_client, test_runner=test_runner)
-
-    test_session = None
-    try:
-        test_session = get_session(client=client, session=session)
-    except ValueError as e:
-        print_error_and_die(msg=str(e), tracking_client=tracking_client, event=Tracking.ErrorEvent.USER_ERROR)
-    except Exception as e:
-        if os.getenv(REPORT_ERROR_KEY):
-            raise e
-        else:
-            typer.echo(ignorable_error(e), err=True)
-
-    if test_session is None:
-        return
-
-    class FlakeDetection(TestPathWriter):
-        def __init__(self, app: Application):
-            super(FlakeDetection, self).__init__(app)
-
-        def run(self):
-            test_paths = []
-            try:
-                res = client.request(
-                    "get",
-                    "detect-flake",
-                    params={
-                        "confidence": retry_threshold.value.upper(),
-                        "session-id": os.path.basename(session),
-                        "test-runner": test_runner,
-                    })
-
-                res.raise_for_status()
-                test_paths = res.json().get("testPaths", [])
-                if test_paths:
-                    self.print(test_paths)
-                    typer.echo("Trying to retry the following tests:", err=True)
-                    for detail in res.json().get("testDetails", []):
-                        typer.echo(f"{detail.get('reason'): {unparse_test_path(detail.get('fullTestPath'))}}", err=True)
-            except Exception as e:
-                tracking_client.send_error_event(
-                    event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
-                    stack_trace=str(e),
-                )
-                if os.getenv(REPORT_ERROR_KEY):
-                    raise e
-                else:
-                    typer.echo(ignorable_error(e), err=True)
-
-    ctx.obj = FlakeDetection(app=ctx.obj)
+    @staticmethod
+    def from_str(value: str) -> "DetectFlakesRetryThreshold":
+        for member in DetectFlakesRetryThreshold:
+            if member.value.lower() == value.lower():
+                return member
+        raise ValueError(f"Invalid value for DetectFlakesRetryThreshold: {value}")
 
 
-nested_command_app = typer.Typer(name="detect-flakes", help="Detect flaky tests from test files (NestedCommand)")
+class DetectFlakes(TestPathWriter):
+    def __init__(
+            self,
+            app: Application,
+            session: Annotated[str, typer.Option(
+                "--session",
+                help="In the format builds/<build-name>/test_sessions/<test-session-id>",
+                metavar="SESSION",
+                required=True
+            )],
+            retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
+                "--retry-threshold",
+                help="Thoroughness of how \"flake\" is detected",
+                type=DetectFlakesRetryThreshold.from_str,
+                metavar="low|medium|high"
+            )] = DetectFlakesRetryThreshold.MEDIUM,
+            test_runner: Annotated[str | None, typer.Argument()] = None,
+    ):
+        super().__init__(app)
+
+        app.test_runner = test_runner
+        self.tracking_client = TrackingClient(Command.DETECT_FLAKE, app=app)
+        self.client = SmartTestsClient(app=app, tracking_client=self.tracking_client)
+
+        self.session = session
+        self.test_session = None
+        try:
+            self.test_session = get_session(client=self.client, session=session)
+        except ValueError as e:
+            print_error_and_die(msg=str(e), tracking_client=self.tracking_client, event=Tracking.ErrorEvent.USER_ERROR)
+        except Exception as e:
+            if os.getenv(REPORT_ERROR_KEY):
+                raise e
+            else:
+                click.echo(ignorable_error(e), err=True)
+
+        if self.test_session is None:
+            raise typer.Exit(0)     # bail out
+
+        self.retry_threshold = retry_threshold
+
+    def run(self):
+        test_paths = []
+        try:
+            res = self.client.request(
+                "get",
+                "detect-flake",
+                params={
+                    "confidence": self.retry_threshold.value.upper(),
+                    "session-id": os.path.basename(self.session),
+                    "test-runner": self.app.test_runner,
+                })
+
+            res.raise_for_status()
+            test_paths = res.json().get("testPaths", [])
+            if test_paths:
+                self.print(test_paths)
+                click.echo("Trying to retry the following tests:", err=True)
+                for detail in res.json().get("testDetails", []):
+                    click.echo(f"{detail.get('reason'): {unparse_test_path(detail.get('fullTestPath'))}}", err=True)
+        except Exception as e:
+            self.tracking_client.send_error_event(
+                event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
+                stack_trace=str(e),
+            )
+            if os.getenv(REPORT_ERROR_KEY):
+                raise e
+            else:
+                click.echo(ignorable_error(e), err=True)
 
 
-def create_nested_command_app():
-    builder = DynamicCommandBuilder()
-
-    callback_options = extract_callback_options(detect_flakes)
-    builder.create_detect_flakes_commands(nested_command_app, detect_flakes, callback_options)
+detect_flakes = Group(name="detect-flakes", callback=DetectFlakes, help="Detect flaky tests")

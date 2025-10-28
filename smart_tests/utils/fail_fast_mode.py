@@ -1,7 +1,7 @@
 import sys
 from typing import List, Optional, Sequence, Tuple
 
-import typer
+import click
 
 from .commands import Command
 
@@ -22,10 +22,8 @@ def is_fail_fast_mode() -> bool:
 
 
 def warn_and_exit_if_fail_fast_mode(message: str):
-    color = typer.colors.RED if is_fail_fast_mode() else typer.colors.YELLOW
-    message = typer.style(message, fg=color)
-
-    typer.echo(message, err=True)
+    color = 'red' if is_fail_fast_mode() else 'yellow'
+    click.secho(message, fg=color, err=True)
     if is_fail_fast_mode():
         sys.exit(1)
 
@@ -96,6 +94,6 @@ def _validate_record_tests(params: FailFastModeValidateParams):
 
 def _exit_if_errors(errors: List[str]):
     if errors:
-        msg = "\n".join(map(lambda x: typer.style(x, fg=typer.colors.RED), errors))
-        typer.echo(msg, err=True)
+        msg = "\n".join(map(lambda x: click.style(x, fg='red'), errors))
+        click.echo(msg, err=True)
         sys.exit(1)

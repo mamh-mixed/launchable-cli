@@ -1,11 +1,12 @@
 from typing import Annotated, Callable, Dict, List
 from xml.etree import ElementTree as ET
 
-import typer
-
+import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.case_event import CaseEvent
 from smart_tests.testpath import TestPath, parse_test_path, unparse_test_path
 
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from . import smart_tests
 
 # common code between 'subset' & 'record tests' to build up test path from
@@ -126,10 +127,12 @@ def nunit_parse_func(report: str):
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     report_xmls: Annotated[List[str], typer.Argument(
+        multiple=True,
+        required=False,
         help="Test report XML files to process"
-    )],
+    )] = [],
 ):
     """
     Parse an XML file produced from NUnit --explore option to list up all the viable test cases
@@ -151,8 +154,9 @@ def subset(
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     report_xml: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report XML files to process"
     )],
 ):

@@ -1,31 +1,31 @@
 import os
 from typing import BinaryIO, Dict
 
+import click
 import requests
-import typer
 from requests import HTTPError, Session, Timeout
 
 from smart_tests.utils.http_client import _HttpClient, _join_paths
 from smart_tests.utils.tracking import Tracking, TrackingClient  # type: ignore
 
 from ..app import Application
+from ..args4p.exceptions import BadCmdLineException
 from .authentication import get_org_workspace
 from .env_keys import REPORT_ERROR_KEY
 
 
 class SmartTestsClient:
     def __init__(self, tracking_client: TrackingClient | None = None, base_url: str = "", session: Session | None = None,
-                 test_runner: str | None = "", app: Application | None = None):
+                 app: Application | None = None):
         self.http_client = _HttpClient(
             base_url=base_url,
             session=session,
-            test_runner=test_runner,
             app=app
         )
         self.tracking_client = tracking_client
         self.organization, self.workspace = get_org_workspace()
         if self.organization is None or self.workspace is None:
-            raise ValueError(
+            raise BadCmdLineException(
                 "Could not identify a Smart Tests organization/workspace. "
                 "Confirm that you set SMART_TESTS_TOKEN "
                 "(or SMART_TESTS_ORGANIZATION and SMART_TESTS_WORKSPACE) environment variable(s)\n"
@@ -91,15 +91,15 @@ class SmartTestsClient:
         if os.getenv(REPORT_ERROR_KEY):
             raise e
 
-        typer.echo(e, err=True)
+        click.echo(e, err=True)
         if isinstance(e, HTTPError):
             # if the payload is present, report that as well to assist troubleshooting
             res = e.response
             if res and res.text:
-                typer.echo(res.text, err=True)
+                click.echo(res.text, err=True)
 
         if warning:
-            typer.secho(warning, fg=getattr(typer.colors, warning_color.upper(), typer.colors.YELLOW), err=True)
+            click.secho(warning, fg=warning_color, err=True)
 
     def base_url(self) -> str:
         return self.http_client.base_url
@@ -132,7 +132,3 @@ class SmartTestsClient:
             self.print_exception_and_recover(e, "Failed to get workspace state")
 
         return {}
-
-    def set_test_runner(self, test_runner: str):
-        """Update the test runner name for this client."""
-        self.http_client.test_runner = test_runner

@@ -1,12 +1,19 @@
-import typer
+from ... import args4p
+from ...app import Application
+from .attachment import attachment
+from .build import build
+from .commit import commit
+from .session import session
+from .tests import tests
 
-from . import attachment, build, commit, session
 
-app = typer.Typer(name="record", help="Record test results, builds, commits, and sessions")
+@args4p.group(help="Record test results, builds, commits, and sessions")
+def record(app: Application):
+    return app
 
-app.add_typer(build.app, name="build")
-app.add_typer(commit.app, name="commit")
-# NestedCommand version will be added in __main__.py
-# Remove old tests command registration - it will be replaced by NestedCommand in __main__.py
-app.add_typer(session.app, name="session")
-app.add_typer(attachment.app, name="attachment")
+
+record.add_command(build)
+record.add_command(commit)
+record.add_command(tests)
+record.add_command(session)
+record.add_command(attachment)

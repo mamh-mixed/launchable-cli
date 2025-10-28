@@ -1,18 +1,24 @@
 import os
 from typing import Annotated, List
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
 from smart_tests.utils.java import junit5_nested_class_path_builder
 
+from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..utils.file_name_pattern import jvm_test_pattern
 from . import smart_tests
 
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     source_roots: Annotated[List[str] | None, typer.Argument(
+        multiple=True,
+        required=False,
         help="Source root directories to scan for tests"
     )] = None,
     bare: Annotated[bool, typer.Option(
@@ -35,14 +41,14 @@ def subset(
 
     if client.is_get_tests_from_previous_sessions:
         if len(source_roots) != 0:
-            typer.secho(
+            click.secho(
                 "Warning: SOURCE_ROOTS are ignored when --get-tests-from-previous-sessions is used",
-                fg=typer.colors.YELLOW, err=True)
+                fg='yellow', err=True)
         # Always set to empty list when getting tests from previous sessions
         source_roots = []
     else:
         if len(source_roots) == 0:
-            raise typer.BadParameter("Error: Missing argument 'SOURCE_ROOTS...'")
+            raise BadCmdLineException("Error: Missing argument 'SOURCE_ROOTS...'")
 
     # Only scan if we have source roots
     for root in source_roots:
@@ -60,9 +66,9 @@ def subset(
 
         classes = [to_class_file(tp[0]['name']) for tp in rest_tests]
         if bare:
-            typer.echo(','.join(classes))
+            click.echo(','.join(classes))
         else:
-            typer.echo('-PexcludeTests=' + (','.join(classes)))
+            click.echo('-PexcludeTests=' + (','.join(classes)))
     client.exclusion_output_handler = exclusion_output_handler
 
     if bare:
@@ -80,8 +86,9 @@ def to_class_file(class_name: str):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):

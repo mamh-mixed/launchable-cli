@@ -1,10 +1,13 @@
 from typing import Annotated, List
 
-import typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
+import smart_tests.args4p.typer as typer
 from smart_tests.testpath import TestPath
 
+from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -24,8 +27,9 @@ def path_builder(case: TestCase, suite: TestSuite, report_file: str) -> TestPath
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):
@@ -37,9 +41,9 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     if client.base_path is None:
-        raise typer.BadParameter("Please specify base path")
+        raise BadCmdLineException("Please specify base path")
 
     for line in client.stdin():
         if len(line.strip()) and not line.startswith(">"):

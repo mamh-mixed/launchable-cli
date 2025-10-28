@@ -2,9 +2,12 @@ from datetime import datetime
 from typing import Annotated, List
 from xml.etree import ElementTree as ET
 
-import typer
 from junitparser import JUnitXml  # type: ignore
 
+import smart_tests.args4p.typer as typer
+
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -69,8 +72,9 @@ def parse_func(p: str) -> ET.ElementTree:
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):
@@ -83,10 +87,12 @@ def record_tests(
 
 @smart_tests.subset
 def subset(
-    client,
+    client: Subset,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
+        required=False,
         help="Test report files to process"
-    )],
+    )] = [],
 ):
     for r in reports:
         xml = JUnitXml.fromfile(r, parse_func)

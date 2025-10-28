@@ -2,6 +2,7 @@ import os
 import platform
 from unittest import TestCase, mock
 
+from smart_tests.app import Application
 from smart_tests.utils.http_client import _HttpClient
 from smart_tests.version import __version__
 
@@ -25,7 +26,9 @@ class HttpClientTest(TestCase):
             "User-Agent": f"Launchable/{__version__} (Python {platform.python_version()}, {platform.platform()})",
         })
 
-        cli = _HttpClient("/test", test_runner="dummy")
+        app = Application()
+        app.test_runner = "dummy"
+        cli = _HttpClient("/test", app=app)
         self.assertEqual(cli._headers(False), {
             'Content-Type': 'application/json',
             "User-Agent": f"Launchable/{__version__} (Python {platform.python_version()}, "

@@ -3,13 +3,16 @@ import re
 import sys
 from typing import Annotated, List
 
-import typer
+import click
 from tabulate import tabulate
 
+import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.session import KeyValue, parse_key_value
 from smart_tests.utils.link import CIRCLECI_KEY, GITHUB_ACTIONS_KEY, JENKINS_URL_KEY, capture_links
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
+from ... import args4p
+from ...app import Application
 from ...utils import subprocess
 from ...utils.authentication import get_org_workspace
 from ...utils.commands import Command
@@ -27,16 +30,14 @@ CODE_BUILD_BUILD_ID_KEY = "CODEBUILD_BUILD_ID"
 CODE_BUILD_WEBHOOK_HEAD_REF_KEY = "CODEBUILD_WEBHOOK_HEAD_REF"
 
 
-app = typer.Typer(name="build", help="Record build information")
-
-
-@app.callback(invoke_without_command=True)
+@args4p.command(help="Record build information")
 def build(
-    ctx: typer.Context,
+    app: Application,
     build_name: Annotated[str, typer.Option(
         "--build",
         help="build name",
-        metavar="BUILD_NAME"
+        metavar="BUILD_NAME",
+        required=True
     )],
     branch: Annotated[str | None, typer.Option(
         "--branch",
@@ -44,10 +45,12 @@ def build(
     )] = None,
     repositories: Annotated[List[str], typer.Option(
         "--repo-branch-map",
+        multiple=True,
         help="Set repository name and branch name when you use --no-commit-collection option. "
              "Please use the same repository name with a commit option"
     )] = [],
     source: Annotated[List[str], typer.Option(
+        multiple=True,
         help="path to local Git workspace, optionally prefixed by a label. "
              "like --source path/to/ws or --source main=path/to/ws",
         metavar="REPO_NAME"
@@ -66,6 +69,7 @@ def build(
     )] = False,
     commits: Annotated[List[str], typer.Option(
         "--commit",
+        multiple=True,
         help="set repository name and commit hash when you use --no-commit-collection option"
     )] = [],
     timestamp: Annotated[str | None, typer.Option(
@@ -74,11 +78,11 @@ def build(
     )] = None,
     links: Annotated[List[KeyValue], typer.Option(
         "--link",
+        multiple=True,
         help="Set external link of a title and url",
-        parser=parse_key_value,
+        type=parse_key_value,
     )] = [],
 ):
-    app = ctx.obj
 
     # Parse key-value pairs for commits
     parsed_commits = [validate_key_value(c) for c in commits]
@@ -93,16 +97,16 @@ def build(
     set_fail_fast_mode(client.is_fail_fast_mode())
 
     if "/" in build_name or "%2f" in build_name.lower():
-        typer.echo("--build must not contain a slash and an encoded slash", err=True)
+        click.echo("--build must not contain a slash and an encoded slash", err=True)
         raise typer.Exit(1)
     if "%25" in build_name:
-        typer.echo("--build must not contain encoded % (%25)", err=True)
+        click.echo("--build must not contain encoded % (%25)", err=True)
         raise typer.Exit(1)
     if not no_commit_collection and len(parsed_commits) != 0:
-        typer.echo("--no-commit-collection must be specified when --commit is used", err=True)
+        click.echo("--no-commit-collection must be specified when --commit is used", err=True)
         raise typer.Exit(1)
     if not no_commit_collection and len(repositories) != 0:
-        typer.echo("--no-commit-collection must be specified when --repo-branch-map is used", err=True)
+        click.echo("--no-commit-collection must be specified when --repo-branch-map is used", err=True)
         raise typer.Exit(1)
 
     # Information we want to collect for each Git repository
@@ -199,11 +203,11 @@ def build(
     def collect_commits():
         if not no_commit_collection:
             for w in ws:
-                commit(ctx, name=w.name, source=w.dir, max_days=max_days)
+                commit.callback(app, name=w.name, source=w.dir, max_days=max_days)
         else:
-            typer.secho(
+            click.secho(
                 "Warning: Commit collection is turned off. The commit data must be collected separately.",
-                fg=typer.colors.YELLOW, err=True)
+                fg='yellow', err=True)
 
     # tally up all the submodules, unless we are told not to
     def list_submodules(workspaces: List[Workspace]) -> List[Workspace]:
@@ -244,9 +248,9 @@ def build(
             for r in repositories:
                 kv = r.split('=')
                 if len(kv) != 2:
-                    typer.secho(
+                    click.secho(
                         f"Expected --repo-branch-map REPO=BRANCHNAME but got {kv}",
-                        fg=typer.colors.YELLOW, err=True)
+                        fg='yellow', err=True)
                     raise typer.Exit(1)
 
                 if not ws_by_name.get(kv[0]):
@@ -259,10 +263,10 @@ def build(
                 if not w.commit_hash:
                     w.commit_hash = subprocess.check_output("git rev-parse HEAD".split(), cwd=w.dir).decode().replace("\n", "")
             except Exception as e:
-                typer.secho(
+                click.secho(
                     "Can't get commit hash for {}. Do you run command under git-controlled directory? "
                     "If not, please set a directory use by --source option.",
-                    fg=typer.colors.YELLOW, err=True)
+                    fg='yellow', err=True)
                 print(e, file=sys.stderr)
                 raise typer.Exit(1)
             if w.name in branch_name_map:
@@ -278,9 +282,9 @@ def build(
 
         for name, hash in parsed_commits:
             if not commit_pattern.match(hash):
-                typer.secho(
+                click.secho(
                     f"{name}'s commit hash `{hash}` is invalid.",
-                    fg=typer.colors.YELLOW, err=True)
+                    fg='yellow', err=True)
                 raise typer.Exit(1)
 
             ws.append(Workspace(name=name, commit_hash=hash))
@@ -297,7 +301,7 @@ def build(
         try:
             lineage = branch or ws[0].branch
             if lineage is None:
-                typer.echo("Unable to determine branch name. Please specify --branch option.", err=True)
+                click.echo("Unable to determine branch name. Please specify --branch option.", err=True)
                 raise typer.Exit(1)
 
             payload = {
@@ -327,15 +331,15 @@ def build(
     # report what we did to the user to assist diagnostics
     def report(ws: List[Workspace], build_id: str):
         org, workspace = get_org_workspace()
-        typer.echo(
+        click.echo(
             f"Launchable recorded build {build_name} to workspace {org}/{workspace} with commits from {
                 len(ws)} {
                 'repositories' if len(ws) > 1 else 'repository'}:\n")
 
         header = ["Name", "Path", "HEAD Commit"]
         rows = [[w.name, w.dir, w.commit_hash] for w in ws]
-        typer.echo(tabulate(rows, header, tablefmt="github"))
-        typer.echo(
+        click.echo(tabulate(rows, header, tablefmt="github"))
+        click.echo(
             f"\nVisit https://app.launchableinc.com/organizations/{org}/workspaces/"
             f"{workspace}/data/builds/{build_id} to view this build and its test sessions")
 

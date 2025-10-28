@@ -2,7 +2,7 @@ import re
 from enum import Enum
 from typing import Dict, List, Mapping, Sequence, Tuple
 
-import typer
+from smart_tests.args4p.exceptions import BadCmdLineException
 
 JENKINS_URL_KEY = 'JENKINS_URL'
 JENKINS_BUILD_URL_KEY = 'BUILD_URL'
@@ -84,7 +84,7 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
         A list of dictionaries, where each dictionary contains the validated title, URL, and kind for each link.
 
     Raises:
-        typer.BadParameter: If an invalid kind is provided or URL doesn't match with the specified kind.
+        BadCmdLineException: If an invalid kind is provided or URL doesn't match with the specified kind.
     """
     links = []
     for k, url in link_options:
@@ -94,12 +94,12 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
         if '|' in k:
             kind, title = (part.strip() for part in k.split('|', 1))
             if kind not in _valid_kinds():
-                msg = f"Invalid kind '{kind}' passed to --link option.\nSupported kinds are {_valid_kinds()}"
-                raise typer.BadParameter(typer.style(msg, fg=typer.colors.RED))
+                raise BadCmdLineException(
+                    f"Invalid kind '{kind}' passed to --link option.\nSupported kinds are {_valid_kinds()}")
 
             if not _url_matches_kind(url, kind):
-                msg = f"Invalid url '{url}' passed to --link option.\nURL doesn't match with the specified kind '{kind}'"
-                raise typer.BadParameter(typer.style(msg, fg=typer.colors.RED))
+                raise BadCmdLineException(
+                    f"Invalid url '{url}' passed to --link option.\nURL doesn't match with the specified kind '{kind}'")
         # if k,v in format "title=url"
         else:
             kind = _infer_kinds(url)

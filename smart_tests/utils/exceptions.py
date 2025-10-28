@@ -1,7 +1,7 @@
 # TODO: add cli-specific custom exceptions
 import sys
 
-import typer
+import click
 
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
@@ -29,6 +29,6 @@ class InvalidJUnitXMLException(Exception):
 
 
 def print_error_and_die(msg: str, tracking_client: TrackingClient, event: Tracking.ErrorEvent):
-    typer.secho(msg, fg=typer.colors.RED, err=True)
+    click.secho(msg, fg='red', err=True)
     tracking_client.send_error_event(event_name=event, stack_trace=msg)
     sys.exit(1)

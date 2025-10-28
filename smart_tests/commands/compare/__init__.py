@@ -1,7 +1,11 @@
-import typer
+from ... import args4p
+from ...app import Application
+from .subsets import subsets
 
-from .subsets import app as subsets_app
 
-app = typer.Typer()
+@args4p.group()
+def compare(app: Application):
+    return app
 
-app.add_typer(subsets_app, name="subsets")
+
+compare.add_command(subsets)

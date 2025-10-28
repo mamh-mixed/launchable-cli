@@ -45,7 +45,8 @@ class RawTest(CliTestCase):
                     '# This is a comment',
                     'testcase=FooTest.Baz',
                 ]) + '\n')
-            result = self.cli('subset', 'raw', '--session', self.session, '--target', '10%', test_path_file)
+            result = self.cli('subset', 'raw', '--session', self.session, '--target', '10%',
+                              test_path_file, mix_stderr=False)
             self.assert_success(result)
 
             # Check request body
@@ -101,7 +102,8 @@ class RawTest(CliTestCase):
             '--target',
             '10%',
             "--rest",
-            rest.name)
+            rest.name,
+            mix_stderr=False)
         self.assert_success(result)
 
         # Check request body
@@ -206,7 +208,7 @@ class RawTest(CliTestCase):
                     '}',
                 ]) + '\n')
             result = self.cli('record', 'tests', 'raw', '--session', self.session,
-                              test_path_file, test_path_file2, test_path_file3)
+                              test_path_file, test_path_file2, test_path_file3, mix_stderr=False)
             self.assert_success(result)
 
             # Check request body
@@ -305,8 +307,8 @@ class RawTest(CliTestCase):
                     '  </testsuite>',
                     '</testsuites>',
                 ]) + '\n')
-            result = self.cli('record', 'tests', 'raw', '--session', self.session,
-                              test_path_file, test_path_file2)
+            result = self.cli('record', 'tests', 'raw', '--session',
+                              self.session, test_path_file, test_path_file2, mix_stderr=False)
             if result.exit_code != 0:
                 self.assertEqual(
                     result.exit_code,

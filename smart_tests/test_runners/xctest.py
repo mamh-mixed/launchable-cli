@@ -2,17 +2,22 @@ import html
 import xml.etree.ElementTree as ET  # type: ignore
 from typing import Annotated, List, cast
 
-import typer
+import click
 from junitparser import TestCase, TestSuite
 
+import smart_tests.args4p.typer as typer
+
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):
@@ -50,11 +55,11 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     if not client.is_get_tests_from_previous_sessions or not client.is_output_exclusion_rules:
-        typer.secho(
+        click.secho(
             "XCTest profile only supports the subset with `--get-tests-from-previous-sessions` and `--output-exclusion-rules` options",  # noqa: E501
-            fg=typer.colors.RED,
+            fg='red',
             err=True,
         )
 

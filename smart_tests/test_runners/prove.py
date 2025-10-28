@@ -1,9 +1,13 @@
 import re
 from typing import Annotated, List
 
-import typer
 from junitparser import TestCase, TestSuite  # type: ignore
 
+import smart_tests.args4p.typer as typer
+
+from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -16,7 +20,7 @@ def remove_leading_number_and_dash(input_string: str) -> str:
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))
@@ -26,8 +30,9 @@ def subset(client):
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
 ):
@@ -46,7 +51,7 @@ def record_tests(
 
         filepath = find_filename()
         if not filepath:
-            raise typer.BadParameter(
+            raise BadCmdLineException(
                 "No file name found in %s."
                 "Perl prove profile is made to take Junit report produced by "
                 "TAP::Formatter::JUnit (https://github.com/bleargh45/TAP-Formatter-JUnit), "

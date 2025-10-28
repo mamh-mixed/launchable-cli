@@ -3,12 +3,17 @@
 # https://playwright.dev/
 #
 import json
-from typing import Annotated, Dict, Generator, List
+from typing import Annotated, Dict, List
 
-import typer
+import click
 from junitparser import TestCase, TestSuite  # type: ignore
 
-from ..commands.record.case_event import CaseEvent
+import smart_tests.args4p.typer as typer
+
+from ..args4p.exceptions import BadCmdLineException
+from ..commands.record.case_event import CaseEvent, CaseEventGenerator
+from ..commands.record.tests import RecordTests
+from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -17,8 +22,9 @@ TEST_CASE_DELIMITER = " › "
 
 @smart_tests.record.tests
 def record_tests(
-    client,
+    client: RecordTests,
     reports: Annotated[List[str], typer.Argument(
+        multiple=True,
         help="Test report files to process"
     )],
     json_format: Annotated[bool, typer.Option(
@@ -39,7 +45,7 @@ def record_tests(
         """
         filepath = suite.name
         if not filepath:
-            raise typer.BadParameter("No file name found in %s" % report_file)
+            raise BadCmdLineException("No file name found in %s" % report_file)
 
         test_path = [client.make_file_path_component(filepath)]
         if case.name:
@@ -58,7 +64,7 @@ def record_tests(
 
 
 @smart_tests.subset
-def subset(client):
+def subset(client: Subset):
     # read lines as test file names
     for t in client.stdin():
         client.test_path(t.rstrip("\n"))
@@ -169,7 +175,7 @@ class JSONReportParser:
     def __init__(self, client):
         self.client = client
 
-    def parse_func(self, report_file: str) -> Generator[CaseEvent, None, None]:
+    def parse_func(self, report_file: str) -> CaseEventGenerator:
         data: Dict[str, Dict]
         with open(report_file, 'r') as json_file:
             try:
@@ -179,7 +185,7 @@ class JSONReportParser:
 
         suites: List[Dict[str, Dict]] = list(data.get("suites", []))
         if len(suites) == 0:
-            typer.echo(f"Can't find test results from {report_file}. Make sure to confirm report file.", err=True)
+            click.echo(f"Can't find test results from {report_file}. Make sure to confirm report file.", err=True)
 
         for s in suites:
             # The title of the root suite object contains the file name.

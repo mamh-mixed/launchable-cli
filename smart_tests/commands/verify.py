@@ -4,12 +4,15 @@ import re
 import subprocess
 from typing import List
 
-import typer
+import click
 
+import smart_tests.args4p.typer as typer
 from smart_tests.utils.commands import Command
 from smart_tests.utils.env_keys import TOKEN_KEY
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
+from .. import args4p
+from ..app import Application
 from ..utils.authentication import get_org_workspace
 from ..utils.java import get_java_command
 from ..utils.smart_tests_client import SmartTestsClient
@@ -56,17 +59,12 @@ def check_java_version(javacmd: str) -> int:
         return -1
 
 
-app = typer.Typer(name="verify", help="Verify CLI setup and connectivity")
-
-
-@app.callback(invoke_without_command=True)
-def verify(ctx: typer.Context):
+@args4p.command(help="Verify CLI setup and connectivity")
+def verify(app_instance: Application):
     # Run the verification (no subcommands in this app)
     # In this command, regardless of REPORT_ERROR_KEY, always report an unexpected error with full stack trace
     # to assist troubleshooting. `typer.BadParameter` is handled by the invoking
     # Click gracefully.
-
-    app_instance = ctx.obj
 
     org, workspace = get_org_workspace()
     tracking_client = TrackingClient(Command.VERIFY, app=app_instance)
@@ -76,13 +74,13 @@ def verify(ctx: typer.Context):
     # Print the system information first so that we can get them even if there's
     # an issue.
 
-    typer.echo("Organization: " + repr(org))
-    typer.echo("Workspace: " + repr(workspace))
-    typer.echo("Proxy: " + repr(os.getenv("HTTPS_PROXY")))
-    typer.echo("Platform: " + repr(platform.platform()))
-    typer.echo("Python version: " + repr(platform.python_version()))
-    typer.echo("Java command: " + repr(java))
-    typer.echo("smart-tests version: " + repr(version))
+    click.echo("Organization: " + repr(org))
+    click.echo("Workspace: " + repr(workspace))
+    click.echo("Proxy: " + repr(os.getenv("HTTPS_PROXY")))
+    click.echo("Platform: " + repr(platform.platform()))
+    click.echo("Python version: " + repr(platform.python_version()))
+    click.echo("Java command: " + repr(java))
+    click.echo("smart-tests version: " + repr(version))
 
     if org is None or workspace is None:
         msg = (
@@ -94,7 +92,7 @@ def verify(ctx: typer.Context):
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             stack_trace=msg
         )
-        typer.secho(msg, fg=typer.colors.RED, err=True)
+        click.secho(msg, fg='red', err=True)
         raise typer.Exit(1)
 
     try:
@@ -107,7 +105,7 @@ def verify(ctx: typer.Context):
                 msg = ("Authentication failed. Please set the SMART_TESTS_TOKEN. "
                        "If you intend to use tokenless authentication, "
                        "kindly reach out to our support team for further assistance.")
-            typer.secho(msg, fg=typer.colors.RED, err=True)
+            click.secho(msg, fg='red', err=True)
             tracking_client.send_error_event(
                 event_name=Tracking.ErrorEvent.USER_ERROR,
                 stack_trace=msg,
@@ -128,7 +126,7 @@ def verify(ctx: typer.Context):
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             stack_trace=msg
         )
-        typer.secho(msg, fg=typer.colors.RED, err=True)
+        click.secho(msg, fg='red', err=True)
         raise typer.Exit(1)
 
     # Level 2 check: versions. This is more fragile than just reporting the number, so we move
@@ -140,7 +138,7 @@ def verify(ctx: typer.Context):
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             stack_trace=msg
         )
-        typer.secho(msg, fg=typer.colors.RED, err=True)
+        click.secho(msg, fg='red', err=True)
         raise typer.Exit(1)
 
     if check_java_version(java) < 0:
@@ -149,7 +147,7 @@ def verify(ctx: typer.Context):
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             stack_trace=msg
         )
-        typer.secho(msg, fg=typer.colors.RED, err=True)
+        click.secho(msg, fg='red', err=True)
         raise typer.Exit(1)
 
-    typer.secho("Your CLI configuration is successfully verified" + emoji(" \U0001f389"), fg=typer.colors.GREEN)
+    click.secho("Your CLI configuration is successfully verified" + emoji(" \U0001f389"), fg='green')

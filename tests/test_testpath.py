@@ -134,7 +134,3 @@ class TestFilePathNormalizer(unittest.TestCase):
                 })
         except subprocess.CalledProcessError as e:
             self.fail("Failed to execute a command: {}\nSTDOUT: {}\nSTDERR: {}\n".                format(e, e.stdout, e.stderr))
-
-
-if __name__ == '__main__':
-    unittest.main()

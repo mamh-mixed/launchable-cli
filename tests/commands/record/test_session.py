@@ -63,7 +63,7 @@ class SessionTest(CliTestCase):
         result = self.cli(
             "record", "session", "--build", self.build_name,
             "--test-suite", "test-suite", "--flavor", "only-key")
-        self.assert_exit_code(result, 2)
+        self.assert_exit_code(result, 1)
         self.assertIn("but got 'only-key'", result.output)
 
     @responses.activate

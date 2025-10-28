@@ -1,8 +1,10 @@
 import os
 from typing import Tuple
 
+import click
 import requests
-import typer
+
+import smart_tests.args4p.typer as typer
 
 from .env_keys import ORGANIZATION_KEY, WORKSPACE_KEY, get_token
 
@@ -23,11 +25,11 @@ def get_org_workspace():
 def ensure_org_workspace() -> Tuple[str, str]:
     org, workspace = get_org_workspace()
     if org is None or workspace is None:
-        typer.secho(
+        click.secho(
             "Could not identify Smart Tests organization/workspace. "
             "Please confirm if you set SMART_TESTS_TOKEN "
             "(or LAUNCHABLE_TOKEN for backward compatibility) or SMART_TESTS_ORGANIZATION and "
-            "SMART_TESTS_WORKSPACE environment variables", fg=typer.colors.RED, err=True)
+            "SMART_TESTS_WORKSPACE environment variables", fg='red', err=True)
         raise typer.Exit(1)
     return org, workspace
 
@@ -41,11 +43,11 @@ def authentication_headers():
         req_url = os.getenv('ACTIONS_ID_TOKEN_REQUEST_URL')
         rt_token = os.getenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN')
         if not req_url or not rt_token:
-            typer.secho(
+            click.secho(
                 "GitHub Actions OIDC tokens cannot be retrieved."
                 "Confirm that you have added necessary permissions following "
                 "https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers#adding-permissions-settings",  # noqa: E501
-                fg=typer.colors.RED, err=True)
+                fg='red', err=True)
             raise typer.Exit(1)
         r = requests.get(req_url,
                          headers={

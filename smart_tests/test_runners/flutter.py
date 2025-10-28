@@ -1,12 +1,14 @@
 import json
 import pathlib
-from typing import Dict, Generator, List
+from typing import Annotated, Dict, List
 
-import typer
+import click
 
-from smart_tests.commands.record.case_event import CaseEvent
+import smart_tests.args4p.typer as typer
+from smart_tests.commands.record.case_event import CaseEvent, CaseEventGenerator
 from smart_tests.testpath import FilePathNormalizer
 
+from ..commands.record.tests import RecordTests
 from . import smart_tests
 
 FLUTTER_FILE_EXT = "_test.dart"
@@ -120,11 +122,11 @@ class ReportParser:
 
         return events
 
-    def parse_func(self, report_file: str) -> Generator[CaseEvent, None, None]:
+    def parse_func(self, report_file: str) -> CaseEventGenerator:
         # TODO: Support cases that include information about `flutter pub get`
         # see detail: https://github.com/launchableinc/examples/actions/runs/11884312142/job/33112309450
         if not pathlib.Path(report_file).exists():
-            typer.secho(f"Error: Report file not found: {report_file}", fg=typer.colors.RED, err=True)
+            click.secho(f"Error: Report file not found: {report_file}", fg='red', err=True)
             return
 
         with open(report_file, "r") as ndjson:
@@ -136,14 +138,14 @@ class ReportParser:
                         data = json.loads(j)
                         self._parse_json(data)
                     except json.JSONDecodeError:
-                        typer.secho(
+                        click.secho(
                             f"Error: Invalid JSON format: {j}. Skip load this line",
-                            fg=typer.colors.YELLOW,
+                            fg='yellow',
                             err=True)
                         continue
             except Exception as e:
-                typer.secho(
-                    f"Error: Failed to parse the report file: {report_file} : {e}", fg=typer.colors.RED, err=True)
+                click.secho(
+                    f"Error: Failed to parse the report file: {report_file} : {e}", fg='red', err=True)
                 return
 
         for event in self._events():
@@ -183,9 +185,9 @@ class ReportParser:
             suite = self._get_suite(suite_id)
 
             if suite_id is None or suite is None:
-                typer.secho(
+                click.secho(
                     f"Warning: Cannot find a parent test suite (id: {suite_id}). So won't send test result of {
-                        test_data.get('name')}", fg=typer.colors.YELLOW, err=True)
+                        test_data.get('name')}", fg='yellow', err=True)
                 return
 
             test_id = test_data.get("id")
@@ -214,8 +216,8 @@ class ReportParser:
             test_id = data.get("testID", 0)
             test = self._get_test(test_id)
             if test is None:
-                typer.secho(
-                    f"Warning: Cannot find a test (id: {test_id}). So we skip update stderr", fg=typer.colors.YELLOW,
+                click.secho(
+                    f"Warning: Cannot find a test (id: {test_id}). So we skip update stderr", fg='yellow',
                     err=True)
                 return
             test.stderr += ("\n" if test.stderr else "") + data.get("error", "")
@@ -226,8 +228,8 @@ class ReportParser:
             test_id = data.get("testID", 0)
             test = self._get_test(test_id)
             if test is None:
-                typer.secho(
-                    f"Warning: Cannot find a test (id: {test_id}). So we skip update stdout", fg=typer.colors.YELLOW,
+                click.secho(
+                    f"Warning: Cannot find a test (id: {test_id}). So we skip update stdout", fg='yellow',
                     err=True)
                 return
 
@@ -237,9 +239,9 @@ class ReportParser:
             return
 
 
-# This decorator is converted to Typer annotations in the function signature
 @smart_tests.record.tests
-def record_tests(client, reports):
+def record_tests(client: RecordTests,
+                 reports: Annotated[List[str], typer.Argument(required=True, multiple=True)]):
     file_path_normalizer = FilePathNormalizer(base_path=client.base_path, no_base_path_inference=client.no_base_path_inference)
     client.parse_func = ReportParser(file_path_normalizer).parse_func
 
