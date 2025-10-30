@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="0.861" tests="2" failures="1">
+  <testsuite name="Root Suite" timestamp="2025-10-27T01:20:06" tests="0" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Basic Tests" timestamp="2025-10-27T01:20:06" tests="2" file="/Users/ono-max/src/github.com/cloudbees-oss/smart-tests-integration-examples/codeceptjs/tests/website_test.js" time="0.861" failures="1">
+    <testcase name="Basic Tests: Visit homepage" time="0.194" classname="Visit homepage">
+      <failure message="expected web application to include &quot;Test Pagee&quot;" type="Error"><![CDATA[expected web application to include "Test Pagee"
+
+      + expected - actual
+
+      -Test Page Welcome
+      +Test Pagee
+      ]]></failure>
+    </testcase>
+    <testcase name="Basic Tests: Visit form page" time="0.127" classname="Visit form page">
+    </testcase>
+  </testsuite>
+</testsuites>

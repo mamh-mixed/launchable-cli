@@ -53,6 +53,9 @@ class DetectFlakeTest(CliTestCase):
             "detect-flakes",
             "file",
             "--session", self.session,
+            "--session",
+            self.session,
+            "file",
             mix_stderr=False,
         )
         self.assert_success(result)

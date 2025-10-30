@@ -6,4 +6,5 @@
                 [{"name": "rocket-car-gotest", "type": "class"}, {"name": "TestExample3", "type": "testcase"}],
                 [{"name": "rocket-car-gotest", "type": "class"}, {"name": "TestExample4", "type": "testcase"}]],
   "testRunner": "go-test",
+  "getTestsFromGuess": false,
   "getTestsFromPreviousSessions": false}

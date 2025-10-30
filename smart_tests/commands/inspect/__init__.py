@@ -1,3 +1,4 @@
+from .model import model
 from ... import args4p
 from ...app import Application
 from .subset import subset
@@ -8,4 +9,6 @@ def inspect(app: Application):
     return app
 
 
+inspect.add_command(model)
 inspect.add_command(subset)
+inspect.add_command(tests)

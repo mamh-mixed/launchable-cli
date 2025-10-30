@@ -87,7 +87,7 @@ def session(
             "noBuild": is_no_build,
             "testSuite": test_suite,
             "timestamp": parsed_timestamp.isoformat() if parsed_timestamp else None,
-            "links": capture_links(link_options=[(link.key, link.value) for link in links], env=os.environ)
+            "links": capture_links(link_options=links, env=os.environ)
         }
 
         sub_path = f"builds/{build_name}/test_sessions"

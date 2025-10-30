@@ -13,5 +13,6 @@
     ]
   ],
   "testRunner": "cypress",
+  "getTestsFromGuess": false,
   "getTestsFromPreviousSessions": false
 }
