@@ -1,4 +1,5 @@
 from .model import model
+from .tests import tests
 from ... import args4p
 from ...app import Application
 from .subset import subset

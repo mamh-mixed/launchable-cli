@@ -141,8 +141,11 @@ class SessionTest(CliTestCase):
             self.workspace,
             self.build_name)
 
+        def invoke(*args):
+            return self.cli(*("record", "session", "--build", self.build_name, "--test-suite", "test-suite")+args)
+
         # Capture from environment
-        result = self.cli("record", "session", "--build", self.build_name)
+        result = invoke()
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 0).request.body.decode())
         self.assertEqual([{
@@ -152,8 +155,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Priority check
-        result = self.cli("record", "session", "--build", self.build_name, "--link",
-                          "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link","GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 1).request.body.decode())
         self.assertEqual([{
@@ -163,8 +165,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Infer kind
-        result = self.cli("record", "session", "--build", self.build_name, "--link",
-                          "PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link","PR=https://github.com/launchableinc/cli/pull/2")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 2).request.body.decode())
         self.assertEqual([{
@@ -174,8 +175,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Explicit kind
-        result = self.cli("record", "session", "--build", self.build_name, "--link",
-                          "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link","GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 3).request.body.decode())
         self.assertEqual([{
@@ -185,8 +185,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Multiple kinds
-        result = self.cli("record", "session", "--build", self.build_name, "--link",
-                          "GITHUB_ACTIONS|=https://github.com/launchableinc/mothership/actions/runs/3747451612")
+        result = invoke("--link", "GITHUB_ACTIONS|=https://github.com/launchableinc/mothership/actions/runs/3747451612")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 4).request.body.decode())
         self.assertEqual([{
@@ -201,11 +200,9 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Invalid kind
-        result = self.cli("record", "session", "--build", self.build_name, "--link",
-                          "UNKNOWN_KIND|PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link", "UNKNOWN_KIND|PR=https://github.com/launchableinc/cli/pull/2")
         self.assertIn("Invalid kind 'UNKNOWN_KIND' passed to --link option", result.output)
 
         # Invalid URL
-        result = self.cli("record", "session", "--build", self.build_name, "--link",
-                          "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2/files")
+        result = invoke("--link","GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2/files")
         self.assertIn("Invalid url 'https://github.com/launchableinc/cli/pull/2/files' passed to --link option", result.output)

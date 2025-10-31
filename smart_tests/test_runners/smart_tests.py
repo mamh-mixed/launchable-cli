@@ -147,8 +147,11 @@ class CommonRecordTestImpls:
         'record tests' expect JUnit report/XML file names.
         """
 
-        @click.argument('source_roots', required=True, nargs=-1)
-        def record_tests(client, source_roots):
+        def record_tests(client: RecordTests,
+                         source_roots: Annotated[list[str], typer.Argument(
+                             multiple=True,
+                             help="Source directories containing test report files"
+                         )]):
             def path_builder(
                 case: TestCase, suite: TestSuite, report_file: str
             ) -> TestPath:

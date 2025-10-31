@@ -33,9 +33,7 @@ def subset(client: Subset):
     client.run()
 
 
-smart_tests.CommonDetectFlakesImpls(__name__).detect_flakes()
-
-launchable.CommonFlakeDetectionImpls(__name__, formatter=lambda x: x[0]['name'] + ":" + x[1]['name']).detect_flakes()
+smart_tests.CommonDetectFlakesImpls(__name__, formatter=lambda x: x[0]['name'] + ":" + x[1]['name']).detect_flakes()
 
 
 @smart_tests.record.tests
