@@ -136,7 +136,7 @@ def tests(
             '--test-session-id',
             help="display JSON format",
             required=True,
-        )] = None,
+        )],
         is_json_format: Annotated[bool, typer.Option(
             '--json',
             help="display JSON format"
