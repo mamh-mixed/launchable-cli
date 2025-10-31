@@ -5,8 +5,8 @@ from pathlib import Path
 from unittest import mock
 
 import responses  # type: ignore
-from smart_tests.utils.http_client import get_base_url
 
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 

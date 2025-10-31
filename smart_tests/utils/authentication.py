@@ -56,7 +56,7 @@ def authentication_headers():
                              'Content-Type': 'application/json',
                          })
         r.raise_for_status()
-        return {"Authorization": f"Bearer {r.json()["value"]}"}
+        return {"Authorization": f"Bearer {r.json()['value']}"}
 
     if os.getenv('GITHUB_ACTIONS'):
         headers = {

@@ -2,7 +2,7 @@ import json
 import sys
 from abc import ABCMeta, abstractmethod
 from http import HTTPStatus
-from typing import List, Annotated
+from typing import Annotated, List
 
 import click
 from tabulate import tabulate

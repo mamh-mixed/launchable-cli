@@ -234,4 +234,5 @@ def record_tests(
 
     client.run()
 
+
 smart_tests.CommonDetectFlakesImpls(__name__).detect_flakes()

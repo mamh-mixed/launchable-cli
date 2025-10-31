@@ -2,10 +2,8 @@
 # The most bare-bone versions of the test runner support
 #
 
-from junitparser import TestCase, TestSuite  # type: ignore
-
-from . import smart_tests
 from ..commands.subset import Subset
+from . import smart_tests
 
 
 @smart_tests.subset

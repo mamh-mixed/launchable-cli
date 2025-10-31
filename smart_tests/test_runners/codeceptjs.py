@@ -3,9 +3,9 @@ from typing import List
 
 import click
 
-from . import smart_tests
 from ..commands.subset import Subset
 from ..testpath import TestPath
+from . import smart_tests
 
 
 @smart_tests.subset

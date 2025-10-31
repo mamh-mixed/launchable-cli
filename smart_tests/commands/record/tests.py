@@ -247,9 +247,8 @@ class RecordTests:
         ):
             format = "%Y-%m-%d %H:%M:%S"
             self.logger.warning(
-                f"skip: {junit_report_file} is too old to report. start_record_at: {
-                    self.record_start_at.strftime(format)} file_created_at: {
-                    ctime.strftime(format)}")
+                f"skip: {junit_report_file} is too old to report. start_record_at:"
+                f"{self.record_start_at.strftime(format)} file_created_at: {ctime.strftime(format)}")
             self.skipped_reports.append(junit_report_file)
 
             return
@@ -414,9 +413,9 @@ class RecordTests:
         test_count, success_count, fail_count, duration = recorded_result()
 
         click.echo(
-            f"Smart Tests recorded tests for build {
-                self.build_name} (test session {
-                self.test_session_id}) to workspace {self.org}/{self.workspace} from {file_count} files:")
+            f"Smart Tests recorded tests for build "
+            f"{self.build_name}(test session {self.test_session_id}) to "
+            f"workspace {self.org} / {self.workspace} from {file_count} files: ")
 
         if is_observation:
             click.echo("(This test session is under observation mode)")

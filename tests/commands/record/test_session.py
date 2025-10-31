@@ -142,7 +142,7 @@ class SessionTest(CliTestCase):
             self.build_name)
 
         def invoke(*args):
-            return self.cli(*("record", "session", "--build", self.build_name, "--test-suite", "test-suite")+args)
+            return self.cli(*("record", "session", "--build", self.build_name, "--test-suite", "test-suite") + args)
 
         # Capture from environment
         result = invoke()
@@ -155,7 +155,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Priority check
-        result = invoke("--link","GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link", "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 1).request.body.decode())
         self.assertEqual([{
@@ -165,7 +165,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Infer kind
-        result = invoke("--link","PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link", "PR=https://github.com/launchableinc/cli/pull/2")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 2).request.body.decode())
         self.assertEqual([{
@@ -175,7 +175,7 @@ class SessionTest(CliTestCase):
         }], payload["links"])
 
         # Explicit kind
-        result = invoke("--link","GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
+        result = invoke("--link", "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2")
         self.assert_success(result)
         payload = json.loads(self.find_request(endpoint, 3).request.body.decode())
         self.assertEqual([{
@@ -204,5 +204,5 @@ class SessionTest(CliTestCase):
         self.assertIn("Invalid kind 'UNKNOWN_KIND' passed to --link option", result.output)
 
         # Invalid URL
-        result = invoke("--link","GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2/files")
+        result = invoke("--link", "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2/files")
         self.assertIn("Invalid url 'https://github.com/launchableinc/cli/pull/2/files' passed to --link option", result.output)

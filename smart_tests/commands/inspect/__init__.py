@@ -1,8 +1,8 @@
-from .model import model
-from .tests import tests
 from ... import args4p
 from ...app import Application
+from .model import model
 from .subset import subset
+from .tests import tests
 
 
 @args4p.group(help="Inspect test and subset data")
