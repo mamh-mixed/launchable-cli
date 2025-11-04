@@ -1,8 +1,9 @@
 import re
 from enum import Enum
-from typing import Dict, List, Mapping, Sequence, Tuple
+from typing import Dict, List, Mapping, Sequence
 
 from smart_tests.args4p.exceptions import BadCmdLineException
+from smart_tests.utils.typer_types import KeyValue
 
 JENKINS_URL_KEY = 'JENKINS_URL'
 JENKINS_BUILD_URL_KEY = 'BUILD_URL'
@@ -73,7 +74,7 @@ def capture_link(env: Mapping[str, str]) -> List[Dict[str, str]]:
     return links
 
 
-def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[Dict[str, str]]:
+def capture_links_from_options(link_options: Sequence[KeyValue]) -> List[Dict[str, str]]:
     """
     Validate user-provided link options, inferring the kind when not explicitly specified.
 
@@ -87,8 +88,9 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
         BadCmdLineException: If an invalid kind is provided or URL doesn't match with the specified kind.
     """
     links = []
-    for k, url in link_options:
-        url = url.strip()
+    for kv in link_options:
+        k = kv.key
+        url = kv.value.strip()
 
         # if k,v in format "kind|title=url"
         if '|' in k:
@@ -114,7 +116,7 @@ def capture_links_from_options(link_options: Sequence[Tuple[str, str]]) -> List[
     return links
 
 
-def capture_links(link_options: Sequence[Tuple[str, str]], env: Mapping[str, str]) -> List[Dict[str, str]]:
+def capture_links(link_options: Sequence[KeyValue], env: Mapping[str, str]) -> List[Dict[str, str]]:
     links = capture_links_from_options(link_options)
 
     env_links = capture_link(env)

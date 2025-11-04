@@ -186,8 +186,8 @@ class ReportParser:
 
             if suite_id is None or suite is None:
                 click.secho(
-                    f"Warning: Cannot find a parent test suite (id: {suite_id}). So won't send test result of {
-                        test_data.get('name')}", fg='yellow', err=True)
+                    f"Warning: Cannot find a parent test suite(id: {suite_id}). So won't send test result of "
+                    f"{test_data.get('name')}", fg='yellow', err=True)
                 return
 
             test_id = test_data.get("id")

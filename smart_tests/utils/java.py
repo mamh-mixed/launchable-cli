@@ -2,11 +2,13 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import Callable
 
 from junitparser import TestCase, TestSuite
 
-from smart_tests.commands.record.case_event import TestPathBuilder
 from smart_tests.testpath import TestPath
+
+TestPathBuilder = Callable[[TestCase, TestSuite, str], TestPath]
 
 
 def get_java_command():

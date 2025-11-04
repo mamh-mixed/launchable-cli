@@ -363,6 +363,7 @@ class Subset(TestPathWriter):
             },
             "ignoreNewTests": self.ignore_new_tests,
             "getTestsFromPreviousSessions": self.is_get_tests_from_previous_sessions,
+            "getTestsFromGuess": self.is_get_tests_from_guess,
         }
 
         if self.target is not None:

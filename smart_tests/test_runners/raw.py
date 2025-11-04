@@ -233,3 +233,6 @@ def record_tests(
         client.report(test_result_file)
 
     client.run()
+
+
+smart_tests.CommonDetectFlakesImpls(__name__).detect_flakes()

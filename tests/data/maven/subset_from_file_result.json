@@ -26,5 +26,6 @@
   "session": {
       "id":  "16"
   },
+  "getTestsFromGuess": false,
   "getTestsFromPreviousSessions": false
 }
