@@ -44,7 +44,16 @@ pipenv install --dev some-what-module
 
 # How to release
 
-Create new release on Github, then Github Actions automatically uploads the
+1. Create a new tag for the next release locally
+
+```sh
+git checkout v1
+git pull
+git tag v1.xx.yy
+git push origin --tags
+```
+
+2. Create new release on Github, then Github Actions automatically uploads the
 module to PyPI.
 
 ## How to update launchable/jar/exe_deploy.jar
