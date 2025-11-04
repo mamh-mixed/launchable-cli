@@ -38,6 +38,6 @@
 #
 [tagpr]
 	vPrefix = true
-	releaseBranch = v1
+	releaseBranch = main
 	versionFile = -
 	changelog = false
