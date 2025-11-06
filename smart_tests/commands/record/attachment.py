@@ -7,6 +7,7 @@ from smart_tests.utils.session import get_session
 
 from ... import args4p
 from ...app import Application
+from ...utils.fail_fast_mode import warn_and_exit_if_fail_fast_mode
 from ...utils.smart_tests_client import SmartTestsClient
 
 
@@ -29,10 +30,15 @@ def attachment(
         _ = get_session(session, client)
         for a in attachments:
             click.echo(f"Sending {a}")
-            with open(a, mode='rb') as f:
-                res = client.request(
-                    "post", f"{session}/attachment", compress=True, payload=f,
-                    additional_headers={"Content-Disposition": f"attachment;filename=\"{a}\""})
-                res.raise_for_status()
+            try:
+                with open(a, mode='rb') as f:
+                    res = client.request(
+                        "post", f"{session}/attachment", compress=True, payload=f,
+                        additional_headers={"Content-Disposition": f"attachment;filename=\"{a}\""})
+                    res.raise_for_status()
+            except OSError as e:
+                # no such file, permission error, etc.
+                # report, then continue to next attachment file
+                warn_and_exit_if_fail_fast_mode(str(e))
     except Exception as e:
         client.print_exception_and_recover(e)
