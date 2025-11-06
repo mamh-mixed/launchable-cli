@@ -4,7 +4,7 @@ from unittest import mock
 import responses
 
 from smart_tests.utils.http_client import get_base_url
-from smart_tests.utils.session import TestSession, get_session
+from smart_tests.utils.session import SessionId, TestSession, get_session
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from tests.cli_test_case import CliTestCase
 
@@ -27,7 +27,7 @@ class TestTestSession(CliTestCase):
             },
             status=200)
 
-        test_session = get_session(self.session, client)
+        test_session = get_session(SessionId(self.session), client)
         self.assertEqual(test_session, TestSession(
             id=self.session_id,
             build_id=456,
@@ -44,5 +44,5 @@ class TestTestSession(CliTestCase):
             status=404)
 
         with self.assertRaises(SystemExit) as cm:
-            get_session(self.session, client)
+            get_session(SessionId(self.session), client)
         self.assertEqual(cm.exception.code, 1)

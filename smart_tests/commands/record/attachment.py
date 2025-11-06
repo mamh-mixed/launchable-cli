@@ -3,7 +3,7 @@ from typing import Annotated, List
 import click
 
 import smart_tests.args4p.typer as typer
-from smart_tests.utils.session import get_session
+from smart_tests.utils.session import SessionId, get_session
 
 from ... import args4p
 from ...app import Application
@@ -13,11 +13,7 @@ from ...utils.smart_tests_client import SmartTestsClient
 @args4p.command(help="Record attachment information")
 def attachment(
     app: Application,
-    session: Annotated[str, typer.Option(
-        "--session",
-        help="test session name",
-        required=True
-    )],
+    session: Annotated[SessionId, SessionId.as_option()],
     attachments: Annotated[List[str], typer.Argument(
         multiple=True,
         help="Attachment files to upload"
@@ -31,7 +27,7 @@ def attachment(
             click.echo(f"Sending {a}")
             with open(a, mode='rb') as f:
                 res = client.request(
-                    "post", f"{session}/attachment", compress=True, payload=f,
+                    "post", session.subpath("attachment"), compress=True, payload=f,
                     additional_headers={"Content-Disposition": f"attachment;filename=\"{a}\""})
                 res.raise_for_status()
     except Exception as e:

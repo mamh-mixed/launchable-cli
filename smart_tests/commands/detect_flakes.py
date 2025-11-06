@@ -12,7 +12,7 @@ from smart_tests.testpath import unparse_test_path
 from smart_tests.utils.commands import Command
 from smart_tests.utils.env_keys import REPORT_ERROR_KEY
 from smart_tests.utils.exceptions import print_error_and_die
-from smart_tests.utils.session import get_session
+from smart_tests.utils.session import SessionId, get_session
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 from smart_tests.utils.tracking import Tracking, TrackingClient
 from smart_tests.utils.typer_types import ignorable_error
@@ -35,12 +35,7 @@ class DetectFlakes(TestPathWriter):
     def __init__(
             self,
             app: Application,
-            session: Annotated[str, typer.Option(
-                "--session",
-                help="In the format builds/<build-name>/test_sessions/<test-session-id>",
-                metavar="SESSION",
-                required=True
-            )],
+            session: Annotated[SessionId, SessionId.as_option()],
             retry_threshold: Annotated[DetectFlakesRetryThreshold, typer.Option(
                 "--retry-threshold",
                 help="Thoroughness of how \"flake\" is detected",
@@ -80,7 +75,7 @@ class DetectFlakes(TestPathWriter):
                 "detect-flake",
                 params={
                     "confidence": self.retry_threshold.value.upper(),
-                    "session-id": os.path.basename(self.session),
+                    "session-id": self.session.test_part,
                     "test-runner": self.app.test_runner,
                 })
 
