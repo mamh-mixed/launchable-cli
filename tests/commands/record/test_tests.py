@@ -2,6 +2,7 @@ import gzip
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -18,7 +19,13 @@ class TestsTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_with_group_name(self):
-        result = self.cli('record', 'tests', 'maven', '--session', self.session, '--group', 'hoge',
+        # also testing the use of @session_file syntax here
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
+            tmp.write(self.session)
+            tmp.flush()
+            session_file = tmp.name
+
+        result = self.cli('record', 'tests', 'maven', '--session', f'@{session_file}', '--group', 'hoge',
                           str(self.report_files_dir) + "**/reports/")
 
         self.assert_success(result)
