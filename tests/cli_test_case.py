@@ -97,11 +97,26 @@ class CliTestCase(unittest.TestCase):
         responses.add(
             responses.GET,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
+            f"/builds/{self.build_name}/test_session_names/{self.session_name}",
+            json={
+                'id': self.session_id,
+                'isObservation': False,
+            },
+            status=404)
+        responses.add(
+            responses.GET,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
             f"/builds/{self.build_name}/test_sessions/{self.session_id}",
             json={
                 'id': self.session_id,
                 'isObservation': False,
             },
+            status=200)
+        responses.add(
+            responses.PATCH,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
+            f"/builds/{self.build_name}/test_sessions/{self.session_id}",
+            json={'name': self.session_name},
             status=200)
         responses.add(
             responses.PATCH,

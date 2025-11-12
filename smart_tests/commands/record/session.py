@@ -9,7 +9,6 @@ import click
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
-from smart_tests.args4p.exceptions import BadCmdLineException
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
 from smart_tests.utils.fail_fast_mode import set_fail_fast_mode
@@ -20,13 +19,6 @@ from smart_tests.utils.tracking import Tracking, TrackingClient
 from smart_tests.utils.typer_types import KeyValue, parse_key_value, validate_datetime_with_tz
 
 TEST_SESSION_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_.-]*$")
-
-
-def _validate_session_name(value: str) -> str:
-    if TEST_SESSION_NAME_RULE.match(value):
-        return value
-    else:
-        raise BadCmdLineException("--name option supports only alphabet(a-z, A-Z), number(0-9), '-', and '_'")
 
 
 @args4p.command(help="Record session information")
@@ -67,10 +59,6 @@ def session(
     timestamp: Annotated[str | None, typer.Option(
         help="Used to overwrite the session time when importing historical data. Note: Format must be "
              "`YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)"
-    )] = None,
-    name: Annotated[str | None, typer.Option(
-        help="Give a human friendly name to the test session to make it easy to tell them apart. Used in the webapp.",
-        type=_validate_session_name
     )] = None,
 ):
 
@@ -124,41 +112,9 @@ def session(
 
         click.echo(f"{sub_path}/{session_id}", nl=False)
 
-        if name:
-            add_session_name(
-                client=client,
-                build_name=build_name,
-                session_id=session_id,
-                session_name=name,
-            )
-
     except Exception as e:
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             stack_trace=str(e),
         )
         client.print_exception_and_recover(e)
-
-
-def add_session_name(
-        client: SmartTestsClient,
-        build_name: str,
-        session_id: str,
-        session_name: str,
-):
-    sub_path = "builds/{}/test_sessions/{}".format(build_name, session_id)
-    payload = {
-        "name": session_name
-    }
-    res = client.request("patch", sub_path, payload=payload)
-
-    if res.status_code == HTTPStatus.NOT_FOUND:
-        click.secho("Test session {} was not found. Record session may have failed.".format(session_id), fg='yellow', err=True)
-        sys.exit(1)
-    if res.status_code == HTTPStatus.BAD_REQUEST:
-        click.secho(
-            "You cannot use test session name {} since it is already used by other test session in your workspace. The record session is completed successfully without session name."  # noqa: E501
-            .format(session_name), fg='yellow', err=True)
-        sys.exit(1)
-
-    res.raise_for_status()

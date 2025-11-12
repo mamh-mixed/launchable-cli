@@ -90,38 +90,6 @@ class SessionTest(CliTestCase):
         }, payload)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {
-        "SMART_TESTS_TOKEN": CliTestCase.smart_tests_token,
-        'LANG': 'C.UTF-8',
-    }, clear=True)
-    def test_run_session_with_session_name(self):
-        def invoke(*args):
-            return self.cli(*("record", "session", "--build", self.build_name, "--test-suite", "test-suite") + args)
-
-        # session name is already exist
-        responses.add(
-            responses.PATCH,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
-            f"/builds/{self.build_name}/test_sessions/{self.session_id}",
-            json={'name': self.session_name},
-            status=400)
-        result = invoke("--name", self.session_name)
-        self.assert_exit_code(result, 1)
-
-        # invalid session name
-        result = invoke("--name", "invalid/name")
-        self.assert_exit_code(result, 1)
-
-        responses.replace(
-            responses.PATCH,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"
-            f"/builds/{self.build_name}/test_sessions/{self.session_id}",
-            json={'name': self.session_name},
-            status=200)
-        result = invoke("--name", self.session_name)
-        self.assert_success(result)
-
-    @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token, 'LANG': 'C.UTF-8'}, clear=True)
     def test_run_session_with_timestamp(self):
         result = self.cli("record", "session", "--build", self.build_name,
