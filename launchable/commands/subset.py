@@ -529,7 +529,7 @@ def subset(
 
         def _collect_potential_test_files(self):
             LOOSE_TEST_FILE_PATTERN = r'(\.(test|spec)\.|_test\.|Test\.|Spec\.|test/|tests/|__tests__/|src/test/)'
-            EXCLUDE_PATTERN = r'\.(xml|json|txt|yml|yaml|md)$'
+            EXCLUDE_PATTERN = r'(BUILD|Makefile|Dockerfile|LICENSE|.gitignore|.gitkeep|.keep|id_rsa|rsa|blank|taglib)|\.(xml|json|jsonl|txt|yml|yaml|toml|md|png|jpg|jpeg|gif|svg|sql|html|css|graphql|proto|gz|zip|rz|bzl|conf|config|snap|pem|crt|key|lock|jpi|hpi|jelly|properties|jar|ini|mod|sum|bmp|env|envrc|sh)$' ## noqa E501
 
             try:
                 git_managed_files = subprocess.run(['git', 'ls-files'], stdout=subprocess.PIPE,
