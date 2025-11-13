@@ -89,6 +89,8 @@ public class CommitGraphCollector {
 
   private int maxDays;
 
+  private boolean reportAllFiles;
+
   private boolean audit;
 
   private boolean dryRun;
@@ -150,7 +152,7 @@ public class CommitGraphCollector {
       }
       CloseableHttpResponse latestResponse = client.execute(new HttpGet(latestUrl.toExternalForm()));
       ImmutableList<ObjectId> advertised = getAdvertisedRefs(handleError(latestUrl, latestResponse));
-      honorMaxDaysHeader(latestResponse);
+      honorControlHeaders(latestResponse);
 
       // every time a new stream is needed, supply ByteArrayOutputStream, and when the data is all
       // written, turn around and ship that over
@@ -301,15 +303,20 @@ public class CommitGraphCollector {
     }
   }
 
-  /**
-   * When a user incorrectly configures shallow clone, the incremental nature of commit collection
-   * makes it really hard for us and users to collaboratively reset and repopulate the commit data.
-   * This server-side override mechanism makes it easier.
-   */
-  private void honorMaxDaysHeader(HttpResponse response) {
+  private void honorControlHeaders(HttpResponse response) {
+    // When a user incorrectly configures shallow clone, the incremental nature of commit collection
+    // makes it really hard for us and users to collaboratively reset and repopulate the commit data.
+    // This server-side override mechanism makes it easier.
     Header h = response.getFirstHeader("X-Max-Days");
     if (h!=null) {
       maxDays = Integer.parseInt(h.getValue());
+    }
+    // File transfer is supposed to work incrementally, but we are investigating the problem where
+    // not all files get collected prior to commit collection, resulting in incomplete data on the server side.
+    // As a temporary mitigation, allow the server to request all files to be reported.
+    h = response.getFirstHeader("X-Report-All-Files");
+    if (h!=null) {
+      reportAllFiles = true;
     }
   }
 
@@ -427,16 +434,22 @@ public class CommitGraphCollector {
         // and it drastically cuts down the initial commit consumption of a new large repository.
         // ... except we do want to capture the head commit, as that makes it easier to spot integration problems
         // when `record build` and `record commit` are separated.
+
+        // two RevFilters are order sensitive. This is because CommitTimeRevFilter.after doesn't return false to
+        // filter things out, it throws StopWalkException to terminate the walk, never giving a chance for the other
+        // branch of OR to be evaluated. So we need to put ObjectRevFilter first.
         walk.setRevFilter(
             OrRevFilter.create(
-                CommitTimeRevFilter.after(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(maxDays)),
-                new ObjectRevFilter(headId)));
+              new ObjectRevFilter(headId),
+              CommitTimeRevFilter.after(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(maxDays))));
 
         for (ObjectId id : advertised) {
           try {
             RevCommit c = walk.parseCommit(id);
             walk.markUninteresting(c);
-            treeWalk.addTree(c.getTree());
+            if (!reportAllFiles) {
+              treeWalk.addTree(c.getTree());
+            }
           } catch (MissingObjectException e) {
             // it's possible that the server advertises a commit we don't have.
             //
