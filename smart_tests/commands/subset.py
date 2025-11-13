@@ -18,7 +18,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests.utils.authentication import get_org_workspace
 from smart_tests.utils.commands import Command
 from smart_tests.utils.exceptions import print_error_and_die
-from smart_tests.utils.session import get_session, parse_session
+from smart_tests.utils.session import SessionId, get_session
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from ..app import Application
@@ -98,12 +98,7 @@ class Subset(TestPathWriter):
     def __init__(
             self,
             app: Application,
-            session: Annotated[str, typer.Option(
-                "--session",
-                help="In the format builds/<build-name>/test_sessions/<test-session-id>",
-                metavar="SESSION",
-                required=True
-            )],
+            session: Annotated[SessionId, SessionId.as_option()],
             target: Annotated[Percentage | None, typer.Option(
                 type=parse_percentage,
                 help="subsetting target from 0% to 100%"
@@ -213,7 +208,7 @@ class Subset(TestPathWriter):
             else:
                 # not to block pipeline, parse session and use it
                 self.client.print_exception_and_recover(e, "Warning: failed to check test session")
-                self.build_name, self.session_id = parse_session(session)
+                self.build_name, self.session_id = session.build_part, session.test_part
 
         if is_get_tests_from_guess and is_get_tests_from_previous_sessions:
             print_error_and_die(

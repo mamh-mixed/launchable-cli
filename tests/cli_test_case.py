@@ -45,6 +45,10 @@ class CliTestCase(unittest.TestCase):
         # not to use cached configuration between tests
         responses.reset()
 
+        # This is a bad idea -- to have one place where all the mocked responses are defined for all the test cases.
+        # These fixtures should be moved closer to where they are used, as much as possible. It'll take time to clean
+        # this up, but at least let's not add new ones here.
+        # (Kohsuke 2025-11-12)
         responses.add(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}"

@@ -4,6 +4,7 @@ from typing import List, Optional, Sequence, Tuple
 import click
 
 from .commands import Command
+from .session import SessionId
 
 _fail_fast_mode_cache: Optional[bool] = None
 
@@ -30,7 +31,7 @@ def warn_and_exit_if_fail_fast_mode(message: str):
 
 class FailFastModeValidateParams:
     def __init__(self, command: Command, build: Optional[str] = None, is_no_build: bool = False,
-                 test_suite: Optional[str] = None, session: Optional[str] = None,
+                 test_suite: Optional[str] = None, session: Optional[SessionId] = None,
                  links: Sequence[Tuple[str, str]] = (), is_observation: bool = False,
                  flavor: Sequence[Tuple[str, str]] = ()):
         self.command = command
