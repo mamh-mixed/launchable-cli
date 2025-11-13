@@ -100,7 +100,7 @@ def record_tests(
                             system_out = ET.SubElement(c, 'system-out')
                             system_out.text = log
 
-        return tree
+        return tree  # type: ignore
 
     client.junitxml_parse_func = parse_func
 
