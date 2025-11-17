@@ -454,6 +454,7 @@ class Command:
 
                     return " ".join(desc_parts)
 
+                lines.append("// GENERATED. MODIFY IN CLI SOURCE CODE")
                 lines.append(f"|{_print_name()}")
                 lines.append(f"|{_print_description()}")
                 lines.append(f"|{_print_required(arg)}")
@@ -494,6 +495,7 @@ class Command:
 
                     return " ".join(desc_parts)
 
+                lines.append("// GENERATED. MODIFY IN CLI SOURCE CODE")
                 lines.append(f"|{_print_name()}")
                 lines.append(f"|{_print_description()}")
                 lines.append(f"|{_print_required(opt)}")
