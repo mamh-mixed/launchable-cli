@@ -28,7 +28,8 @@ jar_file_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../
 def commit(
     app: Application,
     name: Annotated[str | None, typer.Option(
-        help="Repository name"
+        help="Repository name",
+        metavar="NAME",
     )] = None,
     source: Annotated[str, typer.Option(
         help="Repository path",

@@ -424,16 +424,14 @@ class Command:
         """
         lines = [f"`{self._usage_line(program_name)}`", ""]
 
-        options = sorted([opt for opt in self.options if not opt.hidden], key=lambda o: o.name)
+        def _print_required(p: Parameter) -> str:
+            return "Yes" if p.required else "No"
 
-        if options or self.arguments:
+        if self.arguments:
             lines.append("[cols=\"1,2,1\"]")
             lines.append("|===")
-            lines.append("|Option |Description |Required")
+            lines.append("|Argument |Description |Required")
             lines.append("")
-
-            def _print_required(p: Parameter) -> str:
-                return "Yes" if p.required else "No"
 
             for arg in self.arguments:
                 def _print_name() -> str:
@@ -461,7 +459,15 @@ class Command:
                 lines.append(f"|{_print_required(arg)}")
                 lines.append("")
 
-            for opt in options:
+            lines.append("|===")
+
+        if self.options:
+            lines.append("[cols=\"1,2,1\"]")
+            lines.append("|===")
+            lines.append("|Option |Description |Required")
+            lines.append("")
+
+            for opt in sorted([opt for opt in self.options if not opt.hidden], key=lambda o: o.name):
                 def _print_name() -> str:
                     names = ", ".join([f"`{name}`" for name in opt.option_names])
 
