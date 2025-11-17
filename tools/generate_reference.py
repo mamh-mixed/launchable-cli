@@ -77,4 +77,4 @@ def main(reference_file: Annotated[Path, typer.Argument(type=path(exists=True, f
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main.main()
