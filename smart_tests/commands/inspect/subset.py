@@ -99,11 +99,11 @@ class SubsetResultJSONDisplay(SubsetResultAbstractDisplay):
 def subset(
     app: Application,
     subset_id: Annotated[int, typer.Option(
-        help="subset id",
+        help="Subset id",
         required=True
     )],
     json: Annotated[bool, typer.Option(
-        help="display JSON format"
+        help="Display JSON format"
     )] = False,
 ):
     is_json_format = json  # Map parameter name
