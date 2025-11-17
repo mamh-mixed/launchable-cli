@@ -424,7 +424,6 @@ class Command:
         """
         lines = [f"`{self._usage_line(program_name)}`", ""]
 
-        # Add options table
         options = sorted([opt for opt in self.options if not opt.hidden], key=lambda o: o.name)
 
         if options or self.arguments:
@@ -433,72 +432,65 @@ class Command:
             lines.append("|Option |Description |Required")
             lines.append("")
 
-            # Add arguments first
+            def _print_required(p: Parameter) -> str:
+                return "Yes" if p.required else "No"
+
             for arg in self.arguments:
-                # Format argument name with angle brackets
-                if arg.multiple:
-                    arg_name = f"`<{arg.metavar}>...`"
-                else:
-                    arg_name = f"`<{arg.metavar}>`"
+                def _print_name() -> str:
+                    if arg.multiple:
+                        return f"`<{arg.metavar}>...`"
+                    else:
+                        return f"`<{arg.metavar}>`"
 
-                # Build description
-                desc_parts = []
-                if arg.help:
-                    desc_parts.append(arg.help)
+                def _print_description() -> str:
+                    desc_parts = []
+                    if arg.help:
+                        desc_parts.append(arg.help)
 
-                # Add type info if not string
-                if arg.type != str:
-                    type_name = getattr(arg.type, '__name__', str(arg.type))
-                    desc_parts.append(f"(type: {type_name})")
+                    if arg.type != str:
+                        type_name = getattr(arg.type, '__name__', str(arg.type))
+                        desc_parts.append(f"(type: {type_name})")
 
-                # Add default value
-                if arg.default != NO_DEFAULT:
-                    desc_parts.append(f"Default: `{arg.default}`")
+                    if arg.default != NO_DEFAULT:
+                        desc_parts.append(f"Default: `{arg.default}`")
 
-                description = " ".join(desc_parts) if desc_parts else ""
+                    return " ".join(desc_parts)
 
-                # Required column
-                required = "Yes" if arg.required else "No"
-
-                lines.append(f"|{arg_name}")
-                lines.append(f"|{description}")
-                lines.append(f"|{required}")
+                lines.append(f"|{_print_name()}")
+                lines.append(f"|{_print_description()}")
+                lines.append(f"|{_print_required(arg)}")
                 lines.append("")
 
-            # Add options
             for opt in options:
-                # Format option names
-                opt_names = ", ".join([f"`{name}`" for name in opt.option_names])
+                def _print_name() -> str:
+                    names = ", ".join([f"`{name}`" for name in opt.option_names])
 
-                # Add metavar for non-boolean options
-                if opt.type != bool:
-                    if opt.metavar:
-                        opt_names += f" {opt.metavar}"
-                    else:
-                        type_name = getattr(opt.type, '__name__', str(opt.type))
-                        opt_names += f" {type_name.upper()}"
+                    # Add metavar for non-boolean options
+                    if opt.type != bool:
+                        if opt.metavar:
+                            names += f" {opt.metavar}"
+                        else:
+                            type_name = getattr(opt.type, '__name__', str(opt.type))
+                            names += f" {type_name.upper()}"
 
-                # Build description
-                desc_parts = []
-                if opt.help:
-                    desc_parts.append(opt.help)
+                    return names
 
-                # Add default value info
-                if opt.default != NO_DEFAULT and opt.type != bool:
-                    desc_parts.append(f"Default: `{opt.default}`")
+                def _print_description() -> str:
+                    desc_parts = []
+                    if opt.help:
+                        desc_parts.append(opt.help)
 
-                # Add multiple indicator
-                if opt.multiple:
-                    desc_parts.append("(can be specified multiple times)")
+                    if opt.default != NO_DEFAULT and opt.type != bool:
+                        desc_parts.append(f"Default: `{opt.default}`")
 
-                description = " ".join(desc_parts) if desc_parts else ""
+                    if opt.multiple:
+                        desc_parts.append("(can be specified multiple times)")
 
-                # Required column
-                required = "Yes" if opt.required else "No"
+                    return " ".join(desc_parts)
 
-                lines.append(f"|{opt_names}")
-                lines.append(f"|{description}")
-                lines.append(f"|{required}")
+                lines.append(f"|{_print_name()}")
+                lines.append(f"|{_print_description()}")
+                lines.append(f"|{_print_required(opt)}")
                 lines.append("")
 
             lines.append("|===")
