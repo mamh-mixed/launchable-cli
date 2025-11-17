@@ -416,6 +416,93 @@ class Command:
         if self.parent:
             self.parent._format_options(f"Options (common to {self.parent.name})", lines)
 
+    def format_asciidoc_table(self) -> str:
+        """
+        Generate an AsciiDoc table for the command's options and arguments.
+        Returns the table as a string.
+        """
+        lines = []
+
+        # Add options table
+        options = [opt for opt in self.options if not opt.hidden]
+        if options or self.arguments:
+            lines.append("[cols=\"1,2,1\"]")
+            lines.append("|===")
+            lines.append("|Option |Description |Required")
+            lines.append("")
+
+            # Add arguments first
+            for arg in self.arguments:
+                # Format argument name with angle brackets
+                if arg.multiple:
+                    arg_name = f"`<{arg.metavar}>...`"
+                else:
+                    arg_name = f"`<{arg.metavar}>`"
+
+                # Build description
+                desc_parts = []
+                if arg.help:
+                    desc_parts.append(arg.help)
+
+                # Add type info if not string
+                if arg.type != str:
+                    type_name = getattr(arg.type, '__name__', str(arg.type))
+                    desc_parts.append(f"(type: {type_name})")
+
+                # Add default value
+                if arg.default != NO_DEFAULT:
+                    desc_parts.append(f"Default: `{arg.default}`")
+
+                description = " ".join(desc_parts) if desc_parts else ""
+
+                # Required column
+                required = "Yes" if arg.required else "No"
+
+                lines.append(f"|{arg_name}")
+                lines.append(f"|{description}")
+                lines.append(f"|{required}")
+                lines.append("")
+
+            # Add options
+            for opt in options:
+                # Format option names
+                opt_names = ", ".join([f"`{name}`" for name in opt.option_names])
+
+                # Add metavar for non-boolean options
+                if opt.type != bool:
+                    if opt.metavar:
+                        opt_names += f" {opt.metavar}"
+                    else:
+                        type_name = getattr(opt.type, '__name__', str(opt.type))
+                        opt_names += f" {type_name.upper()}"
+
+                # Build description
+                desc_parts = []
+                if opt.help:
+                    desc_parts.append(opt.help)
+
+                # Add default value info
+                if opt.default != NO_DEFAULT and opt.type != bool:
+                    desc_parts.append(f"Default: `{opt.default}`")
+
+                # Add multiple indicator
+                if opt.multiple:
+                    desc_parts.append("(can be specified multiple times)")
+
+                description = " ".join(desc_parts) if desc_parts else ""
+
+                # Required column
+                required = "Yes" if opt.required else "No"
+
+                lines.append(f"|{opt_names}")
+                lines.append(f"|{description}")
+                lines.append(f"|{required}")
+                lines.append("")
+
+            lines.append("|===")
+
+        return "\n".join(lines)
+
     def __repr__(self):
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
 
