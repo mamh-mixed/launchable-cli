@@ -1,4 +1,4 @@
-#!/usr/bin/env uv run python
+#!/usr/bin/env -S uv run --script
 """
 Generate AsciiDoc documentation tables from args4p command definitions.
 
@@ -31,7 +31,11 @@ def resolve_command(root: Group, command_path: str) -> Command:
     for part in command_path.strip().split():
         if not isinstance(current, Group):
             raise BadCmdLineException(f"Command '{command_path}' is invalid: '{part}' is not a group command")
-        current = current.find_subcommand(part)
+
+        try:
+            current = current.find_subcommand(part)
+        except BadCmdLineException:
+            raise BadCmdLineException(f"Command '{command_path}' is invalid: no such subcommand '{part}'")
 
     return current
 
@@ -52,13 +56,8 @@ def process_reference_file(reference_path: Path, cli_root: Group):
     def replace_section(match):
         command_path = match.group(1).strip()
 
-        # Resolve the command
-        command = resolve_command(cli_root, command_path)
+        table = resolve_command(cli_root, command_path).format_asciidoc_table("smart-tests")
 
-        # Generate the table
-        table = command.format_asciidoc_table()
-
-        # Return the marker with new content
         return f"// [generate:{command_path}]\n{table}\n// [/generate]"
 
     # Replace all marked sections
@@ -69,7 +68,7 @@ def process_reference_file(reference_path: Path, cli_root: Group):
 
 
 @args4p.command(help="Generate AsciiDoc documentation tables from args4p commands")
-def main(reference_file: Annotated[Path, typer.Argument(type=path(exists=True, file_okay=True, dir_okay=False))]):
+def main(reference_file: Annotated[Path, typer.Argument(type=path(exists=True, file_okay=True, dir_okay=False), required=True)]):
     """Main entry point for the script."""
 
     from smart_tests.__main__ import cli
@@ -78,4 +77,4 @@ def main(reference_file: Annotated[Path, typer.Argument(type=path(exists=True, f
 
 
 if __name__ == "__main__":
-    main()
+    main(*sys.argv[1:])
