@@ -264,6 +264,45 @@ class Command:
             for c in self.commands:
                 c.check_consistency()
 
+    def _usage_line(self, program_name) -> str:
+        parts = ["Usage:"]
+
+        # Program name
+        parts.append(program_name)
+
+        # Build command path (for subcommands)
+        command_path: List[str] = []
+        current = self
+        while current.parent is not None:
+            command_path.insert(0, current.name)
+            current = current.parent
+        if len(command_path) > 0:
+            parts.append(" ".join(command_path))
+
+        # Add options placeholder if we have options
+        if self.options:
+            parts.append("[OPTIONS]")
+
+        # Add arguments
+        for a in self.arguments:
+            if a.required:
+                if a.multiple:
+                    parts.append(f"<{a.metavar}>...")
+                else:
+                    parts.append(f"<{a.metavar}>")
+            else:
+                if a.multiple:
+                    parts.append(f"[{a.metavar}...]")
+                else:
+                    parts.append(f"[{a.metavar}]")
+        if isinstance(self, Group):
+            if len(self.arguments) == 0:
+                # Add subcommand placeholder for groups
+                parts.append("COMMAND")
+            parts.append("...")
+
+        return " ".join(parts)
+
     def format_help(self, program_name: str = os.path.basename(sys.argv[0])) -> str:
         """
         Generate and return a formatted help message for this command.
@@ -271,46 +310,8 @@ class Command:
         :param program_name
             Name of the program to display in the usage line. Defaults to the name of the running script.
         """
-        def usage_line() -> str:
-            parts = ["Usage:"]
 
-            # Program name
-            parts.append(program_name)
-
-            # Build command path (for subcommands)
-            command_path: List[str] = []
-            current = self
-            while current.parent is not None:
-                command_path.insert(0, current.name)
-                current = current.parent
-            if len(command_path) > 0:
-                parts.append(" ".join(command_path))
-
-            # Add options placeholder if we have options
-            if self.options:
-                parts.append("[OPTIONS]")
-
-            # Add arguments
-            for a in self.arguments:
-                if a.required:
-                    if a.multiple:
-                        parts.append(f"<{a.metavar}>...")
-                    else:
-                        parts.append(f"<{a.metavar}>")
-                else:
-                    if a.multiple:
-                        parts.append(f"[{a.metavar}...]")
-                    else:
-                        parts.append(f"[{a.metavar}]")
-            if isinstance(self, Group):
-                if len(self.arguments) == 0:
-                    # Add subcommand placeholder for groups
-                    parts.append("COMMAND")
-                parts.append("...")
-
-            return " ".join(parts)
-
-        lines = [usage_line()]
+        lines = [self._usage_line(program_name)]
 
         # Description from docstring
         if self.callback.__doc__:
@@ -416,12 +417,12 @@ class Command:
         if self.parent:
             self.parent._format_options(f"Options (common to {self.parent.name})", lines)
 
-    def format_asciidoc_table(self) -> str:
+    def format_asciidoc_table(self, program_name: str) -> str:
         """
         Generate an AsciiDoc table for the command's options and arguments.
         Returns the table as a string.
         """
-        lines = []
+        lines = [f"`{self._usage_line(program_name)}`", ""]
 
         # Add options table
         options = [opt for opt in self.options if not opt.hidden]
