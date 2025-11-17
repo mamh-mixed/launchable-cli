@@ -428,7 +428,7 @@ class Command:
             return "Yes" if p.required else "No"
 
         if self.arguments:
-            lines.append("[cols=\"1,2,1\"]")
+            lines.append("[cols=\"2,4,1\"]")
             lines.append("|===")
             lines.append("|Argument |Description |Required")
             lines.append("")
@@ -462,7 +462,7 @@ class Command:
             lines.append("|===")
 
         if self.options:
-            lines.append("[cols=\"1,2,1\"]")
+            lines.append("[cols=\"2,4,1\"]")
             lines.append("|===")
             lines.append("|Option |Description |Required")
             lines.append("")
