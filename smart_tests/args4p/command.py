@@ -425,7 +425,8 @@ class Command:
         lines = [f"`{self._usage_line(program_name)}`", ""]
 
         # Add options table
-        options = [opt for opt in self.options if not opt.hidden]
+        options = sorted([opt for opt in self.options if not opt.hidden], key=lambda o: o.name)
+
         if options or self.arguments:
             lines.append("[cols=\"1,2,1\"]")
             lines.append("|===")
