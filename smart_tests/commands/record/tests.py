@@ -149,7 +149,8 @@ class RecordTests:
                 hidden=True
             )] = False,
             group: Annotated[str | None, typer.Option(
-                help="Grouping name for test results"
+                help="Grouping name for test results",
+                metavar="NAME"
             )] = "",
             is_allow_test_before_build: Annotated[bool, typer.Option(
                 "--allow-test-before-build",

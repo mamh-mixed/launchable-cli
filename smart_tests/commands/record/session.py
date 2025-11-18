@@ -26,29 +26,32 @@ def session(
     app: Application,
     build_name: Annotated[str, typer.Option(
         "--build",
-        help="build name",
+        help="Build name",
+        metavar="NAME",
         required=True
     )],
     test_suite: Annotated[str, typer.Option(
         "--test-suite",
         help="Set test suite name. A test suite is a collection of test sessions. Setting a test suite allows you to "
              "manage data over test sessions and lineages.",
+        metavar="NAME",
         required=True
     )],
     flavors: Annotated[List[KeyValue], typer.Option(
         "--flavor",
-        help="flavors",
+        help="Flavors",
         multiple=True,
         metavar="KEY=VALUE",
         type=parse_key_value
     )] = [],
     is_observation: Annotated[bool, typer.Option(
         "--observation",
-        help="enable observation mode"
+        help="Enable observation mode"
     )] = False,
     links: Annotated[List[KeyValue], typer.Option(
         "--link",
-        help="Set external link of a title and url",
+        help="Set external link of title and url",
+        metavar="TITLE=URL",
         multiple=True,
         type=parse_key_value,
     )] = [],
@@ -58,7 +61,8 @@ def session(
     )] = False,
     timestamp: Annotated[str | None, typer.Option(
         help="Used to overwrite the session time when importing historical data. Note: Format must be "
-             "`YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)"
+             "`YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)",
+        metavar="TIMESTAMP"
     )] = None,
 ):
 

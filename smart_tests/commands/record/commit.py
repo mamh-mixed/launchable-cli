@@ -28,20 +28,24 @@ jar_file_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../
 def commit(
     app: Application,
     name: Annotated[str | None, typer.Option(
-        help="repository name"
+        help="Repository name",
+        metavar="NAME",
     )] = None,
     source: Annotated[str, typer.Option(
-        help="repository path"
+        help="Repository path",
+        metavar="DIR",
     )] = os.getcwd(),
     executable: Annotated[str, typer.Option(
         help="[Obsolete] it was to specify how to perform commit collection but has been removed",
         hidden=True
     )] = "jar",
     max_days: Annotated[int, typer.Option(
-        help="the maximum number of days to collect commits retroactively"
+        help="The maximum number of days to collect commits retroactively",
+        metavar="DAYS",
     )] = 30,
     import_git_log_output: Annotated[str | None, typer.Option(
-        help="import from the git-log output"
+        help="Import from the git-log output",
+        metavar="FILE",
     )] = None,
 ):
     if executable == 'docker':

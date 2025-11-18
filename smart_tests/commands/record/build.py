@@ -35,34 +35,37 @@ def build(
     app: Application,
     build_name: Annotated[str, typer.Option(
         "--build",
-        help="build name",
-        metavar="BUILD_NAME",
+        help="Build name",
+        metavar="NAME",
         required=True
     )],
     branch: Annotated[str | None, typer.Option(
         "--branch",
-        help="Branch name. A branch is a set of test sessions grouped and this option value will be used for a lineage name."
+        help="Set branch name. A branch is a set of test sessions grouped and this option value will be used for a branch name.",
+        metavar="NAME"
     )] = None,
     repositories: Annotated[List[str], typer.Option(
         "--repo-branch-map",
         multiple=True,
         help="Set repository name and branch name when you use --no-commit-collection option. "
-             "Please use the same repository name with a commit option"
+             "Please use the same repository name with a commit option",
+        metavar="REPO_NAME=BRANCH_NAME"
     )] = [],
     source: Annotated[List[str], typer.Option(
         multiple=True,
-        help="path to local Git workspace, optionally prefixed by a label. "
+        help="Path to local Git workspace, optionally prefixed by a label. "
              "like --source path/to/ws or --source main=path/to/ws",
-        metavar="REPO_NAME"
+        metavar="DIR"
     )] = ["."],
     max_days: Annotated[int, typer.Option(
-        help="the maximum number of days to collect commits retroactively"
+        help="The maximum number of days to collect commits retroactively",
+        metavar="DAYS"
     )] = 30,
     no_submodules: Annotated[bool, typer.Option(
-        help="stop collecting information from Git Submodules"
+        help="Stop collecting information from Git Submodules"
     )] = False,
     no_commit_collection: Annotated[bool, typer.Option(
-        help="do not collect commit data. "
+        help="Do not collect commit data. "
              "This is useful if the repository is a shallow clone and the RevWalk is not "
              "possible. The commit data must be collected with a separate fully-cloned "
              "repository."
@@ -70,11 +73,13 @@ def build(
     commits: Annotated[List[str], typer.Option(
         "--commit",
         multiple=True,
-        help="set repository name and commit hash when you use --no-commit-collection option"
+        help="Set repository name and commit hash when you use --no-commit-collection option",
+        metavar="REPO_NAME=COMMIT_HASH"
     )] = [],
     timestamp: Annotated[str | None, typer.Option(
         help="Used to overwrite the build time when importing historical data. "
-             "Note: Format must be `YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)"
+             "Note: Format must be `YYYY-MM-DDThh:mm:ssTZD` or `YYYY-MM-DDThh:mm:ss` (local timezone applied)",
+        metavar="TIMESTAMP"
     )] = None,
     links: Annotated[List[KeyValue], typer.Option(
         "--link",

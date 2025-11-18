@@ -101,18 +101,22 @@ class Subset(TestPathWriter):
             session: Annotated[SessionId, SessionId.as_option()],
             target: Annotated[Percentage | None, typer.Option(
                 type=parse_percentage,
-                help="subsetting target from 0% to 100%"
+                help="Subsetting target from 0% to 100%",
+                metavar="PERCENTAGE"
             )] = None,
             time: Annotated[Duration | None, typer.Option(
                 type=parse_duration,
-                help="subsetting by absolute time, in seconds e.g) 300, 5m"
+                help="Subsetting by absolute time, in seconds e.g) 300, 5m",
+                metavar="TIME"
             )] = None,
             confidence: Annotated[Percentage | None, typer.Option(
                 type=parse_percentage,
-                help="subsetting by confidence from 0% to 100%"
+                help="Subsetting by confidence from 0% to 100%",
+                metavar="PERCENTAGE"
             )] = None,
             goal_spec: Annotated[str | None, typer.Option(
-                help="subsetting by programmatic goal definition"
+                help="Subsetting by programmatic goal definition",
+                metavar="GOAL_SPEC"
             )] = None,
             base_path: Annotated[str | None, typer.Option(
                 '--base',
@@ -120,7 +124,8 @@ class Subset(TestPathWriter):
                 metavar="DIR"
             )] = None,
             rest: Annotated[str | None, typer.Option(
-                help="Output the subset remainder to a file, e.g. `--rest=remainder.txt`"
+                help="Output the subset remainder to a file, e.g. --rest=remainder.txt",
+                metavar="FILE"
             )] = None,
             # TODO(Konboi): omit from the smart-tests command initial release
             # split: Annotated[bool, typer.Option(
@@ -142,11 +147,11 @@ class Subset(TestPathWriter):
             )] = False,
             is_get_tests_from_previous_sessions: Annotated[bool, typer.Option(
                 "--get-tests-from-previous-sessions",
-                help="get subset list from previous full tests"
+                help="Get subset list from previous full tests"
             )] = False,
             is_output_exclusion_rules: Annotated[bool, typer.Option(
                 "--output-exclusion-rules",
-                help="outputs the exclude test list. Switch the subset and rest."
+                help="Outputs the exclude test list. Switch the subset and rest."
             )] = False,
             is_non_blocking: Annotated[bool, typer.Option(
                 "--non-blocking",
@@ -155,16 +160,19 @@ class Subset(TestPathWriter):
             )] = False,
             ignore_flaky_tests_above: Annotated[float | None, typer.Option(
                 help="Ignore flaky tests above the value set by this option. You can confirm flaky scores in WebApp",
-                type=floatType(min=0.0, max=1.0)
+                type=floatType(min=0.0, max=1.0),
+                metavar="N"
             )] = None,
             prioritize_tests_failed_within_hours: Annotated[int | None, typer.Option(
                 help="Prioritize tests that failed within the specified hours; maximum 720 hours (= 24 hours * 30 days)",
-                type=intType(min=0, max=24 * 30)
+                type=intType(min=0, max=24 * 30),
+                metavar="N"
             )] = None,
             prioritized_tests_mapping_file: Annotated[TextIOWrapper | None, typer.Option(
                 "--prioritized-tests-mapping",
                 help="Prioritize tests based on test mapping file",
-                type=fileText(mode="r")
+                type=fileText(mode="r"),
+                metavar="FILE"
             )] = None,
             is_get_tests_from_guess: Annotated[bool, typer.Option(
                 "--get-tests-from-guess",

@@ -264,6 +264,45 @@ class Command:
             for c in self.commands:
                 c.check_consistency()
 
+    def _usage_line(self, program_name) -> str:
+        parts = ["Usage:"]
+
+        # Program name
+        parts.append(program_name)
+
+        # Build command path (for subcommands)
+        command_path: List[str] = []
+        current = self
+        while current.parent is not None:
+            command_path.insert(0, current.name)
+            current = current.parent
+        if len(command_path) > 0:
+            parts.append(" ".join(command_path))
+
+        # Add options placeholder if we have options
+        if self.options:
+            parts.append("[OPTIONS]")
+
+        # Add arguments
+        for a in self.arguments:
+            if a.required:
+                if a.multiple:
+                    parts.append(f"<{a.metavar}>...")
+                else:
+                    parts.append(f"<{a.metavar}>")
+            else:
+                if a.multiple:
+                    parts.append(f"[{a.metavar}...]")
+                else:
+                    parts.append(f"[{a.metavar}]")
+        if isinstance(self, Group):
+            if len(self.arguments) == 0:
+                # Add subcommand placeholder for groups
+                parts.append("COMMAND")
+            parts.append("...")
+
+        return " ".join(parts)
+
     def format_help(self, program_name: str = os.path.basename(sys.argv[0])) -> str:
         """
         Generate and return a formatted help message for this command.
@@ -271,46 +310,8 @@ class Command:
         :param program_name
             Name of the program to display in the usage line. Defaults to the name of the running script.
         """
-        def usage_line() -> str:
-            parts = ["Usage:"]
 
-            # Program name
-            parts.append(program_name)
-
-            # Build command path (for subcommands)
-            command_path: List[str] = []
-            current = self
-            while current.parent is not None:
-                command_path.insert(0, current.name)
-                current = current.parent
-            if len(command_path) > 0:
-                parts.append(" ".join(command_path))
-
-            # Add options placeholder if we have options
-            if self.options:
-                parts.append("[OPTIONS]")
-
-            # Add arguments
-            for a in self.arguments:
-                if a.required:
-                    if a.multiple:
-                        parts.append(f"<{a.metavar}>...")
-                    else:
-                        parts.append(f"<{a.metavar}>")
-                else:
-                    if a.multiple:
-                        parts.append(f"[{a.metavar}...]")
-                    else:
-                        parts.append(f"[{a.metavar}]")
-            if isinstance(self, Group):
-                if len(self.arguments) == 0:
-                    # Add subcommand placeholder for groups
-                    parts.append("COMMAND")
-                parts.append("...")
-
-            return " ".join(parts)
-
-        lines = [usage_line()]
+        lines = [self._usage_line(program_name)]
 
         # Description from docstring
         if self.callback.__doc__:
@@ -415,6 +416,94 @@ class Command:
 
         if self.parent:
             self.parent._format_options(f"Options (common to {self.parent.name})", lines)
+
+    def format_asciidoc_table(self, program_name: str) -> str:
+        """
+        Generate an AsciiDoc table for the command's options and arguments.
+        Returns the table as a string.
+        """
+        lines = [f"`{self._usage_line(program_name)}`", ""]
+
+        def _print_required(p: Parameter) -> str:
+            return "Yes" if p.required else "No"
+
+        if self.arguments:
+            lines.append("[cols=\"2,4,1\"]")
+            lines.append("|===")
+            lines.append("|Argument |Description |Required")
+            lines.append("")
+
+            for arg in self.arguments:
+                def _print_name() -> str:
+                    if arg.multiple:
+                        return f"`<{arg.metavar}>...`"
+                    else:
+                        return f"`<{arg.metavar}>`"
+
+                def _print_description() -> str:
+                    desc_parts = []
+                    if arg.help:
+                        desc_parts.append(arg.help)
+
+                    if arg.type != str:
+                        type_name = getattr(arg.type, '__name__', str(arg.type))
+                        desc_parts.append(f"(type: {type_name})")
+
+                    if arg.default != NO_DEFAULT:
+                        desc_parts.append(f"Default: `{arg.default}`")
+
+                    return " ".join(desc_parts)
+
+                lines.append("// GENERATED. MODIFY IN CLI SOURCE CODE")
+                lines.append(f"|{_print_name()}")
+                lines.append(f"|{_print_description()}")
+                lines.append(f"|{_print_required(arg)}")
+                lines.append("")
+
+            lines.append("|===")
+
+        if self.options:
+            lines.append("[cols=\"2,4,1\"]")
+            lines.append("|===")
+            lines.append("|Option |Description |Required")
+            lines.append("")
+
+            for opt in sorted([opt for opt in self.options if not opt.hidden], key=lambda o: o.name):
+                def _print_name() -> str:
+                    names = ", ".join([f"`{name}`" for name in opt.option_names])
+
+                    # Add metavar for non-boolean options
+                    if opt.type != bool:
+                        if opt.metavar:
+                            names += f" {opt.metavar}"
+                        else:
+                            type_name = getattr(opt.type, '__name__', str(opt.type))
+                            names += f" {type_name.upper()}"
+
+                    return names
+
+                def _print_description() -> str:
+                    desc_parts = []
+                    if opt.help:
+                        desc_parts.append(opt.help)
+
+                    if opt.default != NO_DEFAULT and opt.type != bool:
+                        desc_parts.append(f"Default: `{opt.default}`")
+
+                    if opt.multiple:
+                        desc_parts.append("(can be specified multiple times)")
+
+                    return " ".join(desc_parts)
+
+                lines.append("// GENERATED. MODIFY IN CLI SOURCE CODE")
+                lines.append(f"|{_print_name()}")
+                lines.append(f"|{_print_description()}")
+                lines.append(f"|{_print_required(opt)}")
+                lines.append("")
+
+            lines.append("|===")
+
+        return "\n".join(lines)
 
     def __repr__(self):
         return f"<Command name={self.name!r} options={self.options!r} arguments={self.arguments!r}>"
