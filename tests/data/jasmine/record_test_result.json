@@ -1,0 +1,81 @@
+{
+  "events": [
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "spec/jasmine_examples/PlayerSpec.js"
+        },
+        {
+          "type": "testcase",
+          "name": "Player when song has been paused should indicate that the song is currently paused"
+        }
+      ],
+      "duration": 0.001,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "spec/jasmine_examples/PlayerSpec.js"
+        },
+        {
+          "type": "testcase",
+          "name": "Player when song has been paused should be possible to resume"
+        }
+      ],
+      "duration": 0.001,
+      "status": 0,
+      "stdout": "",
+      "stderr": "Expected true to be falsy.\n    at <Jasmine>\n    at UserContext.<anonymous> (spec/jasmine_examples/PlayerSpec.js:37:29)\n    at <Jasmine>",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "spec/jasmine_examples/PlayerSpec.js"
+        },
+        {
+          "type": "testcase",
+          "name": "Player should be able to play a Song"
+        }
+      ],
+      "duration": 0.0,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "spec/jasmine_examples/UserSpec.js"
+        },
+        {
+          "type": "testcase",
+          "name": "User should be able to play a Song"
+        }
+      ],
+      "duration": 0.0,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    }
+  ],
+  "testRunner": "jasmine",
+  "group": "",
+  "noBuild": false,
+  "flavors": [],
+  "testSuite": ""
+}
