@@ -1,0 +1,159 @@
+{
+  "suite2": {
+    "id": "suite2",
+    "description": "when song has been paused",
+    "fullName": "Player when song has been paused",
+    "parentSuiteId": "suite1",
+    "filename": "spec/jasmine_examples/PlayerSpec.js",
+    "failedExpectations": [],
+    "deprecationWarnings": [],
+    "duration": 2,
+    "properties": null,
+    "status": "passed",
+    "specs": [
+      {
+        "id": "spec1",
+        "description": "should indicate that the song is currently paused",
+        "fullName": "Player when song has been paused should indicate that the song is currently paused",
+        "parentSuiteId": "suite2",
+        "filename": "spec/jasmine_examples/PlayerSpec.js",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toBeFalsy",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toBePlaying",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 1,
+        "properties": null,
+        "debugLogs": null,
+        "status": "passed"
+      },
+      {
+        "id": "spec2",
+        "description": "should be possible to resume",
+        "fullName": "Player when song has been paused should be possible to resume",
+        "parentSuiteId": "suite2",
+        "filename": "spec/jasmine_examples/PlayerSpec.js",
+        "failedExpectations": [
+          {
+            "matcherName": "toBeFalsy",
+            "message": "Expected true to be falsy.",
+            "stack": "    at <Jasmine>\n    at UserContext.<anonymous> (spec/jasmine_examples/PlayerSpec.js:37:29)\n    at <Jasmine>",
+            "passed": false,
+            "expected": [],
+            "actual": true
+          }
+        ],
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 1,
+        "properties": null,
+        "debugLogs": null,
+        "status": "failed"
+      }
+    ]
+  },
+  "suite1": {
+    "id": "suite1",
+    "description": "Player",
+    "fullName": "Player",
+    "parentSuiteId": null,
+    "filename": "spec/jasmine_examples/PlayerSpec.js",
+    "failedExpectations": [],
+    "deprecationWarnings": [],
+    "duration": 2,
+    "properties": null,
+    "status": "passed",
+    "specs": [
+      {
+        "id": "spec0",
+        "description": "should be able to play a Song",
+        "fullName": "Player should be able to play a Song",
+        "parentSuiteId": "suite1",
+        "filename": "spec/jasmine_examples/PlayerSpec.js",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toBePlaying",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 0,
+        "properties": null,
+        "debugLogs": null,
+        "status": "passed"
+      }
+    ]
+  },
+  "suite3": {
+    "id": "suite3",
+    "description": "User",
+    "fullName": "User",
+    "parentSuiteId": null,
+    "filename": "spec/jasmine_examples/UserSpec.js",
+    "failedExpectations": [],
+    "deprecationWarnings": [],
+    "duration": 0,
+    "properties": null,
+    "status": "passed",
+    "specs": [
+      {
+        "id": "spec3",
+        "description": "should be able to play a Song",
+        "fullName": "User should be able to play a Song",
+        "parentSuiteId": "suite3",
+        "filename": "spec/jasmine_examples/UserSpec.js",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toBePlaying",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 0,
+        "properties": null,
+        "debugLogs": null,
+        "status": "passed"
+      }
+    ]
+  }
+}
