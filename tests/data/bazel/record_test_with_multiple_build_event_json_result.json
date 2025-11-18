@@ -9,9 +9,9 @@
         { "type": "testcase", "name": "testFibonacci" }
       ],
       "duration": 2.02,
-      "status": 1,
-      "stdout": "",
-      "stderr": "",
+      "status": 0,
+      "stdout": "Dummy standard output\n",
+      "stderr": "java.lang.Exception: Yo!\n        at somewhere(Somewhere.java:33)",
       "data": null
     },
     {
