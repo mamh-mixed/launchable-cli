@@ -1,0 +1,16 @@
+{
+  "testPaths": [
+    [
+      { "type": "file", "name": "spec/jasmine_examples/PlayerSpec.js" }
+    ],
+    [
+      { "type": "file", "name": "spec/jasmine_examples/UserSpec.js" }
+    ]
+  ],
+  "testRunner": "jasmine",
+  "goal": {"type": "subset-by-percentage", "percentage": 0.1},
+  "ignoreNewTests": false,
+  "session": { "id": "16" },
+  "getTestsFromGuess": false,
+  "getTestsFromPreviousSessions": false
+}
