@@ -1,0 +1,150 @@
+{
+  "suite2": {
+    "id": "suite2",
+    "description": "when song has been paused",
+    "fullName": "Player when song has been paused",
+    "failedExpectations": [],
+    "deprecationWarnings": [],
+    "duration": 2,
+    "properties": null,
+    "status": "passed",
+    "specs": [
+      {
+        "id": "spec0",
+        "description": "should be able to play a Song",
+        "fullName": "Player should be able to play a Song",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toBePlaying",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 0,
+        "properties": null,
+        "status": "passed"
+      },
+      {
+        "id": "spec2",
+        "description": "should be possible to resume",
+        "fullName": "Player when song has been paused should be possible to resume",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toBeTruthy",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 1,
+        "properties": null,
+        "status": "passed"
+      },
+      {
+        "id": "spec1",
+        "description": "should indicate that the song is currently paused",
+        "fullName": "Player when song has been paused should indicate that the song is currently paused",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toBeFalsy",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toBePlaying",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 1,
+        "properties": null,
+        "status": "passed"
+      }
+    ]
+  },
+  "suite3": {
+    "id": "suite3",
+    "description": "#resume",
+    "fullName": "Player #resume",
+    "failedExpectations": [],
+    "deprecationWarnings": [],
+    "duration": 1,
+    "properties": null,
+    "status": "passed",
+    "specs": [
+      {
+        "id": "spec3",
+        "description": "tells the current song if the user has made it a favorite",
+        "fullName": "Player tells the current song if the user has made it a favorite",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toHaveBeenCalledWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 1,
+        "properties": null,
+        "status": "passed"
+      },
+      {
+        "id": "spec4",
+        "description": "should throw an exception if song is already playing",
+        "fullName": "Player #resume should throw an exception if song is already playing",
+        "failedExpectations": [],
+        "passedExpectations": [
+          {
+            "matcherName": "toThrowError",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "deprecationWarnings": [],
+        "pendingReason": "",
+        "duration": 0,
+        "properties": null,
+        "status": "passed"
+      }
+    ]
+  },
+  "suite1": {
+    "id": "suite1",
+    "description": "Player",
+    "fullName": "Player",
+    "failedExpectations": [],
+    "deprecationWarnings": [],
+    "duration": 4,
+    "properties": null,
+    "status": "passed",
+    "specs": []
+  }
+}
