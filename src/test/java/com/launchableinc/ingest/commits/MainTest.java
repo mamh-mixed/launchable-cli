@@ -19,7 +19,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 @RunWith(JUnit4.class)
-public class CommitIngesterTest {
+public class MainTest {
   @Rule public TemporaryFolder tmp = new TemporaryFolder();
   @Rule public MockServerRule mockServerRule = new MockServerRule(this);
   private MockServerClient mockServerClient;
@@ -63,14 +63,14 @@ public class CommitIngesterTest {
               return response().withBody("OK");
             });
 
-    CommitIngester commitIngester = new CommitIngester();
+    Main main = new Main();
     InetSocketAddress addr = mockServerClient.remoteAddress();
     // Specify submodule as the repository. JGit cannot open this directly, so the code should open
     // the main repository first, then open the submodule.
-    commitIngester.repo = new File(mainrepoDir, "sub");
-    commitIngester.url =
+    main.repo = new File(mainrepoDir, "sub");
+    main.url =
         new URL(String.format("http://%s:%s/intake/", addr.getHostString(), addr.getPort()));
-    commitIngester.launchableToken = "v1:testorg/testws:dummy-token";
-    commitIngester.run();
+    main.launchableToken = "v1:testorg/testws:dummy-token";
+    main.run();
   }
 }
