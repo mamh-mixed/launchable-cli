@@ -10,6 +10,7 @@ import smart_tests.args4p.typer as typer
 from smart_tests import args4p
 from smart_tests.app import Application
 from smart_tests.args4p.converters import path
+from smart_tests.testpath import unparse_test_path
 from smart_tests.utils.smart_tests_client import SmartTestsClient
 
 
@@ -26,8 +27,9 @@ class SubsetResult(SubsetResultBase):
     duration_sec: float
 
     @classmethod
-    def from_inspect_apigxsn(cls, result: dict[str, Any], order: int) -> "SubsetResult":
-        name = result.get("testPath", []) or []
+    def from_inspect_api(cls, result: dict[str, Any], order: int) -> "SubsetResult":
+        test_path = result.get("testPath", []) or []
+        name = unparse_test_path(test_path)
         density = float(result.get("density") or 0.0)
         reason = result.get("reason", "")
         duration_sec = float(result.get("duration") or 0.0) / 1000.0  # convert to sec from msec
@@ -58,6 +60,10 @@ class SubsetResults(SubsetResultBases):
     def __init__(self, results: Sequence[SubsetResult]):
         super().__init__(results)
 
+    @property
+    def results(self) -> List[SubsetResult]:
+        return self._results
+
     @classmethod
     def load(cls, client: SmartTestsClient, subset_id: int) -> "SubsetResults":
         try:
@@ -84,8 +90,16 @@ class SubsetResults(SubsetResultBases):
 @args4p.command()
 def subsets(
     app: Application,
-    file_before: Annotated[Path | None, typer.Argument(type=path(exists=True), help="First subset file to compare")] = None,
-    file_after: Annotated[Path | None, typer.Argument(type=path(exists=True), help="Second subset file to compare")] = None,
+    file_before: Annotated[Path | None, typer.Argument(
+        type=path(exists=True),
+        help="First subset file to compare",
+        required=False),
+    ] = None,
+    file_after: Annotated[Path | None, typer.Argument(
+        type=path(exists=True),
+        help="Second subset file to compare",
+        required=False),
+    ] = None,
     subset_id_before: Annotated[int | None, typer.Option(
         "--subset-id-before",
         help="Subset ID for the first subset to compare",
@@ -97,9 +111,13 @@ def subsets(
         metavar="SUBSET_ID",
     )] = None,
 ):
-    """
-    Compare two subset files and display changes in test order positions
-    """
+    """Compare subsets sourced from files or remote subset IDs."""
+
+    if (file_before is not None) ^ (file_after is not None):
+        raise click.ClickException("Provide both subset files when using file arguments.")
+    if (subset_id_before is not None) ^ (subset_id_after is not None):
+        raise click.ClickException("Provide both subset IDs when using --subset-id options.")
+
     from_file = file_before is not None and file_after is not None
     from_subset_id = subset_id_before is not None and subset_id_after is not None
 
@@ -108,11 +126,56 @@ def subsets(
     if not from_file and not from_subset_id:
         raise click.ClickException("You must specify either both subset files or both subset IDs.")
 
-    if from_file:
-        _from_file(file_before=file_before, file_after=file_after)
+    if from_subset_id:
+        client = SmartTestsClient(app=app)
+        _from_subset_ids(client=client, subset_id_before=subset_id_before, subset_id_after=subset_id_after)
+        return
+
+    _from_files(file_before=file_before, file_after=file_after)
 
 
-def _from_file(file_before: Path, file_after: Path):
+def _from_subset_ids(client: SmartTestsClient, subset_id_before: int, subset_id_after: int):
+    before_subset = SubsetResults.load(client, subset_id_before)
+    after_subset = SubsetResults.load(client, subset_id_after)
+
+    # List of tuples representing test order changes
+    # (Rank, Subset Rank, Test Path, Reason, Density)
+    rows: List[str, int, str, float] = []
+
+    # Calculate order difference and add each test in file_after to changes
+    for result in after_subset.results:
+        test_name = result.name
+        after_order = result.order
+        before_order = before_subset.get_order(test_name)
+        if before_order is None:
+            rows.append(('NEW', after_order, test_name, result.reason, result.density))
+        else:
+            diff = after_order - before_order
+            rank = "±0"
+            if diff > 0:
+                rank = "↓" + str(diff)
+            elif diff < 0:
+                rank = "↑" + str(-diff)
+
+            rows.append((rank, after_order, test_name, result.reason, result.density))
+
+    # Add all deleted tests to changes
+    for result in before_subset.results:
+        test_name = result.name
+        before_order = result.order
+        if after_subset.get_order(test_name) is None:
+            rows.append(("DELETED", '-', test_name, "", ""))
+
+    # Display results in a tabular format
+    headers = ["Rank", "Subset Rank", "Test Name", "Reason", "Density"]
+    tabular_data = [
+        (rank, after, test_name, reason, density)
+        for rank, after, test_name, reason, density in rows
+    ]
+    click.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))
+
+
+def _from_files(file_before: Path, file_after: Path):
     before_subset = SubsetResultBases.from_file(file_before)
     after_subset = SubsetResultBases.from_file(file_after)
 
