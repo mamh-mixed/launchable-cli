@@ -140,12 +140,20 @@ def _from_subset_ids(client: LaunchableClient, subset_id_before: int, subset_id_
     before_subset = SubsetResults.load(client, subset_id_before)
     after_subset = SubsetResults.load(client, subset_id_after)
 
+    total = 0
+    promoted = 0
+    demoted = 0
+    affected = set()
     # List of tuples representing test order changes
     # (Rank, Subset Rank, Test Path, Reason, Density)
     rows: List[Tuple[str, Union[int, str], str, str, Union[float, str]]] = []
 
     # Calculate order difference and add each test in file_after to changes
     for result in after_subset.results:
+        total += 1
+        if result.reason.startswith("Changed file: "):
+            affected.add(result.reason.removeprefix("Changed file: "))
+
         test_name = result.name
         after_order = result.order
         before_order = before_subset.get_order(test_name)
@@ -156,8 +164,10 @@ def _from_subset_ids(client: LaunchableClient, subset_id_before: int, subset_id_
             rank = "±0"
             if diff > 0:
                 rank = "↓" + str(diff)
+                demoted += 1
             elif diff < 0:
                 rank = "↑" + str(-diff)
+                promoted += 1
 
             rows.append((rank, after_order, test_name, result.reason, result.density))
 
@@ -168,13 +178,20 @@ def _from_subset_ids(client: LaunchableClient, subset_id_before: int, subset_id_
         if after_subset.get_order(test_name) is None:
             rows.append(("DELETED", '-', test_name, "", ""))
 
+    summary = f"""PTS subset change summary:
+────────────────────────────────
+-> {total} tests analyzed | {promoted} ↑ promoted | {demoted} ↓ demoted
+-> Code files affected: {', '.join(sorted(affected)) if len(affected) < 10 else str(len(affected)) + ' files'}
+────────────────────────────────
+"""
+
     # Display results in a tabular format
-    headers = ["Rank", "Subset Rank", "Test Name", "Reason", "Density"]
+    headers = ["Δ Rank", "Subset Rank", "Test Name", "Reason", "Density"]
     tabular_data = [
         (rank, after, test_name, reason, density)
         for rank, after, test_name, reason, density in rows
     ]
-    click.echo_via_pager(tabulate(tabular_data, headers=headers, tablefmt="github"))
+    click.echo_via_pager(summary + "\n" + tabulate(tabular_data, headers=headers, tablefmt="simple"))
 
 
 def _from_files(file_before: Path, file_after: Path):
