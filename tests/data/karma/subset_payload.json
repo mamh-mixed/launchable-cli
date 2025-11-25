@@ -4,10 +4,10 @@
       { "type": "file", "name": "foo/bar/zot.spec.ts" }
     ],
     [
-      { "type": "file", "name": "client-source/src/app/shared/other-test.spec.ts" }
+      { "type": "file", "name": "foo/bar/another.spec.ts" }
     ]
   ],
-  "testRunner": "ng",
+  "testRunner": "karma",
   "goal": {"type": "subset-by-percentage", "percentage": 0.1},
   "ignoreNewTests": false,
   "session": { "id": "16" },
