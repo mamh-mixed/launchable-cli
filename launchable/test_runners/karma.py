@@ -11,6 +11,18 @@ from ..testpath import TestPath
 from . import launchable
 
 
+@click.option('--with', '_with')
+@launchable.subset
+def subset(client, _with: str):
+    # TODO: implement the --with ng option
+
+    # read lines as test file names
+    for t in client.stdin():
+        client.test_path(t.rstrip("\n"))
+
+    client.run()
+
+
 @click.argument('reports', required=True, nargs=-1)
 @launchable.record.tests
 def record_tests(client, reports):
