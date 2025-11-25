@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from pathlib import Path
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import click
 from tabulate import tabulate
@@ -38,33 +38,36 @@ class SubsetResult(SubsetResultBase):
         return cls(order=order, name=name, density=density, reason=reason, duration_sec=duration_sec)
 
 
-class SubsetResultBases:
-    def __init__(self, results: Sequence[SubsetResultBase]):
-        self._results: List[SubsetResultBase] = list(results)
+TSubsetResult = TypeVar("TSubsetResult", bound="SubsetResultBase")
+
+
+class SubsetResultBases(Generic[TSubsetResult]):
+    def __init__(self, results: Sequence[TSubsetResult]):
+        self._results: List[TSubsetResult] = list(results)
         self._index_map = {r.name: r.order for r in self._results}
 
     @property
-    def results(self) -> List[SubsetResultBase]:
+    def results(self) -> List[TSubsetResult]:
         return self._results
 
     def get_order(self, name: str) -> Optional[int]:
         return self._index_map.get(name)
 
-    @classmethod
-    def from_file(cls, file_path: Path) -> "SubsetResultBases":
+    @staticmethod
+    def from_file(file_path: Path) -> "SubsetResultBases[SubsetResultBase]":
         with open(file_path, "r", encoding="utf-8") as subset_file:
             results = subset_file.read().splitlines()
         entries = [SubsetResultBase(order=order, name=result) for order, result in enumerate(results, start=1)]
-        return cls(entries)
+        return SubsetResultBases(entries)
 
 
-class SubsetResults(SubsetResultBases):
+class SubsetResults(SubsetResultBases[SubsetResult]):
     def __init__(self, results: Sequence[SubsetResult]):
         super().__init__(results)
 
     @property
     def results(self) -> List[SubsetResult]:
-        return self._results
+        return super().results
 
     @classmethod
     def load(cls, client: LaunchableClient, subset_id: int) -> "SubsetResults":
@@ -121,10 +124,15 @@ def subsets(context: click.core.Context, file_before, file_after, subset_id_befo
         raise click.ClickException("You must specify either both subset files or both subset IDs.")
 
     if from_subset_id:
+
         client = LaunchableClient(app=context)
+        # for type check
+        assert subset_id_before is not None and subset_id_after is not None
         _from_subset_ids(client=client, subset_id_before=subset_id_before, subset_id_after=subset_id_after)
         return
 
+    # for type check
+    assert file_before is not None and file_after is not None
     _from_files(file_before=file_before, file_after=file_after)
 
 
@@ -134,7 +142,7 @@ def _from_subset_ids(client: LaunchableClient, subset_id_before: int, subset_id_
 
     # List of tuples representing test order changes
     # (Rank, Subset Rank, Test Path, Reason, Density)
-    rows: List[str, int, str, float] = []
+    rows: List[Tuple[str, Union[int, str], str, str, Union[float, str]]] = []
 
     # Calculate order difference and add each test in file_after to changes
     for result in after_subset.results:
