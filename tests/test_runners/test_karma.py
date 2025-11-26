@@ -20,7 +20,7 @@ class KarmaTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_subset(self):
+    def test_subset_with_base(self):
         # emulate launchable record build
         write_build(self.build_name)
 
@@ -28,3 +28,29 @@ class KarmaTest(CliTestCase):
                           os.getcwd(), 'karma', '--with', 'ng', input="a.ts\nb.ts")
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')
+
+    @responses.activate
+    @mock.patch.dict(os.environ,
+                     {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_subset(self):
+        write_build(self.build_name)
+
+        subset_input = """foo/bar/zot.spec.ts
+foo/bar/another.spec.ts
+"""
+        result = self.cli('subset', '--target', '10%', 'karma', input=subset_input)
+        self.assert_success(result)
+        self.assert_subset_payload('subset_payload.json')
+
+    @responses.activate
+    @mock.patch.dict(os.environ,
+                     {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_subset_with_ng(self):
+        write_build(self.build_name)
+
+        subset_input = """foo/bar/zot.spec.ts
+foo/bar/another.spec.ts
+"""
+        result = self.cli('subset', '--target', '10%', 'karma', '--with', 'ng', input=subset_input)
+        self.assert_success(result)
+        self.assert_subset_payload('subset_payload.json')
