@@ -7,7 +7,6 @@ import smart_tests.args4p.typer as typer
 
 from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.tests import RecordTests
-from ..commands.subset import Subset
 from ..testpath import TestPath
 from . import smart_tests
 
@@ -19,13 +18,7 @@ def remove_leading_number_and_dash(input_string: str) -> str:
     return result
 
 
-@smart_tests.subset
-def subset(client: Subset):
-    # read lines as test file names
-    for t in client.stdin():
-        client.test_path(t.rstrip("\n"))
-
-    client.run()
+subset = smart_tests.CommonSubsetImpls(__name__).scan_stdin()
 
 
 @smart_tests.record.tests

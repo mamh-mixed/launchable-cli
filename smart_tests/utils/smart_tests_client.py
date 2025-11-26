@@ -9,8 +9,7 @@ from smart_tests.utils.http_client import _HttpClient, _join_paths
 from smart_tests.utils.tracking import Tracking, TrackingClient  # type: ignore
 
 from ..app import Application
-from ..args4p.exceptions import BadCmdLineException
-from .authentication import get_org_workspace
+from .authentication import ensure_org_workspace
 from .env_keys import REPORT_ERROR_KEY
 
 
@@ -23,13 +22,7 @@ class SmartTestsClient:
             app=app
         )
         self.tracking_client = tracking_client
-        self.organization, self.workspace = get_org_workspace()
-        if self.organization is None or self.workspace is None:
-            raise BadCmdLineException(
-                "Could not identify a Smart Tests organization/workspace. "
-                "Confirm that you set SMART_TESTS_TOKEN "
-                "(or SMART_TESTS_ORGANIZATION and SMART_TESTS_WORKSPACE) environment variable(s)\n"
-                "See https://help.launchableinc.com/sending-data-to-launchable/using-the-launchable-cli/getting-started/")
+        self.organization, self.workspace = ensure_org_workspace()
         self._workspace_state_cache: Dict[str, str | bool] | None = None
 
     def request(

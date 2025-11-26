@@ -7,13 +7,13 @@ from typing import List
 import click
 
 import smart_tests.args4p.typer as typer
-from smart_tests.utils.commands import Command
-from smart_tests.utils.env_keys import TOKEN_KEY
 from smart_tests.utils.tracking import Tracking, TrackingClient
 
 from .. import args4p
 from ..app import Application
-from ..utils.authentication import get_org_workspace
+from ..utils.authentication import ensure_org_workspace, get_org_workspace
+from ..utils.commands import Command
+from ..utils.env_keys import TOKEN_KEY
 from ..utils.java import get_java_command
 from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import emoji
@@ -82,18 +82,8 @@ def verify(app_instance: Application):
     click.echo("Java command: " + repr(java))
     click.echo("smart-tests version: " + repr(version))
 
-    if org is None or workspace is None:
-        msg = (
-            "Could not identify Smart Tests organization/workspace. "
-            "Please confirm if you set SMART_TESTS_TOKEN or SMART_TESTS_ORGANIZATION and SMART_TESTS_WORKSPACE "
-            "environment variables"
-        )
-        tracking_client.send_error_event(
-            event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
-            stack_trace=msg
-        )
-        click.secho(msg, fg='red', err=True)
-        raise typer.Exit(1)
+    # raise an error here after we print out the basic diagnostics if LAUNCHABLE_TOKEN is not set.
+    ensure_org_workspace()
 
     try:
         res = client.request("get", "verification")

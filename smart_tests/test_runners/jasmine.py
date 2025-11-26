@@ -27,13 +27,7 @@ def record_tests(
     client.run()
 
 
-@smart_tests.subset
-def subset(client):
-    # read lines as test file names
-    for t in client.stdin():
-        client.test_path(t.rstrip("\n"))
-
-    client.run()
+subset = smart_tests.CommonSubsetImpls(__name__).scan_stdin()
 
 
 class JSONReportParser:

@@ -17,7 +17,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 /** Driver for {@link CommitGraphCollector}. */
-public class CommitIngester {
+public class Main {
   @Argument(required = true, metaVar = "NAME", usage = "Uniquely identifies this repository within the workspace", index = 0)
   public String name;
 
@@ -60,10 +60,10 @@ public class CommitIngester {
 
   @VisibleForTesting String launchableToken = null;
 
-  public CommitIngester() throws CmdLineException, MalformedURLException {}
+  public Main() throws CmdLineException, MalformedURLException {}
 
   public static void main(String[] args) throws Exception {
-    CommitIngester ingester = new CommitIngester();
+    Main ingester = new Main();
     CmdLineParser parser = new CmdLineParser(ingester);
     try {
       parser.parseArgument(args);
