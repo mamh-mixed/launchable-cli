@@ -19,6 +19,17 @@ class KarmaTest(CliTestCase):
         self.assert_record_tests_payload('record_test_result.json')
 
     @responses.activate
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_subset_with_base(self):
+        # emulate launchable record build
+        write_build(self.build_name)
+
+        result = self.cli('subset', '--target', '10%', '--base',
+                          os.getcwd(), 'karma', '--with', 'ng', input="a.ts\nb.ts")
+        self.assert_success(result)
+        self.assert_subset_payload('subset_result.json')
+
+    @responses.activate
     @mock.patch.dict(os.environ,
                      {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
     def test_subset(self):
