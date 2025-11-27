@@ -342,6 +342,9 @@ public class CommitGraphCollector {
    *
    * @param commitSender Commits are written to streams provided by this {@link Supplier}, in the given
    *     chunk size.
+   * @param treeReceiver Receives file names (aka 'tree' in Git speak) that the CLI thinks the server needs,
+   *                     and respond with those that the server actually needs.
+   * @param fileSender   Receives the actual contents of the files that the server needs.
    */
   public void transfer(
     Collection<ObjectId> advertised, IOConsumer<ContentProducer> commitSender, TreeReceiver treeReceiver, IOConsumer<ContentProducer> fileSender, int chunkSize)
