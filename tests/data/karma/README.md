@@ -7,7 +7,7 @@ Karma
 
 ```bash
 npm init -y
-npm install --save-dev karma karma-jasmine jasmine-core karma-chrome-launcher karma-json-reporter
+npm install --save-dev karma karma-jasmine jasmine-core karma-chrome-launcher karma-json-reporter karma-reports-with-file-paths
 ```
 The instructions are based on:
 https://karma-runner.github.io/6.4/intro/installation.html
@@ -30,10 +30,14 @@ npx karma init
 module.exports = function (config) {
   config.set({
     files: process.env.KARMA_FILES ? JSON.parse(process.env.KARMA_FILES) : [],
+    preprocessors: {
+      '**/*.spec.js': ['reports-with-file-paths']
+    },
     ...
     plugins: [
       ...
-      require('karma-json-reporter')
+      require('karma-json-reporter'),
+      require('karma-reports-with-file-paths')
     ],
     jsonReporter: {
       outputFile: require('path').join(__dirname, 'test-results.json'),
@@ -99,7 +103,7 @@ npx karma start --single-run
 ```
 ng new ng-karma-app --test-runner=karma
 cd ng-karma-app
-npm install --save-dev karma karma-chrome-launcher karma-coverage karma-jasmine karma-jasmine-html-reporter jasmine-core karma-json-reporter @types/jasmine
+npm install --save-dev karma karma-chrome-launcher karma-coverage karma-jasmine karma-jasmine-html-reporter jasmine-core karma-json-reporter karma-reports-with-file-paths @types/jasmine
 ng test --no-watch --no-progress --browsers=ChromeHeadless
 ```
 
@@ -117,9 +121,14 @@ ng generate config karma
 module.exports = function (config) {
   config.set({
     ...
+    preprocessors: {
+      '**/*.spec.ts': ['reports-with-file-paths']
+    },
+    ...
     plugins: [
       ...
-      require('karma-json-reporter')
+      require('karma-json-reporter'),
+      require('karma-reports-with-file-paths')
     ],
     jsonReporter: {
       outputFile: require('path').join(__dirname, 'test-results.json'),
@@ -143,7 +152,7 @@ ng test --no-watch --no-progress --browsers=ChromeHeadless
 launchable record tests karma test-results.json
 ```
 
-**Subset tests with **ng**:**
+**Subset tests with ng:**
 ```
 ng test --list-tests | grep src > test_list.txt
 cat test_list.txt | launchable subset --target 25% karma --with ng > subset.txt
@@ -151,5 +160,5 @@ cat test_list.txt | launchable subset --target 25% karma --with ng > subset.txt
 
 **Run subset of tests**
 ```
-ng test --no-watch --no-progress --browsers=ChromeHeadless --include $(cat subset.txt)
+ng test --no-watch --no-progress --browsers=ChromeHeadless $(cat subset.txt)
 ```
