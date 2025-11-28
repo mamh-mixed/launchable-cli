@@ -1,0 +1,360 @@
+{
+  "browsers": {
+    "123456": {
+      "id": "123456",
+      "fullName": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/131.0.0.0 Safari/537.36",
+      "name": "Chrome Headless 131.0.0.0 (Mac OS 10.15.7)",
+      "state": "DISCONNECTED",
+      "lastResult": {
+        "startTime": 1763588893304,
+        "total": 10,
+        "success": 10,
+        "failed": 0,
+        "skipped": 0,
+        "totalTime": 358,
+        "netTime": 338,
+        "error": true,
+        "disconnected": false
+      },
+      "disconnectsCount": 0,
+      "noActivityTimeout": 30000,
+      "disconnectDelay": 2000
+    }
+  },
+  "result": {
+    "123456": [
+      {
+        "fullName": "foo/bar/zot.spec.ts should feed the monkey",
+        "description": "should feed the monkey",
+        "id": "spec0",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 92,
+        "executedExpectationsCount": 1,
+        "passedExpectations": [
+          {
+            "matcherName": "toBeTruthy",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should fetch the toy",
+        "description": "should fetch the toy",
+        "id": "spec1",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 27,
+        "executedExpectationsCount": 7,
+        "passedExpectations": [
+          {
+            "matcherName": "toHaveBeenCalled",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalled",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalled",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalled",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalled",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalledTimes",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should fetch the toyForRecord - record found",
+        "description": "should fetch the toyForRecord - record found",
+        "id": "spec2",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 28,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should fetch the toyForRecord - record not found",
+        "description": "should fetch the toyForRecord - record not found",
+        "id": "spec3",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 27,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should fetch the toyForRecord - error in response",
+        "description": "should fetch the toyForRecord - error in response",
+        "id": "spec4",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 33,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should throw a ball",
+        "description": "should throw a ball",
+        "id": "spec5",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 26,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should be nice to the zookeeper",
+        "description": "should be nice to the zookeeper",
+        "id": "spec6",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 24,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should like a banana or two",
+        "description": "should like a banana or two",
+        "id": "spec7",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 24,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should fall back to an apple if banana is not available",
+        "description": "should fall back to an apple if banana is not available",
+        "id": "spec8",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 25,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toBeNull",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      },
+      {
+        "fullName": "foo/bar/zot.spec.ts should accept oranges if apple is not available",
+        "description": "should accept oranges if apple is not available",
+        "id": "spec9",
+        "log": [],
+        "skipped": false,
+        "disabled": false,
+        "pending": false,
+        "success": true,
+        "suite": [
+          "foo/bar/zot.spec.ts"
+        ],
+        "time": 32,
+        "executedExpectationsCount": 2,
+        "passedExpectations": [
+          {
+            "matcherName": "toEqual",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          },
+          {
+            "matcherName": "toHaveBeenCalledOnceWith",
+            "message": "Passed.",
+            "stack": "",
+            "passed": true
+          }
+        ],
+        "properties": null
+      }
+    ]
+  },
+  "summary": {
+    "success": 10,
+    "failed": 0,
+    "skipped": 0,
+    "error": true,
+    "disconnected": false,
+    "exitCode": 1
+  }
+}

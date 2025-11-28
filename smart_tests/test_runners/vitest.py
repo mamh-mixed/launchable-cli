@@ -4,7 +4,6 @@ from typing import Annotated, List, cast
 import smart_tests.args4p.typer as typer
 
 from ..commands.record.tests import RecordTests
-from ..commands.subset import Subset
 from . import smart_tests
 
 
@@ -40,10 +39,4 @@ def record_tests(
     smart_tests.CommonRecordTestImpls.load_report_files(client=client, source_roots=reports)
 
 
-@smart_tests.subset
-def subset(client: Subset):
-    # read lines as test file names
-    for t in client.stdin():
-        client.test_path(t.rstrip("\n"))
-
-    client.run()
+subset = smart_tests.CommonSubsetImpls(__name__).scan_stdin()

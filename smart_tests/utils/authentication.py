@@ -10,6 +10,10 @@ from .env_keys import ORGANIZATION_KEY, WORKSPACE_KEY, get_token
 
 
 def get_org_workspace():
+    '''
+    Returns (org,ws) tuple from LAUNCHABLE_TOKEN, or (None,None) if not found.
+    Use ensure_org_workspace() if this is supposed to be an error condition
+    '''
     token = get_token()
     if token:
         try:
@@ -17,7 +21,8 @@ def get_org_workspace():
             org, workspace = user.split("/", 1)
             return org, workspace
         except ValueError:
-            return None, None
+            click.secho("Invalid value in LAUNCHABLE_TOKEN environment variable.", fg="red")
+            raise typer.Exit(1)
 
     return os.getenv(ORGANIZATION_KEY), os.getenv(WORKSPACE_KEY)
 

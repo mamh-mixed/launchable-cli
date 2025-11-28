@@ -1,0 +1,189 @@
+{
+  "events": [
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should feed the monkey"
+        }
+      ],
+      "duration": 0.092,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should fetch the toy"
+        }
+      ],
+      "duration": 0.027,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should fetch the toyForRecord - record found"
+        }
+      ],
+      "duration": 0.028,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should fetch the toyForRecord - record not found"
+        }
+      ],
+      "duration": 0.027,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should fetch the toyForRecord - error in response"
+        }
+      ],
+      "duration": 0.033,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should throw a ball"
+        }
+      ],
+      "duration": 0.026,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should be nice to the zookeeper"
+        }
+      ],
+      "duration": 0.024,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should like a banana or two"
+        }
+      ],
+      "duration": 0.024,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should fall back to an apple if banana is not available"
+        }
+      ],
+      "duration": 0.025,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "foo/bar/zot.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "foo/bar/zot.spec.ts should accept oranges if apple is not available"
+        }
+      ],
+      "duration": 0.032,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    }
+  ],
+  "testRunner": "karma",
+  "group": "",
+  "noBuild": false,
+  "flavors": [],
+  "testSuite": ""
+}
