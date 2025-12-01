@@ -3,7 +3,7 @@ from unittest import mock
 
 import responses
 
-from smart_tests.utils.http_client import get_base_url
+from launchable.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
@@ -157,7 +157,7 @@ class SubsetsTest(CliTestCase):
         if os.path.exists("subset-after.txt"):
             os.remove("subset-after.txt")
 
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
     @responses.activate
     def test_subsets_subset_ids(self):
         responses.add(

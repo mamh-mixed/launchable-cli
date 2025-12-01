@@ -1,19 +1,13 @@
+from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
-from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import click
 from tabulate import tabulate
 
-from build.lib.launchable.testpath import unparse_test_path
+from launchable.testpath import unparse_test_path
 from launchable.utils.launchable_client import LaunchableClient
-
-try:
-    # for from 3.7
-    from dataclasses import dataclass
-except ImportError:
-    # for 3.6
-    from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -29,7 +23,7 @@ class SubsetResult(SubsetResultBase):
     duration_sec: float
 
     @classmethod
-    def from_inspect_api(cls, result: dict[str, Any], order: int) -> "SubsetResult":
+    def from_inspect_api(cls, result: Dict[str, Any], order: int) -> "SubsetResult":
         test_path = result.get("testPath", []) or []
         name = unparse_test_path(test_path)
         density = float(result.get("density") or 0.0)
@@ -93,8 +87,8 @@ class SubsetResults(SubsetResultBases[SubsetResult]):
 
 
 @click.command()
-@click.argument('file_before', type=click.Path(exists=True))
-@click.argument('file_after', type=click.Path(exists=True))
+@click.argument('file_before', type=click.Path(exists=True), required=False)
+@click.argument('file_after', type=click.Path(exists=True), required=False)
 @click.option(
     '--subset-id-before',
     'subset_id_before',
@@ -107,6 +101,7 @@ class SubsetResults(SubsetResultBases[SubsetResult]):
     type=int,
     help='Subset ID for the second subset to compare',
     metavar="SUBSET_ID")
+@click.pass_context
 def subsets(context: click.core.Context, file_before, file_after, subset_id_before, subset_id_after):
     """Compare subsets sourced from files or remote subset IDs."""
 
@@ -125,7 +120,7 @@ def subsets(context: click.core.Context, file_before, file_after, subset_id_befo
 
     if from_subset_id:
 
-        client = LaunchableClient(app=context)
+        client = LaunchableClient(app=context.obj)
         # for type check
         assert subset_id_before is not None and subset_id_after is not None
         _from_subset_ids(client=client, subset_id_before=subset_id_before, subset_id_after=subset_id_after)
@@ -152,7 +147,7 @@ def _from_subset_ids(client: LaunchableClient, subset_id_before: int, subset_id_
     for result in after_subset.results:
         total += 1
         if result.reason.startswith("Changed file: "):
-            affected.add(result.reason.removeprefix("Changed file: "))
+            affected.add(result.reason[len("Changed file: "):])
 
         test_name = result.name
         after_order = result.order
