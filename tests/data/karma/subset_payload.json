@@ -1,0 +1,16 @@
+{
+  "testPaths": [
+    [
+      { "type": "file", "name": "foo/bar/zot.spec.ts" }
+    ],
+    [
+      { "type": "file", "name": "foo/bar/another.spec.ts" }
+    ]
+  ],
+  "testRunner": "karma",
+  "goal": {"type": "subset-by-percentage", "percentage": 0.1},
+  "ignoreNewTests": false,
+  "session": { "id": "16" },
+  "getTestsFromGuess": false,
+  "getTestsFromPreviousSessions": false
+}

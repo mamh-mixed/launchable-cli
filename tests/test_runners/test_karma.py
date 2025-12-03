@@ -19,8 +19,30 @@ class KarmaTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
-    def test_subset(self):
+    def test_subset_with_base(self):
         result = self.cli('subset', 'karma', '--session', self.session, '--target', '10%', '--base',
                           os.getcwd(), '--with', 'ng', input="a.ts\nb.ts")
         self.assert_success(result)
         self.assert_subset_payload('subset_result.json')
+
+    @responses.activate
+    @mock.patch.dict(os.environ,
+                     {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset(self):
+        subset_input = """foo/bar/zot.spec.ts
+foo/bar/another.spec.ts
+"""
+        result = self.cli('subset', 'karma', '--session', self.session, '--target', '10%', input=subset_input)
+        self.assert_success(result)
+        self.assert_subset_payload('subset_payload.json')
+
+    @responses.activate
+    @mock.patch.dict(os.environ,
+                     {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_with_ng(self):
+        subset_input = """foo/bar/zot.spec.ts
+foo/bar/another.spec.ts
+"""
+        result = self.cli('subset', 'karma', '--session', self.session, '--target', '10%', '--with', 'ng', input=subset_input)
+        self.assert_success(result)
+        self.assert_subset_payload('subset_payload.json')

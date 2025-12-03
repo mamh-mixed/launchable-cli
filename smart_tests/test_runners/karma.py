@@ -1,6 +1,3 @@
-# This runner only supports recording tests
-# For subsetting, use 'ng' test runner instead
-# It's possible to use 'karma' runner for recording, and 'ng' runner for subsetting, for the same test session
 import json
 from typing import Annotated, Dict, Generator, List
 
@@ -12,18 +9,6 @@ from ..testpath import TestPath
 from . import smart_tests
 
 
-@smart_tests.subset
-def subset(client, _with: Annotated[str | None, typer.Option(
-        '--with', help="Specify 'ng' to use the Angular test runner for subsetting")] = None, ):
-    # TODO: implement the --with ng option
-
-    # read lines as test file names
-    for t in client.stdin():
-        client.test_path(t.rstrip("\n"))
-
-    client.run()
-
-
 @smart_tests.record.tests
 def record_tests(client,
                  reports: Annotated[List[str], typer.Argument(multiple=True, help="Test report files to process")],
@@ -32,6 +17,28 @@ def record_tests(client,
 
     for r in reports:
         client.report(r)
+    client.run()
+
+
+@smart_tests.subset
+def subset(client, _with: Annotated[str | None, typer.Option(
+        '--with', help='Format output for specific test runner (e.g., "ng" for Angular CLI)')] = None, ):
+    """
+    Usage:
+        find src -name "*.spec.ts" -o -name "*.spec.js" > test-list.txt
+        cat test-list.txt | launchable subset --target 10% karma
+
+        # Output in ng test format
+        find src -name "*.spec.ts" | launchable subset --target 10% karma --with ng
+    """
+    for t in client.stdin():
+        path = t.strip()
+        if path:
+            client.test_path(path)
+
+    if _with == 'ng':
+        client.formatter = lambda x: "--include={}".format(x[0]['name'])
+        client.separator = " "
 
     client.run()
 
