@@ -9,7 +9,7 @@ from launchable.utils.http_client import _HttpClient, _join_paths
 from launchable.utils.tracking import Tracking, TrackingClient  # type: ignore
 
 from ..app import Application
-from .authentication import get_org_workspace, ensure_org_workspace
+from .authentication import ensure_org_workspace
 from .env_keys import REPORT_ERROR_KEY
 
 
