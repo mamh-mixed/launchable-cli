@@ -24,6 +24,9 @@ configuration for [pre-commit](https://pre-commit.com). Install the hook with
 pipenv shell
 ```
 
+From this shell, run `pip install -e .` to create `launchable` wrapper script from the workspace.
+This is useful to test the CLI with real/local server.
+
 ## Run tests cli
 
 ```shell
