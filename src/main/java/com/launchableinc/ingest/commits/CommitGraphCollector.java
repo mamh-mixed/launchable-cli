@@ -92,7 +92,7 @@ public class CommitGraphCollector {
    */
   private final Repository root;
 
-  private AtomicInteger commitsSent = new AtomicInteger(), filesSent = new AtomicInteger();
+  private final AtomicInteger commitsSent = new AtomicInteger(), filesSent = new AtomicInteger();
 
   private boolean collectCommitMessage, collectFiles;
 
@@ -289,7 +289,7 @@ public class CommitGraphCollector {
           // this way, if the file collection fails, the server won't see this commit, so the future
           // "record commit" invocation will retry the file collection, thereby making the behavior idempotent.
           // TODO: file transfer can be parallelized more aggressively, where we send chunks in parallel
-          try (FileChunkStreamer fs = new FileChunkStreamer(fileSender, chunkSize);
+          try (FileChunkStreamer fs = new FileChunkStreamer(r.buildHeader(), fileSender, chunkSize);
                ProgressReporter<VirtualFile>.Consumer fsr = pr.newConsumer(fs)) {
             br.collectFiles(advertised, treeReceiver, fsr);
           }
@@ -355,12 +355,14 @@ public class CommitGraphCollector {
 
     private final ObjectReader objectReader;
     private final Set<ObjectId> shallowCommits;
+    private final ObjectId headId;
 
     ByRepository(Repository git, String name) throws IOException {
       this.name = name;
       this.git = git;
       this.objectReader = git.newObjectReader();
       this.shallowCommits = objectReader.getShallowCommits();
+      this.headId = git.resolve("HEAD");
     }
 
     void forEachSubModule(ExecutorService threadPool, IOConsumer<ByRepository> consumer) throws IOException {
@@ -453,7 +455,6 @@ public class CommitGraphCollector {
      */
     void collectFiles(Collection<ObjectId> advertised, TreeReceiver treeReceiver, FlushableConsumer<VirtualFile> fileReceiver) throws IOException {
       try (TreeWalk treeWalk = new TreeWalk(git)) {
-        ObjectId headId = git.resolve("HEAD");
         RevCommit start = git.parseCommit(headId);
         treeWalk.addTree(start.getTree());
 
@@ -500,15 +501,10 @@ public class CommitGraphCollector {
 
         // Note(Konboi): To balance the order, since words like "test" and "spec" tend to appear
         // toward the end in alphabetical sorting.
-        if (!files.isEmpty()) {
-          fileReceiver.accept(buildHeader(start));
+        Collections.shuffle(files);
+        for (VirtualFile f : files) {
+          fileReceiver.accept(f);
           filesSent.incrementAndGet();
-
-          Collections.shuffle(files);
-          for (VirtualFile f : files) {
-            fileReceiver.accept(f);
-            filesSent.incrementAndGet();
-          }
         }
 
         fileReceiver.flush();
@@ -519,7 +515,7 @@ public class CommitGraphCollector {
      * Creates a per repository "header" file as a {@link VirtualFile}.
      * Currently, this is just the list of files in the repository.
      */
-    private VirtualFile buildHeader(RevCommit start) throws IOException {
+    VirtualFile buildHeader() throws IOException {
       ByteArrayOutputStream os = new ByteArrayOutputStream();
       try (JsonGenerator w = new JsonFactory().createGenerator(os)) {
         w.setCodec(objectMapper);
@@ -527,7 +523,7 @@ public class CommitGraphCollector {
         w.writeArrayFieldStart("tree");
 
         try (TreeWalk tw = new TreeWalk(git)) {
-          tw.addTree(start.getTree());
+          tw.addTree(git.parseCommit(headId).getTree());
           tw.setRecursive(true);
 
           while (tw.next()) {
@@ -555,7 +551,6 @@ public class CommitGraphCollector {
         // implementation optimization that's currently enabling this all the time
         walk.sort(RevSort.COMMIT_TIME_DESC, true);
 
-        ObjectId headId = git.resolve("HEAD");
         walk.markStart(walk.parseCommit(headId));
 
         // don't walk commits too far back.

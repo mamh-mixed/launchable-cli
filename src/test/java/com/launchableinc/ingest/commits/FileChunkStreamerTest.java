@@ -20,7 +20,7 @@ import static org.junit.Assert.fail;
 public class FileChunkStreamerTest {
   @Test
   public void no_op_if_no_content() throws Exception {
-    try (FileChunkStreamer fs = new FileChunkStreamer(content -> fail(), 2)) {
+    try (FileChunkStreamer fs = new FileChunkStreamer(null, content -> fail(), 2)) {
       // no write
     }
   }
@@ -28,13 +28,13 @@ public class FileChunkStreamerTest {
   @Test
   public void basics() throws Exception {
     int[] count = new int[1];
-    try (FileChunkStreamer fs = new FileChunkStreamer(content -> {
+    try (FileChunkStreamer fs = new FileChunkStreamer(new VirtualFileImpl("header.txt"), content -> {
       switch(count[0]++) {
       case 0:
-        assertThat(readEntries(content)).containsExactly("foo.txt", "bar.txt").inOrder();
+        assertThat(readEntries(content)).containsExactly("header.txt", "foo.txt", "bar.txt").inOrder();
         break;
       case 1:
-        assertThat(readEntries(content)).containsExactly("zot.txt").inOrder();
+        assertThat(readEntries(content)).containsExactly("header.txt", "zot.txt").inOrder();
         break;
       default:
         fail();

@@ -38,7 +38,7 @@ class ProgressReporter<T> {
   /**
    * Deals with one serial stream of work.
    */
-  class Consumer implements FlushableConsumer<T>, AutoCloseable {
+  class Consumer implements FlushableConsumer<T> {
     private final FlushableConsumer<T> base;
     private final List<T> pool = new ArrayList<>();
 
