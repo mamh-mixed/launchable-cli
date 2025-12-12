@@ -90,7 +90,7 @@ public class CommitGraphCollectorTest {
     try (Repository r = Git.open(barerepoDir).getRepository()) {
       CommitGraphCollector cgc = collectCommit(r, ImmutableList.of());
       assertThat(cgc.getCommitsSent()).isEqualTo(1);
-      assertThat(cgc.getFilesSent()).isEqualTo(2); // header + .gitmodules
+      assertThat(cgc.getFilesSent()).isEqualTo(1); // .gitmodules
     }
   }
 
@@ -121,7 +121,7 @@ public class CommitGraphCollectorTest {
           2);
     }
     assertThat(councCommitChunks[0]).isEqualTo(2);
-    assertThat(countFilesChunks[0]).isEqualTo(3); // header, a, .gitmodules, and header, sub/x, 5 files, 3 chunks
+    assertThat(countFilesChunks[0]).isEqualTo(2); // a, .gitmodules, and sub/x, 3 files, 2 chunks
   }
 
   private void assertValidTar(ContentProducer content) throws IOException {
@@ -176,14 +176,8 @@ public class CommitGraphCollectorTest {
 
       CommitGraphCollector cgc = new CommitGraphCollector("test", mainrepo.getRepository());
       cgc.collectFiles(true);
-      cgc.new ByRepository(mainrepo.getRepository(), "main")
-        .collectFiles(Collections.emptyList(),
-          new PassThroughTreeReceiverImpl(),
-          FlushableConsumer.of(files::add));
 
-      // header for the main repo, 'gitmodules'
-      assertThat(files).hasSize(2);
-      VirtualFile header = files.get(0);
+      VirtualFile header = cgc.new ByRepository(mainrepo.getRepository(), "main").buildHeader();
       assertThat(header.path()).isEqualTo(CommitGraphCollector.HEADER_FILE);
       JsonNode tree = assertValidJson(header::writeTo).get("tree");
       assertThat(tree.isArray()).isTrue();

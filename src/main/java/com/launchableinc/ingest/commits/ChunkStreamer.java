@@ -2,7 +2,6 @@ package com.launchableinc.ingest.commits;
 
 import org.apache.http.entity.ContentProducer;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
@@ -12,7 +11,7 @@ import java.util.List;
 /**
  * Accepts T, buffers them, and writes them out as a batch.
  */
-abstract class ChunkStreamer<T> implements FlushableConsumer<T>, Closeable {
+abstract class ChunkStreamer<T> implements FlushableConsumer<T> {
   /**
    * Encapsulation of how batches are sent.
    */
