@@ -577,13 +577,20 @@ class Subset(TestPathWriter):
                 e, "Warning: the service failed to subset. Falling back to running all tests")
             return SubsetResult.from_test_paths(self.test_paths)
 
+    def _requires_test_input(self) -> bool:
+        return (
+            self.subset_id is None
+            and not self.is_get_tests_from_previous_sessions  # noqa: W503
+            and len(self.test_paths) == 0  # noqa: W503
+        )
+
     def run(self):
         """called after tests are scanned to compute the optimized order"""
 
         if self.is_get_tests_from_guess:
             self._collect_potential_test_files()
 
-        if not self.is_get_tests_from_previous_sessions and len(self.test_paths) == 0:
+        if self._requires_test_input():
             if self.input_given:
                 print_error_and_die("ERROR: Given arguments did not match any tests. They appear to be incorrect/non-existent.", tracking_client, Tracking.ErrorEvent.USER_ERROR)  # noqa E501
             else:
