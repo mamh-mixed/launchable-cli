@@ -326,7 +326,7 @@ class Subset(TestPathWriter):
         """
 
         # To avoid the cli continue to wait from stdin
-        if self.is_get_tests_from_previous_sessions or self.is_get_tests_from_guess:
+        if self._should_skip_stdin():
             return []
 
         if sys.stdin.isatty():
@@ -585,6 +585,22 @@ class Subset(TestPathWriter):
             and not self.is_get_tests_from_previous_sessions  # noqa: W503
             and len(self.test_paths) == 0  # noqa: W503
         )
+
+    def _should_skip_stdin(self) -> bool:
+        if self.is_get_tests_from_previous_sessions or self.is_get_tests_from_guess:
+            return True
+
+        if self.subset_id is not None:
+            if self._stdin_is_tty():
+                warn_and_exit_if_fail_fast_mode(
+                    "Warning: --subset-id is set so stdin will be ignored."
+                )
+            return True
+        return False
+
+    # Note(Konboi): Helper to be able to patch stdin easily in tests
+    def _stdin_is_tty(self) -> bool:
+        return sys.stdin.isatty()
 
     def run(self):
         """called after tests are scanned to compute the optimized order"""
