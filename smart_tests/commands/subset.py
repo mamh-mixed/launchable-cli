@@ -418,7 +418,97 @@ class Subset(TestPathWriter):
         if self.use_case:
             payload['changesUnderTest'] = self.use_case.value
 
+        split_subset = self._build_split_subset_payload()
+        if split_subset:
+            payload['splitSubset'] = split_subset
+
         return payload
+
+    def _build_split_subset_payload(self) -> dict[str, Any] | None:
+        if self.bin_target is None:
+            if self.same_bin_files:
+                print_error_and_die(
+                    "--same-bin requires --bin",
+                    self.tracking_client,
+                    Tracking.ErrorEvent.USER_ERROR,
+                )
+            return None
+
+        slice_index = self.bin_target.numerator
+        slice_count = self.bin_target.denominator
+
+        if slice_index <= 0 or slice_count <= 0:
+            print_error_and_die(
+                "Invalid --bin value. Both index and count must be positive integers.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+        if slice_count < slice_index:
+            print_error_and_die(
+                "Invalid --bin value. The numerator cannot exceed the denominator.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+        same_bins = self._read_same_bin_files()
+
+        return {
+            "sliceIndex": slice_index,
+            "sliceCount": slice_count,
+            "sameBins": same_bins,
+        }
+
+    def _read_same_bin_files(self) -> list[list[TestPath]]:
+        if not self.same_bin_files:
+            return []
+
+        formatter = self.same_bin_formatter
+        if formatter is None:
+            print_error_and_die(
+                "--same-bin is not supported for this test runner.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+        same_bins: list[list[TestPath]] = []
+        seen_tests: set[str] = set()
+
+        for same_bin_file in self.same_bin_files:
+            try:
+                with open(same_bin_file, "r", encoding="utf-8") as fp:
+                    tests = [line.strip() for line in fp if line.strip()]
+            except OSError as exc:
+                print_error_and_die(
+                    f"Failed to read --same-bin file '{same_bin_file}': {exc}",
+                    self.tracking_client,
+                    Tracking.ErrorEvent.USER_ERROR,
+                )
+
+            unique_tests = list(dict.fromkeys(tests))
+
+            group: list[TestPath] = []
+            for test in unique_tests:
+                if test in seen_tests:
+                    print_error_and_die(
+                        f"Error: test '{test}' is listed in multiple --same-bin files.",
+                        self.tracking_client,
+                        Tracking.ErrorEvent.USER_ERROR,
+                    )
+                seen_tests.add(test)
+
+                formatted = formatter(test)
+                if not formatted:
+                    print_error_and_die(
+                        f"Failed to parse test '{test}' from --same-bin file {same_bin_file}",
+                        self.tracking_client,
+                        Tracking.ErrorEvent.USER_ERROR,
+                    )
+                group.append(formatted)
+
+            same_bins.append(group)
+
+        return same_bins
 
     def _collect_potential_test_files(self):
         LOOSE_TEST_FILE_PATTERN = r'(\.(test|spec)\.|_test\.|Test\.|Spec\.|test/|tests/|__tests__/|src/test/)'

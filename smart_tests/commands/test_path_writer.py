@@ -1,5 +1,5 @@
 from os.path import join
-from typing import Callable, Dict, List
+from typing import Callable, List
 
 import click
 
@@ -19,7 +19,7 @@ class TestPathWriter(object):
 
     def __init__(self, app: Application):
         self.formatter = self.default_formatter
-        self._same_bin_formatter: Callable[[str], Dict[str, str]] | None = None
+        self._same_bin_formatter: Callable[[str], TestPath] | None = None
         self.separator = "\n"
         self.app = app
 
@@ -43,9 +43,9 @@ class TestPathWriter(object):
                                        for t in test_paths))
 
     @property
-    def same_bin_formatter(self) -> Callable[[str], Dict[str, str]] | None:
+    def same_bin_formatter(self) -> Callable[[str], TestPath] | None:
         return self._same_bin_formatter
 
     @same_bin_formatter.setter
-    def same_bin_formatter(self, v: Callable[[str], Dict[str, str]]):
+    def same_bin_formatter(self, v: Callable[[str], TestPath]):
         self._same_bin_formatter = v
