@@ -551,12 +551,15 @@ class SubsetTest(CliTestCase):
             "10%",
             "--bin",
             "1/4",
+            "--subset-id",
+            "222",
             mix_stderr=False,
             input=pipe,
         )
         self.assert_success(result)
 
         payload = self.decode_request_body(self.find_request('/subset').request.body)
+        self.assertEqual(payload.get('subsettingId'), 222)
         self.assertEqual(
             payload.get('splitSubset'),
             {"sliceIndex": 1, "sliceCount": 4, "sameBins": []},
@@ -650,3 +653,42 @@ class SubsetTest(CliTestCase):
             self.assertIn("--same-bin requires --bin", result.stderr)
         finally:
             os.unlink(same_bin_file.name)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_without_tests_but_with_subset_id(self):
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json={
+                "testPaths": [],
+                "rest": [],
+                "subsettingId": 321,
+                "summary": {
+                    "subset": {"duration": 0, "candidates": 0, "rate": 0},
+                    "rest": {"duration": 0, "candidates": 0, "rate": 0},
+                },
+                "isObservation": False,
+            },
+            status=200,
+        )
+
+        result = self.cli(
+            "subset",
+            "file",
+            "--session",
+            self.session,
+            "--subset-id",
+            "321",
+            "--bin",
+            "1/2",
+            "--target",
+            "10%",
+            mix_stderr=False,
+        )
+
+        self.assert_success(result)
+        self.assertNotIn("Warning: this command reads from stdin", result.stderr)
+
+        payload = self.decode_request_body(self.find_request('/subset').request.body)
+        self.assertEqual(payload.get('subsettingId'), 321)
