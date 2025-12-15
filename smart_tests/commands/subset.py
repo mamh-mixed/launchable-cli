@@ -29,7 +29,7 @@ from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
 from ..utils.smart_tests_client import SmartTestsClient
-from ..utils.typer_types import Duration, Percentage, parse_duration, parse_percentage
+from ..utils.typer_types import Duration, Fraction, Percentage, parse_duration, parse_fraction, parse_percentage
 from .test_path_writer import TestPathWriter
 
 
@@ -174,6 +174,18 @@ class Subset(TestPathWriter):
                 type=fileText(mode="r"),
                 metavar="FILE"
             )] = None,
+            bin_target: Annotated[Fraction | None, typer.Option(
+                "--bin",
+                help="Split subset into bins, e.g. --bin 1/4",
+                metavar="INDEX/COUNT",
+                type=parse_fraction
+            )] = None,
+            same_bin_files: Annotated[List[str], typer.Option(
+                "--same-bin",
+                help="Keep all tests listed in the file together when splitting; one test per line",
+                metavar="FILE",
+                multiple=True
+            )] = [],
             is_get_tests_from_guess: Annotated[bool, typer.Option(
                 "--get-tests-from-guess",
                 help="Get subset list from guessed tests"
@@ -255,6 +267,8 @@ class Subset(TestPathWriter):
         self.ignore_flaky_tests_above = ignore_flaky_tests_above
         self.prioritize_tests_failed_within_hours = prioritize_tests_failed_within_hours
         self.prioritized_tests_mapping_file = prioritized_tests_mapping_file
+        self.bin_target = bin_target
+        self.same_bin_files = list(same_bin_files)
         self.is_get_tests_from_guess = is_get_tests_from_guess
         self.use_case = use_case
 
