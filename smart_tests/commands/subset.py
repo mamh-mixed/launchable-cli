@@ -438,7 +438,7 @@ class Subset(TestPathWriter):
         if self.bin_target is None:
             if self.same_bin_files:
                 print_error_and_die(
-                    "--same-bin requires --bin",
+                    "--same-bin option requires --bin option.\nPlease set --bin option to use --same-bin",
                     self.tracking_client,
                     Tracking.ErrorEvent.USER_ERROR,
                 )
