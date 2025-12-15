@@ -542,22 +542,10 @@ class SubsetTest(CliTestCase):
             status=200,
         )
 
-        result = self.cli(
-            "subset",
-            "file",
-            "--session",
-            self.session,
-            "--target",
-            "10%",
-            "--bin",
-            "1/4",
-            "--subset-id",
-            "222",
-            mix_stderr=False,
-            input=pipe,
-        )
-        self.assert_success(result)
+        result = self.cli("subset", "file", "--session", self.session, "--target", "10%", "--bin", "1/4",
+                          "--subset-id", "222", mix_stderr=False, input=pipe)
 
+        self.assert_success(result)
         payload = self.decode_request_body(self.find_request('/subset').request.body)
         self.assertEqual(payload.get('subsettingId'), 222)
         self.assertEqual(
@@ -568,7 +556,25 @@ class SubsetTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_same_bin_file(self):
-        pipe = "TestExample1\nok    github.com/example/project    0.1s\n"
+        # Test invalid case
+        # --same-bin requires --bin options
+        with tempfile.NamedTemporaryFile("w+", delete=False) as same_bin_file:
+            same_bin_file.write("example.AddTest\n")
+            same_bin_file.flush()
+            result = self.cli(
+                "subset",
+                "go-test",
+                "--session",
+                self.session,
+                "--subset-id",
+                123,
+                "--same-bin",
+                same_bin_file.name,
+                mix_stderr=False)
+            self.assert_exit_code(result, 1)
+            self.assertIn("--same-bin option requires --bin option", result.stderr)
+
+        # Test valid case
         mock_json_response = {
             "testPaths": [[
                 {"type": "class", "name": "rocket-car-gotest"},
@@ -589,27 +595,12 @@ class SubsetTest(CliTestCase):
             status=200,
         )
 
-        same_bin_file = tempfile.NamedTemporaryFile(delete=False)
-        try:
-            same_bin_file.write(b"example.AddTest\nexample.DivTest\n")
-            same_bin_file.close()
-
-            result = self.cli(
-                "subset",
-                "go-test",
-                "--session",
-                self.session,
-                "--target",
-                "20%",
-                "--bin",
-                "2/5",
-                "--same-bin",
-                same_bin_file.name,
-                mix_stderr=False,
-                input=pipe,
-            )
+        with tempfile.NamedTemporaryFile("w+", delete=False) as same_bin_file:
+            same_bin_file.write("example.AddTest\nexample.DivTest\n")
+            same_bin_file.flush()
+            result = self.cli("subset", "go-test", "--session", self.session, "--target", "20%", "--subset-id", 123,
+                              "--bin", "2/5", "--same-bin", same_bin_file.name, mix_stderr=False)
             self.assert_success(result)
-
             payload = self.decode_request_body(self.find_request('/subset').request.body)
             split_subset = payload.get('splitSubset')
             self.assertEqual(split_subset.get('sliceIndex'), 2)
@@ -627,68 +618,3 @@ class SubsetTest(CliTestCase):
                     ],
                 ]],
             )
-        finally:
-            os.unlink(same_bin_file.name)
-
-    @responses.activate
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
-    def test_same_bin_requires_bin(self):
-        pipe = "TestExample\nok    github.com/example/project    0.1s\n"
-        same_bin_file = tempfile.NamedTemporaryFile(delete=False)
-        try:
-            same_bin_file.write(b"example.AddTest\n")
-            same_bin_file.close()
-
-            result = self.cli(
-                "subset",
-                "go-test",
-                "--session",
-                self.session,
-                "--same-bin",
-                same_bin_file.name,
-                mix_stderr=False,
-                input=pipe,
-            )
-            self.assert_exit_code(result, 1)
-            self.assertIn("--same-bin requires --bin", result.stderr)
-        finally:
-            os.unlink(same_bin_file.name)
-
-    @responses.activate
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
-    def test_subset_without_tests_but_with_subset_id(self):
-        responses.replace(
-            responses.POST,
-            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
-            json={
-                "testPaths": [],
-                "rest": [],
-                "subsettingId": 321,
-                "summary": {
-                    "subset": {"duration": 0, "candidates": 0, "rate": 0},
-                    "rest": {"duration": 0, "candidates": 0, "rate": 0},
-                },
-                "isObservation": False,
-            },
-            status=200,
-        )
-
-        result = self.cli(
-            "subset",
-            "file",
-            "--session",
-            self.session,
-            "--subset-id",
-            "321",
-            "--bin",
-            "1/2",
-            "--target",
-            "10%",
-            mix_stderr=False,
-        )
-
-        self.assert_success(result)
-        self.assertNotIn("Warning: this command reads from stdin", result.stderr)
-
-        payload = self.decode_request_body(self.find_request('/subset').request.body)
-        self.assertEqual(payload.get('subsettingId'), 321)

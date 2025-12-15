@@ -591,16 +591,12 @@ class Subset(TestPathWriter):
             return True
 
         if self.subset_id is not None:
-            if self._stdin_is_tty():
+            if sys.stdin.isatty():
                 warn_and_exit_if_fail_fast_mode(
                     "Warning: --subset-id is set so stdin will be ignored."
                 )
             return True
         return False
-
-    # Note(Konboi): Helper to be able to patch stdin easily in tests
-    def _stdin_is_tty(self) -> bool:
-        return sys.stdin.isatty()
 
     def run(self):
         """called after tests are scanned to compute the optimized order"""
