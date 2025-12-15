@@ -174,6 +174,12 @@ class Subset(TestPathWriter):
                 type=fileText(mode="r"),
                 metavar="FILE"
             )] = None,
+            subset_id: Annotated[int | None, typer.Option(
+                "--subset-id",
+                help="Reuse reorder results from an existing subset ID",
+                metavar="ID",
+                type=intType(min=1)
+            )] = None,
             bin_target: Annotated[Fraction | None, typer.Option(
                 "--bin",
                 help="Split subset into bins, e.g. --bin 1/4",
@@ -267,6 +273,7 @@ class Subset(TestPathWriter):
         self.ignore_flaky_tests_above = ignore_flaky_tests_above
         self.prioritize_tests_failed_within_hours = prioritize_tests_failed_within_hours
         self.prioritized_tests_mapping_file = prioritized_tests_mapping_file
+        self.subset_id = subset_id
         self.bin_target = bin_target
         self.same_bin_files = list(same_bin_files)
         self.is_get_tests_from_guess = is_get_tests_from_guess
@@ -417,6 +424,9 @@ class Subset(TestPathWriter):
 
         if self.use_case:
             payload['changesUnderTest'] = self.use_case.value
+
+        if self.subset_id is not None:
+            payload['subsettingId'] = self.subset_id
 
         split_subset = self._build_split_subset_payload()
         if split_subset:
