@@ -50,6 +50,12 @@ from .test_path_writer import TestPathWriter
     type=PERCENTAGE,
 )
 @click.option(
+    '--similarity',
+    'similarity',
+    help='subsetting by similarity from 0 to 1.0. Tests scoring above this value are included in the subset.',
+    type=click.FloatRange(min=0, max=1.0),
+)
+@click.option(
     '--goal-spec',
     'goal_spec',
     help='subsetting by programmatic goal definition',
@@ -242,6 +248,7 @@ def subset(
     test_suite: Optional[str] = None,
     is_get_tests_from_guess: bool = False,
     use_case: Optional[str] = None,
+    similarity: Optional[float] = None,
 ):
     app = context.obj
     tracking_client = TrackingClient(Command.SUBSET, app=app)
@@ -509,6 +516,11 @@ def subset(
                 payload["goal"] = {
                     "type": "subset-by-goal-spec",
                     "goal": goal_spec
+                }
+            elif similarity is not None:
+                payload["goal"] = {
+                    "type": "subset-by-similarity",
+                    "similarity": similarity
                 }
             else:
                 payload['useServerSideOptimizationTarget'] = True
