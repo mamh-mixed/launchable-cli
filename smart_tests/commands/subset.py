@@ -507,6 +507,8 @@ class Subset(TestPathWriter):
                     )
                 seen_tests.add(test)
 
+                # For type check
+                assert formatter is not None, "--same -bin is not supported for this test runner"
                 formatted = formatter(test)
                 if not formatted:
                     print_error_and_die(
