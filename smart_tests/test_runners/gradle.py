@@ -77,6 +77,8 @@ def subset(
         client.formatter = lambda x: f"--tests {x[0]['name']}"
         client.separator = ' '
 
+    client.same_bin_formatter = lambda s: [{"type": "class", "name": s}]
+
     client.run()
 
 

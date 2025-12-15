@@ -41,6 +41,7 @@ def subset(client: Subset):
             test_cases = []
     client.formatter = lambda x: f"^{x[1]['name']}$"
     client.separator = '|'
+    client.same_bin_formatter = format_same_bin
     client.run()
 
 
