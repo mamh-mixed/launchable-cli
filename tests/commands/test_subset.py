@@ -595,6 +595,46 @@ class SubsetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_input_snapshot_id_from_file(self):
+        pipe = "test_1.py\ntest_2.py\n"
+        mock_json_response = {
+            "testPaths": [[{"type": "file", "name": "test_1.py"}]],
+            "rest": [[{"type": "file", "name": "test_2.py"}]],
+            "subsettingId": 999,
+            "summary": {"subset": {"duration": 1, "candidates": 1, "rate": 50},
+                        "rest": {"duration": 1, "candidates": 1, "rate": 50}},
+            "isObservation": False,
+        }
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json=mock_json_response,
+            status=200,
+        )
+
+        with tempfile.NamedTemporaryFile("w+", delete=False) as snapshot_file:
+            snapshot_file.write("777\n")
+            snapshot_file.flush()
+            result = self.cli(
+                "subset",
+                "file",
+                "--session",
+                self.session,
+                "--target",
+                "10%",
+                "--input-snapshot-id",
+                f"@{snapshot_file.name}",
+                mix_stderr=False,
+                input=pipe,
+            )
+        os.unlink(snapshot_file.name)
+
+        self.assert_success(result)
+        payload = self.decode_request_body(self.find_request('/subset').request.body)
+        self.assertEqual(payload.get('subsettingId'), 777)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_same_bin_file(self):
         # Test invalid case
         # --same-bin requires --bin options

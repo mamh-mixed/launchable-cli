@@ -28,6 +28,7 @@ from ..testpath import FilePathNormalizer, TestPath
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
+from ..utils.input_snapshot import InputSnapshotId
 from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import Duration, Fraction, Percentage, parse_duration, parse_fraction, parse_percentage
 from .test_path_writer import TestPathWriter
@@ -174,12 +175,7 @@ class Subset(TestPathWriter):
                 type=fileText(mode="r"),
                 metavar="FILE"
             )] = None,
-            input_snapshot_id: Annotated[int | None, typer.Option(
-                "--input-snapshot-id",
-                help="Reuse reorder results from an existing input snapshot ID",
-                metavar="ID",
-                type=intType(min=1)
-            )] = None,
+            input_snapshot_id: Annotated[InputSnapshotId | None, InputSnapshotId.as_option()] = None,
             print_input_snapshot_id: Annotated[bool, typer.Option(
                 "--print-input-snapshot-id",
                 help="Print the input snapshot ID returned from the server instead of the subset results"
@@ -277,7 +273,7 @@ class Subset(TestPathWriter):
         self.ignore_flaky_tests_above = ignore_flaky_tests_above
         self.prioritize_tests_failed_within_hours = prioritize_tests_failed_within_hours
         self.prioritized_tests_mapping_file = prioritized_tests_mapping_file
-        self.input_snapshot_id = input_snapshot_id
+        self.input_snapshot_id = input_snapshot_id.value if input_snapshot_id else None
         self.print_input_snapshot_id = print_input_snapshot_id
         self.bin_target = bin_target
         self.same_bin_files = list(same_bin_files)
@@ -596,7 +592,7 @@ class Subset(TestPathWriter):
             return True
 
         if self.input_snapshot_id is not None:
-            if sys.stdin.isatty():
+            if not sys.stdin.isatty():
                 warn_and_exit_if_fail_fast_mode(
                     "Warning: --input-snapshot-id is set so stdin will be ignored."
                 )
@@ -606,7 +602,7 @@ class Subset(TestPathWriter):
     def _print_input_snapshot_id_value(self, subset_result: SubsetResult):
         if not subset_result.subset_id:
             raise click.ClickException(
-                "This request did not return an input snapshot ID. Please re-run the command."
+                "Subset request did not return an input snapshot ID. Please re-run the command."
             )
 
         click.echo(subset_result.subset_id)
