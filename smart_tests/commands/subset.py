@@ -280,6 +280,8 @@ class Subset(TestPathWriter):
         self.is_get_tests_from_guess = is_get_tests_from_guess
         self.use_case = use_case
 
+        self._validate_print_input_snapshot_option()
+
         self.file_path_normalizer = FilePathNormalizer(base_path, no_base_path_inference=no_base_path_inference)
 
         self.test_paths: list[list[dict[str, str]]] = []
@@ -598,6 +600,41 @@ class Subset(TestPathWriter):
                 )
             return True
         return False
+
+    def _validate_print_input_snapshot_option(self):
+        if not self.print_input_snapshot_id:
+            return
+
+        conflicts: list[str] = []
+        option_checks = [
+            ("--target", self.target is not None),
+            ("--time", self.time is not None),
+            ("--confidence", self.confidence is not None),
+            ("--goal-spec", self.goal_spec is not None),
+            ("--rest", self.rest is not None),
+            ("--bin", self.bin_target is not None),
+            ("--same-bin", bool(self.same_bin_files)),
+            ("--ignore-new-tests", self.ignore_new_tests),
+            ("--ignore-flaky-tests-above", self.ignore_flaky_tests_above is not None),
+            ("--prioritize-tests-failed-within-hours", self.prioritize_tests_failed_within_hours is not None),
+            ("--prioritized-tests-mapping", self.prioritized_tests_mapping_file is not None),
+            ("--get-tests-from-previous-sessions", self.is_get_tests_from_previous_sessions),
+            ("--get-tests-from-guess", self.is_get_tests_from_guess),
+            ("--output-exclusion-rules", self.is_output_exclusion_rules),
+            ("--non-blocking", self.is_non_blocking),
+        ]
+
+        for option_name, is_set in option_checks:
+            if is_set:
+                conflicts.append(option_name)
+
+        if conflicts:
+            conflict_list = ", ".join(conflicts)
+            print_error_and_die(
+                f"--print-input-snapshot-id cannot be used with {conflict_list}.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
 
     def _print_input_snapshot_id_value(self, subset_result: SubsetResult):
         if not subset_result.subset_id:

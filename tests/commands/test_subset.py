@@ -137,6 +137,26 @@ class SubsetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_print_input_snapshot_id_disallows_subset_options(self):
+        pipe = "test_1.py\n"
+
+        result = self.cli(
+            "subset",
+            "file",
+            "--target",
+            "30%",
+            "--session",
+            self.session,
+            "--print-input-snapshot-id",
+            mix_stderr=False,
+            input=pipe,
+        )
+
+        self.assert_exit_code(result, 1)
+        self.assertIn("--print-input-snapshot-id cannot be used with --target", result.stderr)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_observation_session(self):
         pipe = "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py"
         mock_json_response = {
