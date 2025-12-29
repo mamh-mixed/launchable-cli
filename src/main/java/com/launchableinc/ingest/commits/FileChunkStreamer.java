@@ -6,6 +6,7 @@ import org.apache.http.entity.ContentProducer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.*;
@@ -20,6 +21,9 @@ final class FileChunkStreamer extends ChunkStreamer<VirtualFile> {
 
   @Override
   protected void writeTo(List<VirtualFile> files, OutputStream os) throws IOException {
+    // to help the server side deal efficiently with concurrent updates, stream files in a consistent order
+    files.sort(Comparator.comparing(VirtualFile::path));
+
     try (TarArchiveOutputStream tar = new TarArchiveOutputStream(os, "UTF-8")) {
       tar.setLongFileMode(LONGFILE_POSIX);
 
