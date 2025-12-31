@@ -169,7 +169,7 @@ public class CommitGraphCollector {
         (ContentProducer commits) -> sendCommits(service, client, commits),
         new TreeReceiverImpl(service, client),
         (ContentProducer files) -> sendFiles(service, client, files),
-        256);
+        1024);
     }
   }
 
