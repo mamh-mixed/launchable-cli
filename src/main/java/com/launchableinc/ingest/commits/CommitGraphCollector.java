@@ -230,7 +230,29 @@ public class CommitGraphCollector {
     if (dryRun) {
       return;
     }
-    handleError(url, client.execute(request)).close();
+
+    int workId = readResponse(handleError(url, client.execute(request)), JSAsyncFileCollectionResponse.class).workId;
+    URL workUrl = new URL(service, "collect/files/work/" + workId);
+    while (true) {
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        // not expecting this to happen, sufficient to fail
+        throw new IOException();
+      }
+      // TODO: utilize numFiles for progress report
+      HttpGet get = new HttpGet(url.toExternalForm());
+      JSAsyncFileCollectionProgress status = readResponse(handleError(workUrl,client.execute(get)), JSAsyncFileCollectionProgress.class);
+      switch (status.status) {
+      case IN_PROGRESS:
+        break;  // keep polling
+      case SUCCEEDED:
+        return;
+      case FAILED:
+      case ABANDONED:
+        throw new IOException("File collection failed: " + status.status);
+      }
+    }
   }
 
   private <T> T readResponse(CloseableHttpResponse response, Class<T> type) throws IOException {
