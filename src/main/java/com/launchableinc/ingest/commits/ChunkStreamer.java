@@ -17,7 +17,7 @@ abstract class ChunkStreamer<T> implements FlushableConsumer<T> {
    */
   private final IOConsumer<ContentProducer> sender;
   private final int chunkSize;
-  private final List<T> spool = new ArrayList<>();
+  private List<T> spool = new ArrayList<>();
 
   ChunkStreamer(IOConsumer<ContentProducer> sender, int chunkSize) {
     this.sender = sender;
@@ -49,6 +49,7 @@ abstract class ChunkStreamer<T> implements FlushableConsumer<T> {
 
     try {
       sender.accept(os -> writeTo(spool,os));
+      // let sender own the list -- do not reuse
     } finally {
       spool.clear();
     }
