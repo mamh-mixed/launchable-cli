@@ -81,6 +81,7 @@ public class CommitGraphCollector {
    * Repository header is sent using this reserved file name
    */
   static final String HEADER_FILE = ".launchable";
+  private static final String APPLICATION_JSON = "application/json";
 
   private final String rootName;
 
@@ -198,6 +199,7 @@ public class CommitGraphCollector {
     URL url = new URL(service, "collect/files");
     HttpPost request = new HttpPost(url.toExternalForm());
     request.setHeader("Content-Type", "application/octet-stream");
+    request.setHeader("Accept", "application/json; mode=async");
     // no content encoding, since .tar.gz is considered content
     request.setEntity(new EntityTemplate(os -> files.writeTo(new GZIPOutputStream(os))));
 
@@ -231,6 +233,14 @@ public class CommitGraphCollector {
     handleError(url, client.execute(request)).close();
   }
 
+  private <T> T readResponse(CloseableHttpResponse response, Class<T> type) throws IOException {
+    try (JsonParser parser = new JsonFactory().createParser(response.getEntity().getContent())) {
+      return objectMapper.readValue(parser, type);
+    } finally {
+      response.close();
+    }
+  }
+
   private void honorControlHeaders(HttpResponse response) {
     // When a user incorrectly configures shallow clone, the incremental nature of commit collection
     // makes it really hard for us and users to collaboratively reset and repopulate the commit data.
@@ -248,9 +258,8 @@ public class CommitGraphCollector {
     }
   }
 
-  private ImmutableList<ObjectId> getAdvertisedRefs(HttpResponse response) throws IOException {
-    JsonParser parser = new JsonFactory().createParser(response.getEntity().getContent());
-    String[] ids = objectMapper.readValue(parser, String[].class);
+  private ImmutableList<ObjectId> getAdvertisedRefs(CloseableHttpResponse response) throws IOException {
+    String[] ids = readResponse(response, String[].class);
     return stream(ids)
         .map(
             s -> {
@@ -678,7 +687,7 @@ public class CommitGraphCollector {
       try {
         URL url = new URL(service, "collect/tree");
         HttpPost request = new HttpPost(url.toExternalForm());
-        request.setHeader("Content-Type", "application/json");
+        request.setHeader("Content-Type", APPLICATION_JSON);
         request.setHeader("Content-Encoding", "gzip");
         request.setEntity(new EntityTemplate(raw -> {
           try (OutputStream os = new GZIPOutputStream(raw)) {
@@ -695,10 +704,7 @@ public class CommitGraphCollector {
         }
 
         // even in dry run, this method needs to execute in order to show what files we'll be collecting
-        try (CloseableHttpResponse response = handleError(url, client.execute(request));
-             JsonParser parser = new JsonFactory().createParser(response.getEntity().getContent())) {
-            return select(objectMapper.readValue(parser, String[].class));
-        }
+        return select(readResponse(handleError(url, client.execute(request)), String[].class));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       } finally {
