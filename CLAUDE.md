@@ -1,0 +1,2 @@
+- In Java code, use JUnit 4 & Google truth
+- See README.md & CONTRIBUTING.md

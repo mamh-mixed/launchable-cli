@@ -6,9 +6,11 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+    BoundedExecutorServiceTest.class,
     CommitGraphCollectorTest.class,
-    MainTest.class,
+    ConcurrentConsumerTest.class,
     FileChunkStreamerTest.class,
+    MainTest.class,
     SSLBypassTest.class,
     ProgressReporterTest.class
 })

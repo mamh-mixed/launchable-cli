@@ -61,6 +61,8 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -69,6 +71,7 @@ import java.util.zip.GZIPOutputStream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Arrays.stream;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Compares what commits the local repository and the remote repository have, then send delta over.
@@ -307,19 +310,47 @@ public class CommitGraphCollector {
       throws IOException {
     ByRepository r = new ByRepository(root, rootName);
 
-    ExecutorService es = Executors.newFixedThreadPool(4);
-    // for debugging
-//    ExecutorService es = MoreExecutors.newDirectExecutorService();
+    /*
+      Concurrency design
+      ==================
+
+      The work ahead of us is:
+        - for each repository
+          - send all the files we need to send
+          - then record commits
+
+      Commit recording has to happen after file sending, to ensure the server is in possession of all the files
+      relevant to the commits being recorded. This constraint allows for two places of parallelism:
+        1. process multiple repositories in parallel
+        2. within a repository, send (or "collect") files in parallel
+
+      We exploit both of them. But by using two pools. The "scan" pool is used to parallelize the outer loop of
+      "for each repository". The "transfer" pool is used to parallelize file collection network I/O with the server.
+
+      Those are matched M:N -- any scan thread can hand over work to any available transfer thread. This way,
+      the user gets speed boost, whether it's a single massive repo or a lot of small repos.
+      The separate transfer pool limit cap the concurrent server connections, to avoid overwhelming the server.
+
+      Both thread pool are bounded, meaning the work producer gets blocked until the work consumer keeps up.
+      This creates natural work throttling, keeping overall memory consumption in check
+     */
+
+    ExecutorService scanPool = new BoundedExecutorService(4);
+//    ExecutorService scanPool = MoreExecutors.newDirectExecutorService(); // for debugging
+    ExecutorService transferPool = new BoundedExecutorService(4);
 
     ProgressReporter<VirtualFile> pr = new ProgressReporter<>(VirtualFile::path, Duration.ofSeconds(3));
     try {
-      r.forEachSubModule(es, br -> {
+      r.forEachSubModule(scanPool, br -> {
         if (collectFiles) {
           // record all the necessary BLOBs first, before attempting to record its commit.
           // this way, if the file collection fails, the server won't see this commit, so the future
           // "record commit" invocation will retry the file collection, thereby making the behavior idempotent.
-          // TODO: file transfer can be parallelized more aggressively, where we send chunks in parallel
-          try (FileChunkStreamer fs = new FileChunkStreamer(r.buildHeader(), fileSender, chunkSize);
+
+          // ConcurrentConsumer parallelizes file sending within a repository. When it leads the try block
+          // it ensures all the submissions have completed.
+          try (ConcurrentConsumer<ContentProducer> parallel = new ConcurrentConsumer<>(fileSender, transferPool);
+               FileChunkStreamer fs = new FileChunkStreamer(r.buildHeader(), parallel, chunkSize);
                ProgressReporter<VirtualFile>.Consumer fsr = pr.newConsumer(fs)) {
             br.collectFiles(advertised, treeReceiver, fsr);
           }
@@ -336,7 +367,8 @@ public class CommitGraphCollector {
         }
       });
     } finally {
-      es.shutdown();
+      scanPool.shutdown();
+      transferPool.shutdown();
     }
   }
 
