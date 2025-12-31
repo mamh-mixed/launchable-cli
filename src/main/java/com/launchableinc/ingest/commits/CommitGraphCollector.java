@@ -52,7 +52,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +67,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.zip.GZIPOutputStream;
 
-import static com.google.common.collect.ImmutableList.*;
-import static java.util.Arrays.*;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Arrays.stream;
 
 /**
  * Compares what commits the local repository and the remote repository have, then send delta over.
@@ -497,11 +496,8 @@ public class CommitGraphCollector {
         }
 
         // Now let the server select the files it actually wants to see
-        List<VirtualFile> files = new ArrayList<>(treeReceiver.response());
+        Collection<VirtualFile> files = treeReceiver.response();
 
-        // Note(Konboi): To balance the order, since words like "test" and "spec" tend to appear
-        // toward the end in alphabetical sorting.
-        Collections.shuffle(files);
         for (VirtualFile f : files) {
           fileReceiver.accept(f);
           filesSent.incrementAndGet();
