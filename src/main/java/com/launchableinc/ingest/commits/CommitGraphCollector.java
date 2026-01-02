@@ -7,18 +7,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.CharStreams;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentProducer;
 import org.apache.http.entity.EntityTemplate;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -44,11 +41,9 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,10 +54,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -71,7 +63,6 @@ import java.util.zip.GZIPOutputStream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Arrays.stream;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Compares what commits the local repository and the remote repository have, then send delta over.
@@ -156,14 +147,14 @@ public class CommitGraphCollector {
               .setSocketTimeout(HTTP_TIMEOUT_MILLISECONDS).build();
       builder.setDefaultRequestConfig(config);
     }
-    try (CloseableHttpClient client = builder.build()) {
+    try (LaunchableHttpClient client = new LaunchableHttpClient(builder.build())) {
       latestUrl = new URL(service, "latest");
       if (outputAuditLog()) {
         System.err.printf(
             "AUDIT:launchable:%ssend request method:get path: %s%n", dryRunPrefix(), latestUrl);
       }
-      CloseableHttpResponse latestResponse = client.execute(new HttpGet(latestUrl.toExternalForm()));
-      ImmutableList<ObjectId> advertised = getAdvertisedRefs(handleError(latestUrl, latestResponse));
+      CloseableHttpResponse latestResponse = client.httpGet(latestUrl);
+      ImmutableList<ObjectId> advertised = getAdvertisedRefs(latestResponse);
       honorControlHeaders(latestResponse);
 
       // every time a new stream is needed, supply ByteArrayOutputStream, and when the data is all
@@ -177,7 +168,7 @@ public class CommitGraphCollector {
     }
   }
 
-  private void sendCommits(URL service, CloseableHttpClient client, ContentProducer commits) throws IOException {
+  private void sendCommits(URL service, LaunchableHttpClient client, ContentProducer commits) throws IOException {
     URL url = new URL(service, "collect");
     HttpPost request = new HttpPost(url.toExternalForm());
     request.setHeader("Content-Type", "application/json");
@@ -195,10 +186,10 @@ public class CommitGraphCollector {
     if (dryRun) {
       return;
     }
-    handleError(url, client.execute(request)).close();
+    client.httpPost(request).close();
   }
 
-  private void sendFiles(URL service, CloseableHttpClient client, ContentProducer files) throws IOException {
+  private void sendFiles(URL service, LaunchableHttpClient client, ContentProducer files) throws IOException {
     URL url = new URL(service, "collect/files");
     HttpPost request = new HttpPost(url.toExternalForm());
     request.setHeader("Content-Type", "application/octet-stream");
@@ -234,7 +225,7 @@ public class CommitGraphCollector {
       return;
     }
 
-    int workId = readResponse(handleError(url, client.execute(request)), JSAsyncFileCollectionResponse.class).workId;
+    int workId = readResponse(client.httpPost(request), JSAsyncFileCollectionResponse.class).workId;
     URL workUrl = new URL(service, "collect/files/work/" + workId);
     while (true) {
       try {
@@ -244,8 +235,7 @@ public class CommitGraphCollector {
         throw new IOException();
       }
       // TODO: utilize numFiles for progress report
-      HttpGet get = new HttpGet(workUrl.toExternalForm());
-      JSAsyncFileCollectionProgress status = readResponse(handleError(workUrl,client.execute(get)), JSAsyncFileCollectionProgress.class);
+      JSAsyncFileCollectionProgress status = readResponse(client.httpGet(workUrl), JSAsyncFileCollectionProgress.class);
       switch (status.status) {
       case IN_PROGRESS:
         break;  // keep polling
@@ -350,7 +340,7 @@ public class CommitGraphCollector {
           // ConcurrentConsumer parallelizes file sending within a repository. When it leads the try block
           // it ensures all the submissions have completed.
           try (ConcurrentConsumer<ContentProducer> parallel = new ConcurrentConsumer<>(fileSender, transferPool);
-               FileChunkStreamer fs = new FileChunkStreamer(r.buildHeader(), parallel, chunkSize);
+               FileChunkStreamer fs = new FileChunkStreamer(r::buildHeader, parallel, chunkSize);
                ProgressReporter<VirtualFile>.Consumer fsr = pr.newConsumer(fs)) {
             br.collectFiles(advertised, treeReceiver, fsr);
           }
@@ -370,23 +360,6 @@ public class CommitGraphCollector {
       scanPool.shutdown();
       transferPool.shutdown();
     }
-  }
-
-  /** Pass through {@link CloseableHttpResponse} but checks and throws an error. */
-  private CloseableHttpResponse handleError(URL url, CloseableHttpResponse response)
-      throws IOException {
-    int code = response.getStatusLine().getStatusCode();
-    if (code >= 400) {
-      throw new IOException(
-          String.format(
-              "Failed to retrieve from %s: %s%n%s",
-              url,
-              response.getStatusLine(),
-              CharStreams.toString(
-                  new InputStreamReader(
-                      response.getEntity().getContent(), StandardCharsets.UTF_8))));
-    }
-    return response;
   }
 
   public void collectCommitMessage(boolean commitMessage) {
@@ -416,6 +389,7 @@ public class CommitGraphCollector {
     private final Repository git;
 
     private final ObjectReader objectReader;
+    private final ThreadLocal<ObjectReader> readers;
     private final Set<ObjectId> shallowCommits;
     private final ObjectId headId;
 
@@ -425,6 +399,7 @@ public class CommitGraphCollector {
       this.objectReader = git.newObjectReader();
       this.shallowCommits = objectReader.getShallowCommits();
       this.headId = git.resolve("HEAD");
+      this.readers = ThreadLocal.withInitial(objectReader::newReader);
     }
 
     void forEachSubModule(ExecutorService threadPool, IOConsumer<ByRepository> consumer) throws IOException {
@@ -549,7 +524,7 @@ public class CommitGraphCollector {
             treeWalk.enterSubtree();
           } else {
             if ((treeWalk.getFileMode(0).getBits() & FileMode.TYPE_MASK) == FileMode.TYPE_FILE) {
-              GitFile f = new GitFile(name, treeWalk.getPathString(), head, objectReader);
+              GitFile f = new GitFile(name, treeWalk.getPathString(), head, readers::get);
               // to avoid excessive data transfer, skip files that are too big
               if (f.size() < 1024 * 1024 && f.isText() && !f.path.equals(HEADER_FILE)) {
                 treeReceiver.accept(f);
@@ -574,25 +549,33 @@ public class CommitGraphCollector {
      * Creates a per repository "header" file as a {@link VirtualFile}.
      * Currently, this is just the list of files in the repository.
      */
-    VirtualFile buildHeader() throws IOException {
+    VirtualFile buildHeader(List<VirtualFile> files) throws IOException {
       ByteArrayOutputStream os = new ByteArrayOutputStream();
       try (JsonGenerator w = new JsonFactory().createGenerator(os)) {
         w.setCodec(objectMapper);
         w.writeStartObject();
-        w.writeArrayFieldStart("tree");
+        {
+          w.writeArrayFieldStart("tree");
+          try (TreeWalk tw = new TreeWalk(git)) {
+            tw.addTree(git.parseCommit(headId).getTree());
+            tw.setRecursive(true);
 
-        try (TreeWalk tw = new TreeWalk(git)) {
-          tw.addTree(git.parseCommit(headId).getTree());
-          tw.setRecursive(true);
+            while (tw.next()) {
+              w.writeStartObject();
+              w.writeStringField("path", tw.getPathString());
+              w.writeEndObject();
+            }
+          }
+          w.writeEndArray();
 
-          while (tw.next()) {
+          w.writeArrayFieldStart("inThisChunk");
+          for (VirtualFile f : files) {
             w.writeStartObject();
-            w.writeStringField("path", tw.getPathString());
+            w.writeStringField("path", f.path());
             w.writeEndObject();
           }
+          w.writeEndArray();
         }
-
-        w.writeEndArray();
         w.writeEndObject();
       }
       return VirtualFile.from(name, HEADER_FILE, ObjectId.zeroId(), os.toByteArray());
@@ -709,9 +692,9 @@ public class CommitGraphCollector {
   private class TreeReceiverImpl implements TreeReceiver {
     private final List<VirtualFile> files = new ArrayList<>();
     private final URL service;
-    private final CloseableHttpClient client;
+    private final LaunchableHttpClient client;
 
-    public TreeReceiverImpl(URL service, CloseableHttpClient client) {
+    public TreeReceiverImpl(URL service, LaunchableHttpClient client) {
       this.service = service;
       this.client = client;
     }
@@ -758,7 +741,7 @@ public class CommitGraphCollector {
         }
 
         // even in dry run, this method needs to execute in order to show what files we'll be collecting
-        return select(readResponse(handleError(url, client.execute(request)), String[].class));
+        return select(readResponse(client.httpPost(request), String[].class));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       } finally {

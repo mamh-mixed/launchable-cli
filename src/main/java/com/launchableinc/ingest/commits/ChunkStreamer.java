@@ -1,6 +1,5 @@
 package com.launchableinc.ingest.commits;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.http.entity.ContentProducer;
 
 import java.io.IOException;

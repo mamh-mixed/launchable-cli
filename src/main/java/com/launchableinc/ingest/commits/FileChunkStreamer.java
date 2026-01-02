@@ -14,9 +14,13 @@ import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.*
  * Receives {@link GitFile}, buffers them, and writes them out in a gzipped tar file.
  */
 final class FileChunkStreamer extends ChunkStreamer<VirtualFile> {
-  private final VirtualFile header;
+  interface HeaderBuilder {
+    VirtualFile makeHeader(List<VirtualFile> chunk) throws IOException;
+  }
 
-  FileChunkStreamer(VirtualFile header, IOConsumer<ContentProducer> sender, int chunkSize) {
+  private final HeaderBuilder header;
+
+  FileChunkStreamer(HeaderBuilder header, IOConsumer<ContentProducer> sender, int chunkSize) {
     super(sender, chunkSize);
     this.header = header;
   }
@@ -27,7 +31,7 @@ final class FileChunkStreamer extends ChunkStreamer<VirtualFile> {
       tar.setLongFileMode(LONGFILE_POSIX);
 
       if (header!=null) {
-        write(header, tar);
+        write(header.makeHeader(files), tar);
       }
 
       for (VirtualFile f : files) {

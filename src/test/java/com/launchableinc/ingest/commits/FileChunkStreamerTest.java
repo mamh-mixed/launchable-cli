@@ -2,6 +2,7 @@ package com.launchableinc.ingest.commits;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.http.entity.ContentProducer;
@@ -28,7 +29,7 @@ public class FileChunkStreamerTest {
   @Test
   public void basics() throws Exception {
     int[] count = new int[1];
-    try (FileChunkStreamer fs = new FileChunkStreamer(new VirtualFileImpl("header.txt"), content -> {
+    try (FileChunkStreamer fs = new FileChunkStreamer(unused -> new VirtualFileImpl("header.txt"), content -> {
       switch(count[0]++) {
       case 0:
         assertThat(readEntries(content)).containsExactly("header.txt", "foo.txt", "bar.txt").inOrder();
