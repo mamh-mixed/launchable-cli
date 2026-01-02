@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link ExecutorService} decorator that limits the number of concurrent tasks,
@@ -15,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 class BoundedExecutorService extends AbstractExecutorService {
   private final ExecutorService delegate;
   private final Semaphore semaphore;
+  /** # of threads that are blocked trying to {@link #execute(Runnable)}. Just for diagnostics. */
+  private final AtomicInteger blockCount = new AtomicInteger(0);
 
   BoundedExecutorService(int limit) {
     this(Executors.newFixedThreadPool(limit), limit);
@@ -28,10 +31,14 @@ class BoundedExecutorService extends AbstractExecutorService {
   @Override
   public void execute(Runnable command) {
     try {
+      blockCount.incrementAndGet();
       semaphore.acquire();
     } catch (InterruptedException e) {
       throw new RejectedExecutionException(e);
+    } finally {
+      blockCount.decrementAndGet();
     }
+
     try {
       delegate.execute(() -> {
         try {
