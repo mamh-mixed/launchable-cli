@@ -244,7 +244,7 @@ public class CommitGraphCollector {
         throw new IOException();
       }
       // TODO: utilize numFiles for progress report
-      HttpGet get = new HttpGet(url.toExternalForm());
+      HttpGet get = new HttpGet(workUrl.toExternalForm());
       JSAsyncFileCollectionProgress status = readResponse(handleError(workUrl,client.execute(get)), JSAsyncFileCollectionProgress.class);
       switch (status.status) {
       case IN_PROGRESS:
@@ -253,7 +253,7 @@ public class CommitGraphCollector {
         return;
       case FAILED:
       case ABANDONED:
-        throw new IOException("File collection failed: " + status.status);
+        throw new IOException("File collection (workId="+workId+") failed: " + status.status);
       }
     }
   }

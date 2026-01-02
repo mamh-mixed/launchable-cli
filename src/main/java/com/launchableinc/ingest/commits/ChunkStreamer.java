@@ -1,5 +1,6 @@
 package com.launchableinc.ingest.commits;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.http.entity.ContentProducer;
 
 import java.io.IOException;
@@ -47,12 +48,12 @@ abstract class ChunkStreamer<T> implements FlushableConsumer<T> {
       return;
     }
 
-    try {
-      sender.accept(os -> writeTo(spool,os));
-      // let sender own the list -- do not reuse
-    } finally {
-      spool.clear();
-    }
+    // let sender own the list -- do not reuse
+    // for this to work, we need to resolve `this.spool` here, not in the lambda
+    List<T> ref = this.spool;
+    this.spool = new ArrayList<>();
+
+    sender.accept(os -> writeTo(ref,os));
   }
 
   protected abstract void writeTo(List<T> spool, OutputStream os) throws IOException;
