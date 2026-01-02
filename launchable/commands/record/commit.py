@@ -108,6 +108,9 @@ def exec_jar(name: str, source: str, max_days: int, app: Application, is_collect
     # using subprocess.check_out with shell=False and a list of command to prevent vulnerability
     # https://knowledge-base.secureflag.com/vulnerabilities/code_injection/os_command_injection_python.html
     command = [java]
+    debug_opts = os.getenv("LAUNCHABLE_JAVA_DEBUG")
+    if debug_opts:
+        command.extend(debug_opts.split())
     command.extend(_build_proxy_option(os.getenv("HTTPS_PROXY")))
     command.extend([
         "-jar",

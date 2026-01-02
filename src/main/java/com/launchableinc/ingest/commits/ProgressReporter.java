@@ -6,17 +6,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static java.time.Instant.now;
 
 /**
- * Given multiple concurrent slow {@link Consumer}s, each g oing over a large
+ * Given multiple concurrent slow {@link Producer}s, each g oing over a large
  * number of items in parallel,
  * provide a progress report to show that the work is still in progress.
  */
-class ProgressReporter<T> {
-  private final Function<T, String> printer;
+class ProgressReporter {
   private final Duration reportInterval;
   private Instant nextReportTime;
 
@@ -29,20 +28,24 @@ class ProgressReporter<T> {
    */
   private final AtomicInteger completed = new AtomicInteger();
 
-  ProgressReporter(Function<T, String> printer, Duration reportInterval) {
-    this.printer = printer;
+  ProgressReporter(Duration reportInterval) {
     this.reportInterval = reportInterval;
     this.nextReportTime = now().plus(reportInterval);
+  }
+
+  public void incrementCompleted() {
+    completed.incrementAndGet();
+    maybePrintStatus();
   }
 
   /**
    * Deals with one serial stream of work.
    */
-  class Consumer implements FlushableConsumer<T> {
+  class Producer<T> implements FlushableConsumer<T> {
     private final FlushableConsumer<T> base;
     private final List<T> pool = new ArrayList<>();
 
-    Consumer(FlushableConsumer<T> base) {
+    Producer(FlushableConsumer<T> base) {
       this.base = base;
     }
 
@@ -55,14 +58,8 @@ class ProgressReporter<T> {
     @Override
     public void flush() throws IOException {
       for (T x : pool) {
-        synchronized (ProgressReporter.this) {
-          if (now().isAfter(nextReportTime)) {
-            print(completed.get(), workload.get(), x);
-            nextReportTime = now().plus(reportInterval);
-          }
-        }
+        maybePrintStatus();
         base.accept(x);
-        completed.incrementAndGet();
       }
       pool.clear();
       base.flush();
@@ -71,16 +68,27 @@ class ProgressReporter<T> {
     @Override
     public void close() throws IOException {
       flush();
+      base.close();
     }
   }
 
-  Consumer newConsumer(FlushableConsumer<T> base) {
-    return new Consumer(base);
+  private synchronized void maybePrintStatus() {
+    if (now().isAfter(nextReportTime)) {
+      print(completed.get(), workload.get());
+      nextReportTime = now().plus(reportInterval);
+    }
   }
 
-  protected void print(int c, int w, T x) {
+  /**
+   * Decorates the {@link Consumer} on the producing end to count the total number of work to be completed.
+   */
+  <T> FlushableConsumer<T> newProducer(FlushableConsumer<T> base) {
+    return new Producer<>(base);
+  }
+
+  protected void print(int c, int w) {
     int width = String.valueOf(w).length();
-    System.err.printf("%s/%d: %s%n", pad(c, width), w, printer.apply(x));
+    System.err.printf("%s/%d%n", pad(c, width), w);
   }
 
   static String pad(int i, int width) {

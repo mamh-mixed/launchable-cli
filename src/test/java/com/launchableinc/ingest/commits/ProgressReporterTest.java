@@ -15,12 +15,12 @@ import static com.google.common.truth.Truth.*;
 import static java.util.Collections.*;
 
 public class ProgressReporterTest {
-  ProgressReporter<String> pr = new ProgressReporter<String>(String::valueOf, Duration.ofMillis(100)) {
+  ProgressReporter pr = new ProgressReporter(Duration.ofMillis(100)) {
     int cc = 0;
     int ww = 0;
     @Override
-    protected void print(int c, int w, String x) {
-      super.print(c, w, x);
+    protected void print(int c, int w) {
+      super.print(c, w);
 
       // ensure numbers are monotonically increasing
       assertThat(c).isAtLeast(cc);
@@ -36,7 +36,7 @@ public class ProgressReporterTest {
   @Test
   public void serial() throws Exception {
     List<String> done = new ArrayList<>();
-    try (ProgressReporter<String>.Consumer x = pr.newConsumer(FlushableConsumer.of(s -> {
+    try (FlushableConsumer<String> x = pr.newProducer(FlushableConsumer.of(s -> {
       done.add(s);
       sleep();
     }))) {
@@ -59,7 +59,7 @@ public class ProgressReporterTest {
     for (int i=0; i<10; i++) {
       final int ii = i;
       all.add(es.submit(() -> {
-        try (ProgressReporter<String>.Consumer x = pr.newConsumer(FlushableConsumer.of(s -> {done.add(s);sleep();}))) {
+        try (FlushableConsumer<String> x = pr.newProducer(FlushableConsumer.of(s -> {done.add(s);sleep();}))) {
             for (int j = 0; j < 100; j++) {
                 x.accept("item " + (ii*100+j));
             }

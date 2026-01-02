@@ -100,6 +100,12 @@ public class CommitGraphCollector {
 
   private boolean warnMissingObject;
 
+  /**
+   * Reports the # of file transfers, which is the most time-consuming part.
+   */
+  private final ProgressReporter fileTransferProgressReporter = new ProgressReporter(Duration.ofSeconds(3));
+
+
   private String dryRunPrefix() {
     if (!dryRun) {
       return "";
@@ -227,6 +233,7 @@ public class CommitGraphCollector {
 
     int workId = readResponse(client.httpPost(request), JSAsyncFileCollectionResponse.class).workId;
     URL workUrl = new URL(service, "collect/files/work/" + workId);
+    int filesProcessed = 0;
     while (true) {
       try {
         Thread.sleep(5000);
@@ -234,8 +241,10 @@ public class CommitGraphCollector {
         // not expecting this to happen, sufficient to fail
         throw new IOException();
       }
-      // TODO: utilize numFiles for progress report
       JSAsyncFileCollectionProgress status = readResponse(client.httpGet(workUrl), JSAsyncFileCollectionProgress.class);
+      for (; filesProcessed<status.filesProcessed; filesProcessed++) {
+        fileTransferProgressReporter.incrementCompleted();
+      }
       switch (status.status) {
       case IN_PROGRESS:
         break;  // keep polling
@@ -329,7 +338,6 @@ public class CommitGraphCollector {
 //    ExecutorService scanPool = MoreExecutors.newDirectExecutorService(); // for debugging
     ExecutorService transferPool = new BoundedExecutorService(4);
 
-    ProgressReporter<VirtualFile> pr = new ProgressReporter<>(VirtualFile::path, Duration.ofSeconds(3));
     try {
       r.forEachSubModule(scanPool, br -> {
         if (collectFiles) {
@@ -341,7 +349,7 @@ public class CommitGraphCollector {
           // it ensures all the submissions have completed.
           try (ConcurrentConsumer<ContentProducer> parallel = new ConcurrentConsumer<>(fileSender, transferPool);
                FileChunkStreamer fs = new FileChunkStreamer(r::buildHeader, parallel, chunkSize);
-               ProgressReporter<VirtualFile>.Consumer fsr = pr.newConsumer(fs)) {
+               FlushableConsumer<VirtualFile> fsr = fileTransferProgressReporter.newProducer(fs)) {
             br.collectFiles(advertised, treeReceiver, fsr);
           }
         }
