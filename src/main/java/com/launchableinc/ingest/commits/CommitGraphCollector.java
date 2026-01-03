@@ -76,6 +76,7 @@ public class CommitGraphCollector {
    */
   static final String HEADER_FILE = ".launchable";
   private static final String APPLICATION_JSON = "application/json";
+  private static final int PROGRESS_REPORT_INTERVAL = 3000;
 
   private final String rootName;
 
@@ -103,7 +104,7 @@ public class CommitGraphCollector {
   /**
    * Reports the # of file transfers, which is the most time-consuming part.
    */
-  private final ProgressReporter fileTransferProgressReporter = new ProgressReporter(Duration.ofSeconds(3));
+  private final ProgressReporter fileTransferProgressReporter = new ProgressReporter(Duration.ofMillis(PROGRESS_REPORT_INTERVAL));
 
 
   private String dryRunPrefix() {
@@ -236,7 +237,7 @@ public class CommitGraphCollector {
     int filesProcessed = 0;
     while (true) {
       try {
-        Thread.sleep(5000);
+        Thread.sleep(PROGRESS_REPORT_INTERVAL);
       } catch (InterruptedException e) {
         // not expecting this to happen, sufficient to fail
         throw new IOException();
