@@ -41,7 +41,7 @@ class InputSnapshotId:
         return str(self.value)
 
     @staticmethod
-    def as_option() -> typer.Option:
+    def as_option():
         return typer.Option(
             "--input-snapshot-id",
             help="Reuse reorder results from an existing input snapshot ID or specify @path/to/file to load it",
