@@ -9,7 +9,7 @@ class InputSnapshotId:
     """Parses either a numeric snapshot ID or @path reference."""
 
     def __init__(self, raw: str):
-        value = raw
+        value = str(raw)
         if value.startswith('@'):
             file_path = value[1:]
             try:
