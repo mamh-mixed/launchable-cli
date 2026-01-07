@@ -123,8 +123,6 @@ class SubsetTest(CliTestCase):
         result = self.cli(
             "subset",
             "file",
-            "--target",
-            "30%",
             "--session",
             self.session,
             "--print-input-snapshot-id",
