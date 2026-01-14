@@ -126,6 +126,8 @@ def subset(
         for root in source_roots:
             client.scan(root, '**/*', file2test)
 
+    client.same_bin_formatter = lambda s: [{"type": "class", "name": s}]
+
     client.run()
 
 

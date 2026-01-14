@@ -28,8 +28,9 @@ from ..testpath import FilePathNormalizer, TestPath
 from ..utils.env_keys import REPORT_ERROR_KEY
 from ..utils.fail_fast_mode import (FailFastModeValidateParams, fail_fast_mode_validate,
                                     set_fail_fast_mode, warn_and_exit_if_fail_fast_mode)
+from ..utils.input_snapshot import InputSnapshotId
 from ..utils.smart_tests_client import SmartTestsClient
-from ..utils.typer_types import Duration, Percentage, parse_duration, parse_percentage
+from ..utils.typer_types import Duration, Fraction, Percentage, parse_duration, parse_fraction, parse_percentage
 from .test_path_writer import TestPathWriter
 
 
@@ -174,6 +175,23 @@ class Subset(TestPathWriter):
                 type=fileText(mode="r"),
                 metavar="FILE"
             )] = None,
+            input_snapshot_id: Annotated[InputSnapshotId | None, InputSnapshotId.as_option()] = None,
+            print_input_snapshot_id: Annotated[bool, typer.Option(
+                "--print-input-snapshot-id",
+                help="Print the input snapshot ID returned from the server instead of the subset results"
+            )] = False,
+            bin_target: Annotated[Fraction | None, typer.Option(
+                "--bin",
+                help="Split subset into bins, e.g. --bin 1/4",
+                metavar="INDEX/COUNT",
+                type=parse_fraction
+            )] = None,
+            same_bin_files: Annotated[List[str], typer.Option(
+                "--same-bin",
+                help="Keep all tests listed in the file together when splitting; one test per line",
+                metavar="FILE",
+                multiple=True
+            )] = [],
             is_get_tests_from_guess: Annotated[bool, typer.Option(
                 "--get-tests-from-guess",
                 help="Get subset list from guessed tests"
@@ -255,8 +273,14 @@ class Subset(TestPathWriter):
         self.ignore_flaky_tests_above = ignore_flaky_tests_above
         self.prioritize_tests_failed_within_hours = prioritize_tests_failed_within_hours
         self.prioritized_tests_mapping_file = prioritized_tests_mapping_file
+        self.input_snapshot_id = input_snapshot_id.value if input_snapshot_id else None
+        self.print_input_snapshot_id = print_input_snapshot_id
+        self.bin_target = bin_target
+        self.same_bin_files = list(same_bin_files)
         self.is_get_tests_from_guess = is_get_tests_from_guess
         self.use_case = use_case
+
+        self._validate_print_input_snapshot_option()
 
         self.file_path_normalizer = FilePathNormalizer(base_path, no_base_path_inference=no_base_path_inference)
 
@@ -305,7 +329,7 @@ class Subset(TestPathWriter):
         """
 
         # To avoid the cli continue to wait from stdin
-        if self.is_get_tests_from_previous_sessions or self.is_get_tests_from_guess:
+        if self._should_skip_stdin():
             return []
 
         if sys.stdin.isatty():
@@ -404,7 +428,102 @@ class Subset(TestPathWriter):
         if self.use_case:
             payload['changesUnderTest'] = self.use_case.value
 
+        if self.input_snapshot_id is not None:
+            payload['subsettingId'] = self.input_snapshot_id
+
+        split_subset = self._build_split_subset_payload()
+        if split_subset:
+            payload['splitSubset'] = split_subset
+
         return payload
+
+    def _build_split_subset_payload(self) -> dict[str, Any] | None:
+        if self.bin_target is None:
+            if self.same_bin_files:
+                print_error_and_die(
+                    "--same-bin option requires --bin option.\nPlease set --bin option to use --same-bin",
+                    self.tracking_client,
+                    Tracking.ErrorEvent.USER_ERROR,
+                )
+            return None
+
+        slice_index = self.bin_target.numerator
+        slice_count = self.bin_target.denominator
+
+        if slice_index <= 0 or slice_count <= 0:
+            print_error_and_die(
+                "Invalid --bin value. Both index and count must be positive integers.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+        if slice_count < slice_index:
+            print_error_and_die(
+                "Invalid --bin value. The numerator cannot exceed the denominator.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+        same_bins = self._read_same_bin_files()
+
+        return {
+            "sliceIndex": slice_index,
+            "sliceCount": slice_count,
+            "sameBins": same_bins,
+        }
+
+    def _read_same_bin_files(self) -> list[list[TestPath]]:
+        if not self.same_bin_files:
+            return []
+
+        formatter = self.same_bin_formatter
+        if formatter is None:
+            print_error_and_die(
+                "--same-bin is not supported for this test runner.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+        same_bins: list[list[TestPath]] = []
+        seen_tests: set[str] = set()
+
+        for same_bin_file in self.same_bin_files:
+            try:
+                with open(same_bin_file, "r", encoding="utf-8") as fp:
+                    tests = [line.strip() for line in fp if line.strip()]
+            except OSError as exc:
+                print_error_and_die(
+                    f"Failed to read --same-bin file '{same_bin_file}': {exc}",
+                    self.tracking_client,
+                    Tracking.ErrorEvent.USER_ERROR,
+                )
+
+            unique_tests = list(dict.fromkeys(tests))
+
+            group: list[TestPath] = []
+            for test in unique_tests:
+                if test in seen_tests:
+                    print_error_and_die(
+                        f"Error: test '{test}' is listed in multiple --same-bin files.",
+                        self.tracking_client,
+                        Tracking.ErrorEvent.USER_ERROR,
+                    )
+                seen_tests.add(test)
+
+                # For type check
+                assert formatter is not None, "--same -bin is not supported for this test runner"
+                formatted = formatter(test)
+                if not formatted:
+                    print_error_and_die(
+                        f"Failed to parse test '{test}' from --same-bin file {same_bin_file}",
+                        self.tracking_client,
+                        Tracking.ErrorEvent.USER_ERROR,
+                    )
+                group.append(formatted)
+
+            same_bins.append(group)
+
+        return same_bins
 
     def _collect_potential_test_files(self):
         LOOSE_TEST_FILE_PATTERN = r'(\.(test|spec)\.|_test\.|Test\.|Spec\.|test/|tests/|__tests__/|src/test/)'
@@ -463,13 +582,75 @@ class Subset(TestPathWriter):
                 e, "Warning: the service failed to subset. Falling back to running all tests")
             return SubsetResult.from_test_paths(self.test_paths)
 
+    def _requires_test_input(self) -> bool:
+        return (
+            self.input_snapshot_id is None
+            and not self.is_get_tests_from_previous_sessions  # noqa: W503
+            and len(self.test_paths) == 0  # noqa: W503
+        )
+
+    def _should_skip_stdin(self) -> bool:
+        if self.is_get_tests_from_previous_sessions or self.is_get_tests_from_guess:
+            return True
+
+        if self.input_snapshot_id is not None:
+            if not sys.stdin.isatty():
+                warn_and_exit_if_fail_fast_mode(
+                    "Warning: --input-snapshot-id is set so stdin will be ignored."
+                )
+            return True
+        return False
+
+    def _validate_print_input_snapshot_option(self):
+        if not self.print_input_snapshot_id:
+            return
+
+        conflicts: list[str] = []
+        option_checks = [
+            ("--target", self.target is not None),
+            ("--time", self.time is not None),
+            ("--confidence", self.confidence is not None),
+            ("--goal-spec", self.goal_spec is not None),
+            ("--rest", self.rest is not None),
+            ("--bin", self.bin_target is not None),
+            ("--same-bin", bool(self.same_bin_files)),
+            ("--ignore-new-tests", self.ignore_new_tests),
+            ("--ignore-flaky-tests-above", self.ignore_flaky_tests_above is not None),
+            ("--prioritize-tests-failed-within-hours", self.prioritize_tests_failed_within_hours is not None),
+            ("--prioritized-tests-mapping", self.prioritized_tests_mapping_file is not None),
+            ("--get-tests-from-previous-sessions", self.is_get_tests_from_previous_sessions),
+            ("--get-tests-from-guess", self.is_get_tests_from_guess),
+            ("--output-exclusion-rules", self.is_output_exclusion_rules),
+            ("--non-blocking", self.is_non_blocking),
+        ]
+
+        for option_name, is_set in option_checks:
+            if is_set:
+                conflicts.append(option_name)
+
+        if conflicts:
+            conflict_list = ", ".join(conflicts)
+            print_error_and_die(
+                f"--print-input-snapshot-id cannot be used with {conflict_list}.",
+                self.tracking_client,
+                Tracking.ErrorEvent.USER_ERROR,
+            )
+
+    def _print_input_snapshot_id_value(self, subset_result: SubsetResult):
+        if not subset_result.subset_id:
+            raise click.ClickException(
+                "Subset request did not return an input snapshot ID. Please re-run the command."
+            )
+
+        click.echo(subset_result.subset_id)
+
     def run(self):
         """called after tests are scanned to compute the optimized order"""
 
         if self.is_get_tests_from_guess:
             self._collect_potential_test_files()
 
-        if not self.is_get_tests_from_previous_sessions and len(self.test_paths) == 0:
+        if self._requires_test_input():
             if self.input_given:
                 print_error_and_die("ERROR: Given arguments did not match any tests. They appear to be incorrect/non-existent.", tracking_client, Tracking.ErrorEvent.USER_ERROR)  # noqa E501
             else:
@@ -488,6 +669,12 @@ class Subset(TestPathWriter):
 
         if len(subset_result.subset) == 0:
             warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
+            if self.print_input_snapshot_id:
+                self._print_input_snapshot_id_value(subset_result)
+            return
+
+        if self.print_input_snapshot_id:
+            self._print_input_snapshot_id_value(subset_result)
             return
 
         # TODO(Konboi): split subset isn't provided for smart-tests initial release

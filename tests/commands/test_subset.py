@@ -97,6 +97,64 @@ class SubsetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_print_input_snapshot_id(self):
+        pipe = "test_1.py\ntest_2.py"
+        mock_json_response = {
+            "testPaths": [
+                [{"type": "file", "name": "test_1.py"}],
+                [{"type": "file", "name": "test_2.py"}],
+            ],
+            "testRunner": "file",
+            "rest": [],
+            "subsettingId": 456,
+            "summary": {
+                "subset": {"duration": 10, "candidates": 2, "rate": 50},
+                "rest": {"duration": 10, "candidates": 0, "rate": 50},
+            },
+            "isObservation": False,
+        }
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json=mock_json_response,
+            status=200,
+        )
+
+        result = self.cli(
+            "subset",
+            "file",
+            "--session",
+            self.session,
+            "--print-input-snapshot-id",
+            mix_stderr=False,
+            input=pipe,
+        )
+
+        self.assert_success(result)
+        self.assertEqual(result.stdout, "456\n")
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_print_input_snapshot_id_disallows_subset_options(self):
+        pipe = "test_1.py\n"
+
+        result = self.cli(
+            "subset",
+            "file",
+            "--target",
+            "30%",
+            "--session",
+            self.session,
+            "--print-input-snapshot-id",
+            mix_stderr=False,
+            input=pipe,
+        )
+
+        self.assert_exit_code(result, 1)
+        self.assertIn("--print-input-snapshot-id cannot be used with --target", result.stderr)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_observation_session(self):
         pipe = "test_1.py\ntest_2.py\ntest_3.py\ntest_4.py"
         mock_json_response = {
@@ -522,3 +580,139 @@ class SubsetTest(CliTestCase):
         """
         payload = self.decode_request_body(self.find_request('/subset').request.body)
         self.assertIn([{"type": "file", "name": "tests/commands/test_subset.py"}], payload.get("testPaths", []))
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_with_bin_option(self):
+        pipe = "test_1.py\ntest_2.py\n"
+        mock_json_response = {
+            "testPaths": [[{"type": "file", "name": "test_1.py"}]],
+            "rest": [[{"type": "file", "name": "test_2.py"}]],
+            "subsettingId": 999,
+            "summary": {"subset": {"duration": 1, "candidates": 1, "rate": 50},
+                        "rest": {"duration": 1, "candidates": 1, "rate": 50}},
+            "isObservation": False,
+        }
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json=mock_json_response,
+            status=200,
+        )
+
+        result = self.cli("subset", "file", "--session", self.session, "--target", "10%", "--bin", "1/4",
+                          "--input-snapshot-id", "222", mix_stderr=False, input=pipe)
+
+        self.assert_success(result)
+        payload = self.decode_request_body(self.find_request('/subset').request.body)
+        self.assertEqual(payload.get('subsettingId'), 222)
+        self.assertEqual(
+            payload.get('splitSubset'),
+            {"sliceIndex": 1, "sliceCount": 4, "sameBins": []},
+        )
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_input_snapshot_id_from_file(self):
+        pipe = "test_1.py\ntest_2.py\n"
+        mock_json_response = {
+            "testPaths": [[{"type": "file", "name": "test_1.py"}]],
+            "rest": [[{"type": "file", "name": "test_2.py"}]],
+            "subsettingId": 999,
+            "summary": {"subset": {"duration": 1, "candidates": 1, "rate": 50},
+                        "rest": {"duration": 1, "candidates": 1, "rate": 50}},
+            "isObservation": False,
+        }
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json=mock_json_response,
+            status=200,
+        )
+
+        with tempfile.NamedTemporaryFile("w+", delete=False) as snapshot_file:
+            snapshot_file.write("777\n")
+            snapshot_file.flush()
+            result = self.cli(
+                "subset",
+                "file",
+                "--session",
+                self.session,
+                "--target",
+                "10%",
+                "--input-snapshot-id",
+                f"@{snapshot_file.name}",
+                mix_stderr=False,
+                input=pipe,
+            )
+        os.unlink(snapshot_file.name)
+
+        self.assert_success(result)
+        payload = self.decode_request_body(self.find_request('/subset').request.body)
+        self.assertEqual(payload.get('subsettingId'), 777)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_subset_with_same_bin_file(self):
+        # Test invalid case
+        # --same-bin requires --bin options
+        with tempfile.NamedTemporaryFile("w+", delete=False) as same_bin_file:
+            same_bin_file.write("example.AddTest\n")
+            same_bin_file.flush()
+            result = self.cli(
+                "subset",
+                "go-test",
+                "--session",
+                self.session,
+                "--input-snapshot-id",
+                123,
+                "--same-bin",
+                same_bin_file.name,
+                mix_stderr=False)
+            self.assert_exit_code(result, 1)
+            self.assertIn("--same-bin option requires --bin option", result.stderr)
+
+        # Test valid case
+        mock_json_response = {
+            "testPaths": [[
+                {"type": "class", "name": "rocket-car-gotest"},
+                {"type": "testcase", "name": "TestExample1"},
+            ]],
+            "rest": [],
+            "subsettingId": 123,
+            "summary": {
+                "subset": {"duration": 1, "candidates": 1, "rate": 50},
+                "rest": {"duration": 1, "candidates": 0, "rate": 50},
+            },
+            "isObservation": False,
+        }
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json=mock_json_response,
+            status=200,
+        )
+
+        with tempfile.NamedTemporaryFile("w+", delete=False) as same_bin_file:
+            same_bin_file.write("example.AddTest\nexample.DivTest\n")
+            same_bin_file.flush()
+            result = self.cli("subset", "go-test", "--session", self.session, "--target", "20%", "--input-snapshot-id", 123,
+                              "--bin", "2/5", "--same-bin", same_bin_file.name, mix_stderr=False)
+            self.assert_success(result)
+            payload = self.decode_request_body(self.find_request('/subset').request.body)
+            split_subset = payload.get('splitSubset')
+            self.assertEqual(split_subset.get('sliceIndex'), 2)
+            self.assertEqual(split_subset.get('sliceCount'), 5)
+            self.assertEqual(
+                split_subset.get('sameBins'),
+                [[
+                    [
+                        {"type": "class", "name": "example"},
+                        {"type": "testcase", "name": "AddTest"},
+                    ],
+                    [
+                        {"type": "class", "name": "example"},
+                        {"type": "testcase", "name": "DivTest"},
+                    ],
+                ]],
+            )
