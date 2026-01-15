@@ -206,3 +206,24 @@ class SessionTest(CliTestCase):
         # Invalid URL
         result = invoke("--link", "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/2/files")
         self.assertIn("Invalid url 'https://github.com/launchableinc/cli/pull/2/files' passed to --link option", result.output)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {
+        "SMART_TESTS_TOKEN": CliTestCase.smart_tests_token,
+        'LANG': 'C.UTF-8',
+    }, clear=True)
+    def test_run_session_with_no_build(self):
+        result = self.cli(
+            "record", "session", "--no-build",
+            "--test-suite", "test-suite")
+        self.assert_success(result)
+
+        payload = json.loads(responses.calls[1].request.body.decode())
+        self.assert_json_orderless_equal({
+            "flavors": {},
+            "isObservation": False,
+            "links": [],
+            "noBuild": True,
+            "testSuite": "test-suite",
+            "timestamp": None,
+        }, payload)
