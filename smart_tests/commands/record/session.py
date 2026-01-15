@@ -24,19 +24,18 @@ TEST_SESSION_NAME_RULE = re.compile("^[a-zA-Z0-9][a-zA-Z0-9_.-]*$")
 @args4p.command(help="Record session information")
 def session(
     app: Application,
-    build_name: Annotated[str, typer.Option(
+    build_name: Annotated[str | None, typer.Option(
         "--build",
         help="Build name",
         metavar="NAME",
-        required=True
-    )],
+    )] = None,
     test_suite: Annotated[str, typer.Option(
         "--test-suite",
         help="Set test suite name. A test suite is a collection of test sessions. Setting a test suite allows you to "
              "manage data over test sessions and lineages.",
         metavar="NAME",
         required=True
-    )],
+    )] = "",
     flavors: Annotated[List[KeyValue], typer.Option(
         "--flavor",
         help="Flavors",
