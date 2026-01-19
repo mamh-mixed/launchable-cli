@@ -86,7 +86,6 @@ def record_tests(client, workspace, build_event_json_files):
             if ts.findtext('system-out', '') == "" and ts.findtext('system-err', '') == "":
                 logfile = path.join(path.dirname(report), 'test.log')
                 if path.exists(logfile):
-                    print("Found {}".format(logfile))
                     for x in ts.findall('system-out'):
                         ts.remove(x)
                     with open(logfile, 'r', encoding='utf-8', errors='replace') as log_file:
