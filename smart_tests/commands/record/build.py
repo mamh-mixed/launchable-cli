@@ -337,7 +337,7 @@ def build(
     def report(ws: List[Workspace], build_id: str):
         org, workspace = get_org_workspace()
         click.echo(
-            f"Launchable recorded build {build_name} to workspace {org} / {workspace} with commits from "
+            f"Smart Tests recorded build {build_name} to workspace {org} / {workspace} with commits from "
             f"{len(ws)} {'repositories' if len(ws) > 1 else 'repository'}: \n")
 
         header = ["Name", "Path", "HEAD Commit"]

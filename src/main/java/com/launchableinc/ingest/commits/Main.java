@@ -144,7 +144,7 @@ public class Main {
       cgc.transfer(endpoint, authenticator, enableTimeout);
       int numCommits = cgc.getCommitsSent();
       int numFiles = cgc.getFilesSent();
-      System.out.printf("Launchable transferred %d more %s and %d more %s from repository %s%n",
+      System.out.printf("Smart Tests transferred %d more %s and %d more %s from repository %s%n",
           numCommits, plural(numCommits, "commit"),
           numFiles, plural(numFiles, "file"),
           repo);
