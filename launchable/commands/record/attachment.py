@@ -1,3 +1,4 @@
+import tarfile
 import zipfile
 from io import BytesIO
 from typing import Optional
@@ -53,6 +54,28 @@ def attachment(
                         status = post_attachment(
                             client, session, file_content, zip_info.filename)
                         summary_rows.append([zip_info.filename, status])
+
+            # If tar file (tar, tar.gz, tar.bz2, tgz, etc.)
+            elif tarfile.is_tarfile(a):
+                with tarfile.open(a, 'r:*') as tar_file:
+                    for tar_info in tar_file:
+                        if tar_info.isdir():
+                            continue
+
+                        file_obj = tar_file.extractfile(tar_info)
+                        if file_obj is None:
+                            continue
+
+                        file_content = file_obj.read()
+
+                        if not valid_utf8_file(file_content):
+                            summary_rows.append(
+                                [tar_info.name, AttachmentStatus.SKIPPED_NON_TEXT])
+                            continue
+
+                        status = post_attachment(
+                            client, session, file_content, tar_info.name)
+                        summary_rows.append([tar_info.name, status])
 
             else:
                 with open(a, mode='rb') as f:

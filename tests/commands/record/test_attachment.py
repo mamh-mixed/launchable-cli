@@ -1,5 +1,6 @@
 import gzip
 import os
+import tarfile
 import tempfile
 import zipfile
 from unittest import mock
@@ -55,6 +56,7 @@ class AttachmentTest(CliTestCase):
         text_file_2 = os.path.join(temp_dir, "nested", "debug.log")
         binary_file = os.path.join(temp_dir, "binary.dat")
         zip_path = os.path.join(temp_dir, "logs.zip")
+        tar_path = os.path.join(temp_dir, "logs.tar.gz")
 
         # Create directory structure
         os.makedirs(os.path.dirname(text_file_2))
@@ -73,6 +75,12 @@ class AttachmentTest(CliTestCase):
             zf.write(text_file_2, 'nested/debug.log')
             zf.write(binary_file, 'binary.dat')
 
+        # Create tar.gz file
+        with tarfile.open(tar_path, 'w:gz') as tf:
+            tf.add(text_file_1, 'app.log')
+            tf.add(text_file_2, 'nested/debug.log')
+            tf.add(binary_file, 'binary.dat')
+
         responses.add(
             responses.POST,
             "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
@@ -88,10 +96,6 @@ class AttachmentTest(CliTestCase):
             match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="nested/debug.log"'})],
             status=200)
 
-        result = self.cli("record", "attachment", "--session", self.session, zip_path)
-
-        self.assert_success(result)
-
         expect = """
 | File             | Status                           |
 |------------------|----------------------------------|
@@ -100,10 +104,17 @@ class AttachmentTest(CliTestCase):
 | binary.dat       | ⚠ Skipped: not a valid text file |
 """
 
+        result = self.cli("record", "attachment", "--session", self.session, zip_path)
+
+        self.assertIn(expect, result.output)
+
+        result = self.cli("record", "attachment", "--session", self.session, tar_path)
+
         self.assertIn(expect, result.output)
 
         # Clean up
         os.unlink(zip_path)
+        os.unlink(tar_path)
         os.unlink(text_file_1)
         os.unlink(text_file_2)
         os.unlink(binary_file)
