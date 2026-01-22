@@ -50,53 +50,53 @@ class AttachmentTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
     def test_attachment_zip_file(self):
-        # Create temporary files
-        temp_dir = tempfile.mkdtemp()
-        text_file_1 = os.path.join(temp_dir, "app.log")
-        text_file_2 = os.path.join(temp_dir, "nested", "debug.log")
-        binary_file = os.path.join(temp_dir, "binary.dat")
-        zip_path = os.path.join(temp_dir, "logs.zip")
-        tar_path = os.path.join(temp_dir, "logs.tar.gz")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create temporary files
+            text_file_1 = os.path.join(temp_dir, "app.log")
+            text_file_2 = os.path.join(temp_dir, "nested", "debug.log")
+            binary_file = os.path.join(temp_dir, "binary.dat")
+            zip_path = os.path.join(temp_dir, "logs.zip")
+            tar_path = os.path.join(temp_dir, "logs.tar.gz")
 
-        # Create directory structure
-        os.makedirs(os.path.dirname(text_file_2))
+            # Create directory structure
+            os.makedirs(os.path.dirname(text_file_2))
 
-        # Write test content
-        with open(text_file_1, 'w') as f:
-            f.write("[INFO] Test log entry")
-        with open(text_file_2, 'w') as f:
-            f.write("[DEBUG] Nested log entry")
-        with open(binary_file, 'wb') as f:
-            f.write(b'\x00\x01\x02\x03')
+            # Write test content
+            with open(text_file_1, 'w') as f:
+                f.write("[INFO] Test log entry")
+            with open(text_file_2, 'w') as f:
+                f.write("[DEBUG] Nested log entry")
+            with open(binary_file, 'wb') as f:
+                f.write(b'\x00\x01\x02\x03')
 
-        # Create zip file
-        with zipfile.ZipFile(zip_path, 'w') as zf:
-            zf.write(text_file_1, 'app.log')
-            zf.write(text_file_2, 'nested/debug.log')
-            zf.write(binary_file, 'binary.dat')
+            # Create zip file
+            with zipfile.ZipFile(zip_path, 'w') as zf:
+                zf.write(text_file_1, 'app.log')
+                zf.write(text_file_2, 'nested/debug.log')
+                zf.write(binary_file, 'binary.dat')
 
-        # Create tar.gz file
-        with tarfile.open(tar_path, 'w:gz') as tf:
-            tf.add(text_file_1, 'app.log')
-            tf.add(text_file_2, 'nested/debug.log')
-            tf.add(binary_file, 'binary.dat')
+            # Create tar.gz file
+            with tarfile.open(tar_path, 'w:gz') as tf:
+                tf.add(text_file_1, 'app.log')
+                tf.add(text_file_2, 'nested/debug.log')
+                tf.add(binary_file, 'binary.dat')
 
-        responses.add(
-            responses.POST,
-            "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
-                get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
-            match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="app.log"'})],
-            json={"error": "Log file of the same name already exists"},
-            status=400)
+            responses.add(
+                responses.POST,
+                "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
+                    get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
+                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="app.log"'})],
+                json={"error": "Log file of the same name already exists"},
+                status=400)
 
-        responses.add(
-            responses.POST,
-            "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
-                get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
-            match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="nested/debug.log"'})],
-            status=200)
+            responses.add(
+                responses.POST,
+                "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
+                    get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
+                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="nested/debug.log"'})],
+                status=200)
 
-        expect = """
+            expect = """
 | File             | Status                           |
 |------------------|----------------------------------|
 | app.log          | ⚠ Failed to record               |
@@ -104,19 +104,10 @@ class AttachmentTest(CliTestCase):
 | binary.dat       | ⚠ Skipped: not a valid text file |
 """
 
-        result = self.cli("record", "attachment", "--session", self.session, zip_path)
+            result = self.cli("record", "attachment", "--session", self.session, zip_path)
 
-        self.assertIn(expect, result.output)
+            self.assertIn(expect, result.output)
 
-        result = self.cli("record", "attachment", "--session", self.session, tar_path)
+            result = self.cli("record", "attachment", "--session", self.session, tar_path)
 
-        self.assertIn(expect, result.output)
-
-        # Clean up
-        os.unlink(zip_path)
-        os.unlink(tar_path)
-        os.unlink(text_file_1)
-        os.unlink(text_file_2)
-        os.unlink(binary_file)
-        os.rmdir(os.path.dirname(text_file_2))
-        os.rmdir(temp_dir)
+            self.assertIn(expect, result.output)
