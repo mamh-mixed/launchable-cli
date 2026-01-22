@@ -33,6 +33,7 @@ def attachment(
     summary_rows = []
     try:
         session = require_session(session)
+        assert session is not None
 
         for a in attachments:
             # If zip file
