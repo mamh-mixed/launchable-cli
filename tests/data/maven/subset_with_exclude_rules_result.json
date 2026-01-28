@@ -5,9 +5,6 @@
     ],
     [
       {"type": "class", "name": "com.launchableinc.rocket_car_maven.AppTest"}
-    ],
-    [
-      {"type": "class", "name": "com.launchableinc.rocket_car_maven.e2e.E2ETest"}
     ]],
   "testRunner": "maven",
   "goal": {"type": "subset-by-percentage", "percentage": 0.1},
