@@ -66,7 +66,7 @@ def is_file(f: str) -> bool:
     'exclude_rules',
     required=False,
     multiple=True,
-    help="Exclude tests matching the given regular expression pattern. Can be specified multiple times.",
+    help="Exclude tests matching the given Python regular expression pattern. Can be specified multiple times.",
 )
 @click.argument('source_roots', required=False, nargs=-1)
 @launchable.subset
