@@ -20,6 +20,15 @@ from ..utils.typer_types import emoji
 from ..version import __version__ as version
 
 
+def parse_version(version_string: str) -> List[int]:
+    """Parse version string and extract numeric parts.
+
+    Handles version strings with special characters like '3.13.0+' by extracting
+    only the numeric prefix from each component.
+    """
+    return [int(x) for x in version_string.replace('+', '').split('.')]
+
+
 def compare_version(a: List[int], b: List[int]):
     """Compare two version numbers represented as int arrays"""
 
@@ -132,7 +141,8 @@ def verify(app_instance: Application):
     # Level 2 check: versions. This is more fragile than just reporting the number, so we move
     # this out here
 
-    if compare_version([int(x) for x in platform.python_version().split('.')], [3, 6]) < 0:
+    python_version = parse_version(platform.python_version())
+    if compare_version(python_version, [3, 6]) < 0:
         msg = "Python 3.6 or later is required"
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
