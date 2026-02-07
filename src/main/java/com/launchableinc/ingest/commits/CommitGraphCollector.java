@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -43,7 +44,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
@@ -643,7 +647,7 @@ public class CommitGraphCollector {
 
         // even in dry run, this method needs to execute in order to show what files we'll be collecting
         try (CloseableHttpResponse response = handleError(url, client.execute(request));
-             JsonParser parser = new JsonFactory().createParser(response.getEntity().getContent())) {
+             JsonParser parser = new JsonFactory().createParser(maybeDump(response.getEntity().getContent(),"SMART_TESTS_DUMP_COLLECT_TREE"))) {
             return select(objectMapper.readValue(parser, String[].class));
         }
       } catch (IOException e) {
@@ -674,5 +678,22 @@ public class CommitGraphCollector {
     public void accept(VirtualFile f) {
       files.add(f);
     }
+  }
+
+  /**
+   * To assist troubleshooting, captue the network response into a local file and then replay.
+   */
+  private InputStream maybeDump(InputStream content, String env) throws IOException {
+    String file = System.getenv(env);
+    if (file==null) {
+      return content;
+    }
+    // write the content to a file for debugging purpose, but still return the content so that the program can continue
+    try (OutputStream out = new FileOutputStream(file)) {
+      IOUtils.copy(content, out);
+    }
+    content.close();
+
+    return new FileInputStream(file);
   }
 }
