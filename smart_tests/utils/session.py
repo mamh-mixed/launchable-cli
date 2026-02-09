@@ -30,7 +30,7 @@ class SessionId:
         '''This is the method in which we parse the user input, so be defensive'''
         if id.startswith('@'):
             file_path = id[1:]
-            # Earlier versions of PowerShell writes Unicode BOM when redirecting output to a file.
+            # Earlier versions of PowerShell write Unicode BOM when redirecting output to a file.
             # https://github.com/PowerShell/PowerShell/issues/8592
             # Since we tell people to redirect `record session` output to a file, here we can
             # encounter such files. Here's the scheme to cope with this.
