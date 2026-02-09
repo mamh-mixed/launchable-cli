@@ -1,7 +1,8 @@
+import fnmatch
 import tarfile
 import zipfile
 from io import BytesIO
-from typing import Optional
+from typing import Optional, Tuple
 
 import click
 from tabulate import tabulate
@@ -23,12 +24,20 @@ class AttachmentStatus:
     help='In the format builds/<build-name>/test_sessions/<test-session-id>',
     type=str,
 )
+@click.option(
+    '--include',
+    'include_patterns',
+    help='Include only files matching pattern (e.g., "*.log"). Can be specified multiple times.',
+    type=str,
+    multiple=True,
+)
 @click.argument('attachments', nargs=-1)  # type=click.Path(exists=True)
 @click.pass_context
 def attachment(
         context: click.core.Context,
         attachments,
-        session: Optional[str] = None
+        session: Optional[str] = None,
+        include_patterns: Tuple[str, ...] = ()
 ):
     client = LaunchableClient(app=context.obj)
     summary_rows = []
@@ -42,6 +51,9 @@ def attachment(
                 with zipfile.ZipFile(a, 'r') as zip_file:
                     for zip_info in zip_file.infolist():
                         if zip_info.is_dir():
+                            continue
+
+                        if not matches_include_patterns(zip_info.filename, include_patterns):
                             continue
 
                         file_content = zip_file.read(zip_info.filename)
@@ -60,6 +72,9 @@ def attachment(
                 with tarfile.open(a, 'r:*') as tar_file:
                     for tar_info in tar_file:
                         if tar_info.isdir():
+                            continue
+
+                        if not matches_include_patterns(tar_info.name, include_patterns):
                             continue
 
                         file_obj = tar_file.extractfile(tar_info)
@@ -93,6 +108,21 @@ def attachment(
         client.print_exception_and_recover(e)
 
     display_summary_as_table(summary_rows)
+
+
+def matches_include_patterns(filename: str, include_patterns: Tuple[str, ...]) -> bool:
+    """
+    Check if a file should be included based on the include patterns.
+    If no patterns are specified, all files are included.
+    """
+    if not include_patterns:
+        return True
+
+    for pattern in include_patterns:
+        if fnmatch.fnmatch(filename, pattern):
+            return True
+
+    return False
 
 
 def valid_utf8_file(file_content: bytes) -> bool:
