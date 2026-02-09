@@ -1,4 +1,5 @@
 import os
+import tempfile
 from unittest import mock
 
 import responses
@@ -46,3 +47,43 @@ class TestTestSession(CliTestCase):
         with self.assertRaises(SystemExit) as cm:
             get_session(SessionId(self.session), client)
         self.assertEqual(cm.exception.code, 1)
+
+
+class TestSessionId(CliTestCase):
+    """Test SessionId initialization and file reading with various encodings"""
+
+    def setUp(self):
+        super().setUp()
+        # A valid session ID for testing
+        self.valid_session_id = f"builds/{self.build_name}/test_sessions/{self.session_id}"
+
+    def _assert_session_from_file(self, encoding: str, content: str):
+        """Helper method to test reading session ID from a file with specific encoding"""
+        with tempfile.NamedTemporaryFile(mode='w', encoding=encoding, delete=False, suffix='.txt') as f:
+            f.write(content)
+            temp_path = f.name
+
+        try:
+            session = SessionId(f"@{temp_path}")
+            self.assertEqual(str(session), self.valid_session_id)
+            self.assertEqual(session.build_part, self.build_name)
+            self.assertEqual(session.test_part, self.session_id)
+        finally:
+            os.unlink(temp_path)
+
+    def test_session_id_from_utf8_file_without_bom(self):
+        """Test reading session ID from a UTF-8 file without BOM"""
+        # also, extra NL
+        self._assert_session_from_file('utf-8', f"{self.valid_session_id}\n")
+
+    def test_session_id_from_utf8_file_with_bom(self):
+        """Test reading session ID from a UTF-8 file with BOM (UTF-8 signature)"""
+        self._assert_session_from_file('utf-8-sig', self.valid_session_id)
+
+    def test_session_id_from_utf16_le_file(self):
+        """Test reading session ID from a UTF-16 LE file with BOM (PowerShell default on Windows)"""
+        self._assert_session_from_file('utf-16-le', f'\ufeff{self.valid_session_id}')
+
+    def test_session_id_from_utf16_file(self):
+        """Test reading session ID from a UTF-16 file with BOM (using utf-16 encoding)"""
+        self._assert_session_from_file('utf-16', self.valid_session_id)
