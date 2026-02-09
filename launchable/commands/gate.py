@@ -32,7 +32,7 @@ from ..utils.launchable_client import LaunchableClient
 )
 @click.pass_context
 def gate(ctx: click.core.Context, session: str, is_json_format: bool):
-    tracking_client = TrackingClient(Command.DETECT_FLAKE, app=ctx.obj)
+    tracking_client = TrackingClient(Command.GATE, app=ctx.obj)
     client = LaunchableClient(app=ctx.obj)
     session_id = None
     try:
