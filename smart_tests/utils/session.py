@@ -38,7 +38,7 @@ class SessionId:
             # First we try utf-8-sig, which handles UTF-8 BOM correctly.
             # our session ID only uses ASCII chars, so unless the writer used non ascii compatible encoding
             # (e.g., EBCDIC but those are very very unlikely), this will read the file correctly.
-            # If the writer used UTF-16 (e.g., legacy PowerShell on Windows), we'll get a decode error, an
+            # If the writer used UTF-16 (e.g., legacy PowerShell on Windows), we'll get a decode error, and
             # then we try UTF-16, which handles BOM correctly.
             try:
                 try:
