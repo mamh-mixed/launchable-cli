@@ -8,6 +8,7 @@ from smart_tests.app import Application
 from smart_tests.args4p.command import Group
 from smart_tests.commands.compare import compare
 from smart_tests.commands.detect_flakes import detect_flakes
+from smart_tests.commands.gate import gate
 from smart_tests.commands.inspect import inspect
 from smart_tests.commands.record import record
 from smart_tests.commands.stats import stats
@@ -23,6 +24,7 @@ cli.add_command(inspect)
 cli.add_command(stats)
 cli.add_command(compare)
 cli.add_command(detect_flakes)
+cli.add_command(gate)
 
 
 def _load_test_runners():

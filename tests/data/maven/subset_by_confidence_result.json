@@ -4,7 +4,10 @@
       {"type": "class", "name": "com.example.sample_app_maven.App2Test"}
     ],
     [
-      { "type": "class",  "name": "com.example.sample_app_maven.AppTest"}
+      {"type": "class", "name": "com.example.sample_app_maven.AppTest"}
+    ],
+    [
+      {"type": "class", "name": "com.launchableinc.rocket_car_maven.e2e.E2ETest"}
     ]],
   "testRunner": "maven",
   "session": {

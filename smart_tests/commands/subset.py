@@ -115,6 +115,10 @@ class Subset(TestPathWriter):
                 help="Subsetting by confidence from 0% to 100%",
                 metavar="PERCENTAGE"
             )] = None,
+            similarity: Annotated[float | None, typer.Option(
+                type=floatType(min=0.0, max=1.0),
+                help='subsetting by similarity from 0 to 1.0. Tests scoring above this value are included in the subset.',
+            )] = None,
             goal_spec: Annotated[str | None, typer.Option(
                 help="Subsetting by programmatic goal definition",
                 metavar="GOAL_SPEC"
@@ -262,6 +266,7 @@ class Subset(TestPathWriter):
         self.target = target
         self.time = time
         self.confidence = confidence
+        self.similarity = similarity
         self.goal_spec = goal_spec
         self.base_path = base_path
         self.base_path_explicitly_set = (base_path is not None)
@@ -412,6 +417,11 @@ class Subset(TestPathWriter):
             payload["goal"] = {
                 "type": "subset-by-goal-spec",
                 "goal": self.goal_spec
+            }
+        elif self.similarity is not None:
+            payload["goal"] = {
+                "type": "subset-by-similarity",
+                "similarity": self.similarity
             }
         else:
             payload['useServerSideOptimizationTarget'] = True
