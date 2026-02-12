@@ -164,7 +164,7 @@ class AttachmentTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_attachment_with_duplicate_file_names(self):
+    def test_attachment_with_identical_file_names(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create temporary files
             text_file_1 = os.path.join(temp_dir, "app.log")
