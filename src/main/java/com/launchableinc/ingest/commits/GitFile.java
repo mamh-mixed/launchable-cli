@@ -9,10 +9,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.eclipse.jgit.lib.Constants.*;
+import static org.eclipse.jgit.lib.Constants.OBJ_BLOB;
 
 /**
  * Represents a file in a Git repository, and encapsulates the read access for convenience.
@@ -21,9 +21,10 @@ final class GitFile implements VirtualFile {
   final String repo;
   final String path;
   final ObjectId blob;
-  private final ObjectReader objectReader;
+  // ObjectReader is not thread-safe, so we use Supplier to get a new instance per thread.
+  private final Supplier<ObjectReader> objectReader;
 
-  public GitFile(String repo, String path, ObjectId blob, ObjectReader objectReader) {
+  public GitFile(String repo, String path, ObjectId blob, Supplier<ObjectReader> objectReader) {
     this.repo = repo;
     this.path = path;
     this.blob = blob;
@@ -55,7 +56,7 @@ final class GitFile implements VirtualFile {
   }
 
   private ObjectLoader open() throws IOException {
-    return objectReader.open(blob, OBJ_BLOB);
+    return objectReader.get().open(blob, OBJ_BLOB);
   }
 
   /**

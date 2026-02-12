@@ -29,10 +29,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static com.google.common.truth.Truth.*;
+import static com.google.common.truth.Truth.assertThat;
+import static java.util.Collections.singletonList;
 
 @RunWith(JUnit4.class)
 public class CommitGraphCollectorTest {
@@ -90,7 +90,7 @@ public class CommitGraphCollectorTest {
     try (Repository r = Git.open(barerepoDir).getRepository()) {
       CommitGraphCollector cgc = collectCommit(r, ImmutableList.of());
       assertThat(cgc.getCommitsSent()).isEqualTo(1);
-      assertThat(cgc.getFilesSent()).isEqualTo(2); // header + .gitmodules
+      assertThat(cgc.getFilesSent()).isEqualTo(1); // .gitmodules
     }
   }
 
@@ -121,7 +121,7 @@ public class CommitGraphCollectorTest {
           2);
     }
     assertThat(councCommitChunks[0]).isEqualTo(2);
-    assertThat(countFilesChunks[0]).isEqualTo(3); // header, a, .gitmodules, and header, sub/x, 5 files, 3 chunks
+    assertThat(countFilesChunks[0]).isEqualTo(2); // a, .gitmodules, and sub/x, 3 files, 2 chunks
   }
 
   private void assertValidTar(ContentProducer content) throws IOException {
@@ -172,28 +172,28 @@ public class CommitGraphCollectorTest {
     try (Git mainrepo = Git.open(mainrepoDir)) {
       addCommitInSubRepo(mainrepo);
 
-      List<VirtualFile> files = new ArrayList<>();
-
       CommitGraphCollector cgc = new CommitGraphCollector("test", mainrepo.getRepository());
       cgc.collectFiles(true);
-      cgc.new ByRepository(mainrepo.getRepository(), "main")
-        .transfer(Collections.emptyList(), c -> {},
-          new PassThroughTreeReceiverImpl(),
-          FlushableConsumer.of(files::add));
 
-      // header for the main repo, 'gitmodules', header for the sub repo, 'a', and 'x' in the sub repo
-      assertThat(files).hasSize(5);
-      VirtualFile header = files.get(2);
+      VirtualFile header = cgc.new ByRepository(mainrepo.getRepository(), "main")
+        .buildHeader(singletonList(VirtualFile.from("repo", "a.txt", ObjectId.zeroId(), new byte[1])));
       assertThat(header.path()).isEqualTo(CommitGraphCollector.HEADER_FILE);
-      JsonNode tree = assertValidJson(header::writeTo).get("tree");
+      JsonNode payload = assertValidJson(header::writeTo);
+      JsonNode tree = payload.get("tree");
       assertThat(tree.isArray()).isTrue();
 
       List<String> paths = new ArrayList<>();
       for (JsonNode i : tree) {
         paths.add(i.get("path").asText());
       }
+      assertThat(paths).containsExactly(".gitmodules", "sub");
 
-      assertThat(paths).containsExactly("a", "x");
+      List<String> inThisChunk = new ArrayList<>();
+      for (JsonNode i : payload.get("inThisChunk")) {
+        inThisChunk.add(i.get("path").asText());
+      }
+
+      assertThat(inThisChunk).containsExactly("a.txt");
     }
   }
 

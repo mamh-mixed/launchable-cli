@@ -14,8 +14,15 @@ import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.*
  * Receives {@link GitFile}, buffers them, and writes them out in a gzipped tar file.
  */
 final class FileChunkStreamer extends ChunkStreamer<VirtualFile> {
-  FileChunkStreamer(IOConsumer<ContentProducer> sender, int chunkSize) {
+  interface HeaderBuilder {
+    VirtualFile makeHeader(List<VirtualFile> chunk) throws IOException;
+  }
+
+  private final HeaderBuilder header;
+
+  FileChunkStreamer(HeaderBuilder header, IOConsumer<ContentProducer> sender, int chunkSize) {
     super(sender, chunkSize);
+    this.header = header;
   }
 
   @Override
@@ -23,14 +30,22 @@ final class FileChunkStreamer extends ChunkStreamer<VirtualFile> {
     try (TarArchiveOutputStream tar = new TarArchiveOutputStream(os, "UTF-8")) {
       tar.setLongFileMode(LONGFILE_POSIX);
 
+      if (header!=null) {
+        write(header.makeHeader(files), tar);
+      }
+
       for (VirtualFile f : files) {
-        TarArchiveEntry e = new TarArchiveEntry(f.path());
-        e.setSize(f.size());
-        e.setGroupName(f.blob().name()); // HACK - reuse the group name field to store the blob ID
-        tar.putArchiveEntry(e);
-        f.writeTo(tar);
-        tar.closeArchiveEntry();
+        write(f, tar);
       }
     }
+  }
+
+  private static void write(VirtualFile f, TarArchiveOutputStream tar) throws IOException {
+    TarArchiveEntry e = new TarArchiveEntry(f.path());
+    e.setSize(f.size());
+    e.setGroupName(f.blob().name()); // HACK - reuse the group name field to store the blob ID
+    tar.putArchiveEntry(e);
+    f.writeTo(tar);
+    tar.closeArchiveEntry();
   }
 }

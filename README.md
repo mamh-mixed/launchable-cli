@@ -30,6 +30,9 @@ source .venv/bin/activate
 uv run <command>
 ```
 
+From this shell, run `pip install -e .` to create `launchable` wrapper script from the workspace.
+This is useful to test the CLI with real/local server.
+
 ## Run tests cli
 
 ```shell

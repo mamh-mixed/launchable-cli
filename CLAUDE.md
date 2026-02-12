@@ -1,0 +1,2 @@
+- In Java code, use JUnit 4 & Google truth. Test needs to be added to AllTests.java or else it won't run. 
+- See README.md & CONTRIBUTING.md
