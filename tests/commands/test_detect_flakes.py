@@ -3,14 +3,14 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from launchable.utils.http_client import get_base_url
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
 class DetectFlakeTest(CliTestCase):
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_flake_detection_success(self):
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_detect_flakes_success(self):
         mock_json_response = {
             "testPaths": [
                 [{"type": "file", "name": "test_flaky_1.py"}],
@@ -25,11 +25,9 @@ class DetectFlakeTest(CliTestCase):
         )
         result = self.cli(
             "detect-flakes",
-            "--session",
-            self.session,
-            "--retry-threshold",
-            "high",
             "file",
+            "--session", self.session,
+            "--retry-threshold", "high",
             mix_stderr=False,
         )
         self.assert_success(result)
@@ -37,8 +35,8 @@ class DetectFlakeTest(CliTestCase):
         self.assertIn("test_flaky_2.py", result.stdout)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_flake_detection_without_retry_threshold_success(self):
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_detect_flakes_without_retry_threshold_success(self):
         mock_json_response = {
             "testPaths": [
                 [{"type": "file", "name": "test_flaky_1.py"}],
@@ -53,9 +51,10 @@ class DetectFlakeTest(CliTestCase):
         )
         result = self.cli(
             "detect-flakes",
+            "file",
+            "--session", self.session,
             "--session",
             self.session,
-            "file",
             mix_stderr=False,
         )
         self.assert_success(result)
@@ -63,8 +62,8 @@ class DetectFlakeTest(CliTestCase):
         self.assertIn("test_flaky_2.py", result.stdout)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_flake_detection_no_flakes(self):
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_detect_flakes_no_flakes(self):
         mock_json_response = {"testPaths": []}
         responses.add(
             responses.GET,
@@ -74,18 +73,16 @@ class DetectFlakeTest(CliTestCase):
         )
         result = self.cli(
             "detect-flakes",
-            "--session",
-            self.session,
-            "--retry-threshold",
-            "low",
             "file",
+            "--session", self.session,
+            "--retry-threshold", "low",
             mix_stderr=False,
         )
         self.assert_success(result)
         self.assertEqual(result.stdout, "")
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_flake_detection_api_error(self):
         responses.add(
             responses.GET,
@@ -94,11 +91,9 @@ class DetectFlakeTest(CliTestCase):
         )
         result = self.cli(
             "detect-flakes",
-            "--session",
-            self.session,
-            "--retry-threshold",
-            "medium",
             "file",
+            "--session", self.session,
+            "--retry-threshold", "medium",
             mix_stderr=False,
         )
         self.assert_exit_code(result, 0)

@@ -6,13 +6,13 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from launchable.utils.http_client import get_base_url
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
 class CodeceptjsTest(CliTestCase):
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_codeceptjs(self):
         result = self.cli(
             "record",
@@ -27,7 +27,7 @@ class CodeceptjsTest(CliTestCase):
         self.assert_record_tests_payload("record_test_result.json")
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_subset(self):
         """Test basic subset functionality with multiple test files"""
         pipe = "test/example_test.js\ntest/login_test.js\n"
@@ -70,7 +70,7 @@ class CodeceptjsTest(CliTestCase):
         )
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_rest(self):
         """Test subset functionality with --rest option to save remaining tests"""
         pipe = "test/example_test.js\ntest/other_test.js\n"
@@ -132,7 +132,7 @@ class CodeceptjsTest(CliTestCase):
                 Path(rest_file_path).unlink()
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_single_test(self):
         """Test subset functionality with a single test file"""
         pipe = "test/single_test.js\n"
@@ -172,7 +172,7 @@ class CodeceptjsTest(CliTestCase):
         self.assertEqual(output_json["tests"], ["test/single_test.js"])
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_strips_newlines(self):
         """Test that subset properly strips newlines from test paths"""
         # Test with various newline formats

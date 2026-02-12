@@ -1,12 +1,12 @@
 import io
+import unittest
 from contextlib import contextmanager, redirect_stderr
 
-from launchable.utils.commands import Command
-from launchable.utils.fail_fast_mode import FailFastModeValidateParams, fail_fast_mode_validate
-from tests.cli_test_case import CliTestCase
+from smart_tests.utils.commands import Command
+from smart_tests.utils.fail_fast_mode import FailFastModeValidateParams, fail_fast_mode_validate
 
 
-class FailFastModeTest(CliTestCase):
+class FailFastModeTest(unittest.TestCase):
     def test_fail_fast_mode_validate(self):
         params = FailFastModeValidateParams(
             command=Command.SUBSET,
@@ -30,7 +30,7 @@ class FailFastModeTest(CliTestCase):
 
 @contextmanager
 def tmp_set_fail_fast_mode(enabled: bool):
-    from launchable.utils.fail_fast_mode import _fail_fast_mode_cache, set_fail_fast_mode
+    from smart_tests.utils.fail_fast_mode import _fail_fast_mode_cache, set_fail_fast_mode
     original = _fail_fast_mode_cache
     try:
         set_fail_fast_mode(enabled)

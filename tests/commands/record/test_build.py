@@ -4,16 +4,15 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from launchable.utils.session import read_build
 from tests.cli_test_case import CliTestCase
 
 
 class BuildTest(CliTestCase):
     # make sure the output of git-submodule is properly parsed
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
-    @mock.patch('launchable.utils.subprocess.check_output')
+    @mock.patch('smart_tests.utils.subprocess.check_output')
     # to tests on GitHub Actions
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
     @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
@@ -30,8 +29,20 @@ class BuildTest(CliTestCase):
             ('c50f5de0f06fe16afa4fd1dd615e4903e40b42a2 refs/head/main\nc50f5de0f06fe16afa4fd1dd615e4903e40b42a2 refs/remotes/origin/main\n').encode(),  # noqa: E501
         ]
 
-        self.assertEqual(read_build(), None)
-        result = self.cli("record", "build", "--no-commit-collection", "--name", self.build_name)
+        result = self.cli(
+            "record",
+            "build",
+            "--no-commit-collection",
+            "--build",
+            self.build_name,
+            "--branch",
+            "main",
+            "--repo-branch-map",
+            ".=main",
+            "--repo-branch-map",
+            "./foo=main",
+            "--repo-branch-map",
+            "./bar-zot=main")
         self.assert_success(result)
 
         # Name & Path should both reflect the submodule path
@@ -51,57 +62,61 @@ class BuildTest(CliTestCase):
                     {
                         "repositoryName": "./foo",
                         "commitHash": "491e03096e2234dab9a9533da714fb6eff5dcaa7",
-                        "branchName": ""
+                        "branchName": "main"
                     },
                     {
                         "repositoryName": "./bar-zot",
                         "commitHash": "8bccab48338219e73c3118ad71c8c98fbd32a4be",
-                        "branchName": ""
+                        "branchName": "main"
                     },
                 ],
                 "links": [],
                 "timestamp": None
             }, payload)
 
-        self.assertEqual(read_build(), self.build_name)
-
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     # to tests on GitHub Actions
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
     @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
-    @mock.patch('launchable.utils.subprocess.check_output')
+    @mock.patch('smart_tests.utils.subprocess.check_output')
     def test_no_submodule(self, mock_check_output):
         mock_check_output.side_effect = [
             # the call is git rev-parse HEAD
             ('c50f5de0f06fe16afa4fd1dd615e4903e40b42a2').encode(),
         ]
 
-        self.assertEqual(read_build(), None)
-
-        result = self.cli("record", "build", "--no-commit-collection", "--no-submodules", "--name", self.build_name)
+        result = self.cli(
+            "record",
+            "build",
+            "--no-commit-collection",
+            "--no-submodules",
+            "--build",
+            self.build_name,
+            "--branch",
+            "main",
+            "--repo-branch-map",
+            ".=main")
         self.assert_success(result)
 
         payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal(
             {
                 "buildNumber": "123",
-                "lineage": None,
+                "lineage": "main",
                 "commitHashes": [
                     {
                         "repositoryName": ".",
                         "commitHash": "c50f5de0f06fe16afa4fd1dd615e4903e40b42a2",
-                        "branchName": ""
+                        "branchName": "main"
                     },
                 ],
                 "links": [],
                 "timestamp": None
             }, payload)
 
-        self.assertEqual(read_build(), self.build_name)
-
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     # to tests on GitHub Actions
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
     @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
@@ -109,51 +124,70 @@ class BuildTest(CliTestCase):
         orig_dir = os.getcwd()
         try:
             os.chdir(self.dir)
-            self.assertEqual(read_build(), None)
 
-            self.cli("record", "build", "--no-commit-collection", "--commit",
-                     ".=c50f5de0f06fe16afa4fd1dd615e4903e40b42a2", "--name", self.build_name)
+            self.cli(
+                "record",
+                "build",
+                "--no-commit-collection",
+                "--commit",
+                ".=c50f5de0f06fe16afa4fd1dd615e4903e40b42a2",
+                "--build",
+                self.build_name,
+                "--branch",
+                "main",
+                "--repo-branch-map",
+                ".=main")
 
             payload = json.loads(responses.calls[1].request.body.decode())
             self.assert_json_orderless_equal(
                 {
                     "buildNumber": "123",
-                    "lineage": None,
+                    "lineage": "main",
                     "commitHashes": [
                         {
                             "repositoryName": ".",
                             "commitHash": "c50f5de0f06fe16afa4fd1dd615e4903e40b42a2",
-                            "branchName": "",
+                            "branchName": "main",
                         },
                     ],
                     "links": [],
                     "timestamp": None
                 }, payload)
 
-            self.assertEqual(read_build(), self.build_name)
         finally:
             os.chdir(orig_dir)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     # to tests on GitHub Actions
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
     @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
     def test_commit_option_and_build_option(self):
         # case only --commit option
-        result = self.cli("record", "build", "--no-commit-collection", "--commit", "A=abc12", "--name", self.build_name)
+        result = self.cli(
+            "record",
+            "build",
+            "--no-commit-collection",
+            "--commit",
+            "A=abc12",
+            "--build",
+            self.build_name,
+            "--branch",
+            "main",
+            "--repo-branch-map",
+            "A=main")
         self.assert_success(result)
 
         payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal(
             {
                 "buildNumber": "123",
-                "lineage": None,
+                "lineage": "main",
                 "commitHashes": [
                     {
                         "repositoryName": "A",
                         "commitHash": "abc12",
-                        "branchName": ""
+                        "branchName": "main"
                     },
                 ],
                 "links": [],
@@ -169,8 +203,10 @@ class BuildTest(CliTestCase):
             "--commit",
             "A=abc12",
             "--branch",
+            "feature-xxx",
+            "--repo-branch-map",
             "A=feature-xxx",
-            "--name",
+            "--build",
             self.build_name)
         self.assert_success(result)
 
@@ -191,24 +227,26 @@ class BuildTest(CliTestCase):
             }, payload)
         responses.calls.reset()
 
-        # case --commit option and --branch option but another one
+        # case --commit option and --repo-branch-map option with invalid repo
         result = self.cli(
             "record",
             "build",
+            "--build",
+            self.build_name,
             "--no-commit-collection",
             "--commit",
             "A=abc12",
             "--branch",
-            "B=feature-yyy",
-            "--name",
-            self.build_name)
+            "main",
+            "--repo-branch-map",
+            "B=feature-yyy")
         self.assert_success(result)
 
         payload = json.loads(responses.calls[1].request.body.decode())
         self.assert_json_orderless_equal(
             {
                 "buildNumber": "123",
-                "lineage": None,
+                "lineage": "main",
                 "commitHashes": [
                     {
                         "repositoryName": "A",
@@ -226,17 +264,17 @@ class BuildTest(CliTestCase):
         result = self.cli(
             "record",
             "build",
+            "--build",
+            self.build_name,
             "--no-commit-collection",
             "--commit",
             "A=abc12",
-            "--branch",
+            "--repo-branch-map",
             "B=feature-yyy",
             "--commit",
             "B=56cde",
-            "--branch",
-            "A=feature-xxx",
-            "--name",
-            self.build_name)
+            "--repo-branch-map",
+            "A=feature-xxx")
         self.assert_success(result)
 
         payload = json.loads(responses.calls[1].request.body.decode())
@@ -262,31 +300,56 @@ class BuildTest(CliTestCase):
         responses.calls.reset()
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_build_name_validation(self):
-        result = self.cli("record", "build", "--no-commit-collection", "--name", "foo/hoge")
+        result = self.cli(
+            "record",
+            "build",
+            "--no-commit-collection",
+            "--build",
+            "foo/hoge",
+            "--branch",
+            "main",
+            "--commit",
+            "foo=abc123",
+            "--repo-branch-map",
+            "foo=main")
         self.assert_exit_code(result, 1)
 
-        result = self.cli("record", "build", "--no-commit-collection", "--name", "foo%2Fhoge")
+        result = self.cli(
+            "record",
+            "build",
+            "--no-commit-collection",
+            "--build",
+            "foo%2Fhoge",
+            "--branch",
+            "main",
+            "--commit",
+            "foo=abc123",
+            "--repo-branch-map",
+            "foo=main")
         self.assert_exit_code(result, 1)
 
 # make sure the output of git-submodule is properly parsed
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     # to tests on GitHub Actions
     @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
     @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
-    @mock.patch('launchable.utils.subprocess.check_output')
+    @mock.patch('smart_tests.utils.subprocess.check_output')
     def test_with_timestamp(self, mock_check_output):
-        self.assertEqual(read_build(), None)
         result = self.cli(
             "record",
             "build",
             "--no-commit-collection",
             "--commit",
             "repo=abc12",
-            "--name",
+            "--build",
             self.build_name,
+            "--branch",
+            "main",
+            "--repo-branch-map",
+            "repo=main",
             '--timestamp',
             "2025-01-23 12:34:56Z")
         self.assert_success(result)
@@ -295,22 +358,109 @@ class BuildTest(CliTestCase):
         self.assert_json_orderless_equal(
             {
                 "buildNumber": "123",
-                "lineage": None,
+                "lineage": "main",
                 "commitHashes": [
                     {
                         "repositoryName": "repo",
                         "commitHash": "abc12",
-                        "branchName": ""
+                        "branchName": "main"
                     },
                 ],
                 "links": [],
                 "timestamp": "2025-01-23T12:34:56+00:00"
             }, payload)
 
-        self.assertEqual(read_build(), self.build_name)
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_repo_branch_map_requires_no_commit_collection(self):
+        # Test that --repo-branch-map requires --no-commit-collection
+        result = self.cli(
+            "record",
+            "build",
+            "--build",
+            self.build_name,
+            "--branch",
+            "main",
+            "--repo-branch-map",
+            ".=main")
+        self.assert_exit_code(result, 1)
+        self.assertIn("--no-commit-collection must be specified when --repo-branch-map is used", result.stdout)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    # to tests on GitHub Actions
+    @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
+    @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
+    def test_with_link(self):
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'url=https://smart-tests.test',
+            '--link', 'build:https://build.smart-tests.test',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+
+        self.assert_exit_code(result, 0)
+        payload = json.loads(responses.calls[1].request.body.decode())
+        self.assert_json_orderless_equal(
+            {
+                "buildNumber": "123",
+                "lineage": "main",
+                "commitHashes": [{"repositoryName": "app", "commitHash": "abc12", "branchName": ""}],
+                "links": [
+                    {"title": "url", "url": "https://smart-tests.test", "kind": "CUSTOM_LINK"},
+                    {"title": "build", "url": "https://build.smart-tests.test", "kind": "CUSTOM_LINK"},
+                ],
+                "timestamp": None
+            }, payload)
+
+        # with invalid kind
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'UNKNOWN_KIND|PR=https://github.com/cloudbees-oss/smart-tests/pull/1',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assertIn("Invalid kind 'UNKNOWN_KIND' passed to --link option.", result.output)
+
+        # with invalid URL
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'GITHUB_PULL_REQUEST|PR=https://smart-tests.test/pull/1/files',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assertIn("Invalid url 'https://smart-tests.test/pull/1/files' passed to --link option.", result.output)
+
+        # with infer kind
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'PR=https://smart-tests.test/pull/1',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assert_success(result)
+
+        # with explicit kind
+        result = self.cli(
+            "record", "build", "--build", self.build_name,
+            '--link', 'GITHUB_PULL_REQUEST|PR=https://smart-tests.test/pull/1',
+            # set these options for easy to check payload
+            "--no-commit-collection",
+            "--branch", "main",
+            "--commit", "app=abc12",
+        )
+        self.assert_success(result)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_build_with_links(self):
         # Invalid kind
         result = self.cli(
@@ -319,7 +469,7 @@ class BuildTest(CliTestCase):
             "--no-commit-collection",
             "--link",
             "UNKNOWN_KIND|PR=https://github.com/launchableinc/cli/pull/1",
-            "--name",
+            "--build",
             self.build_name)
         self.assertIn("Invalid kind 'UNKNOWN_KIND' passed to --link option", result.output)
 
@@ -330,7 +480,7 @@ class BuildTest(CliTestCase):
             "--no-commit-collection",
             "--link",
             "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/1/files",
-            "--name",
+            "--build",
             self.build_name)
         self.assertIn("Invalid url 'https://github.com/launchableinc/cli/pull/1/files' passed to --link option", result.output)
 
@@ -341,7 +491,7 @@ class BuildTest(CliTestCase):
             "--no-commit-collection",
             "--link",
             "PR=https://github.com/launchableinc/cli/pull/1",
-            "--name",
+            "--build",
             self.build_name)
         self.assert_success(result)
 
@@ -352,6 +502,6 @@ class BuildTest(CliTestCase):
             "--no-commit-collection",
             "--link",
             "GITHUB_PULL_REQUEST|PR=https://github.com/launchableinc/cli/pull/1",
-            "--name",
+            "--build",
             self.build_name)
         self.assert_success(result)

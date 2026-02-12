@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-import click
-
-from launchable.utils.link import LinkKind, capture_link, capture_links, capture_links_from_options
+from smart_tests.args4p.exceptions import BadCmdLineException
+from smart_tests.utils.link import LinkKind, capture_link, capture_links, capture_links_from_options
+from smart_tests.utils.typer_types import KeyValue
 
 
 class LinkTest(TestCase):
@@ -49,17 +49,17 @@ class LinkTest(TestCase):
 
     def test_capture_links_from_options(self):
         # Invalid kind
-        link_options = [("INVALID_KIND|PR", "https://github.com/launchableinc/cli/pull/1")]
-        with self.assertRaises(click.UsageError):
+        link_options = [KeyValue("INVALID_KIND|PR", "https://github.com/launchableinc/cli/pull/1")]
+        with self.assertRaises(BadCmdLineException):
             capture_links_from_options(link_options)
 
         # Invalid URL
-        link_options = [("GITHUB_PULL_REQUEST|PR", "https://github.com/launchableinc/cli/pull/1/files")]
-        with self.assertRaises(click.UsageError):
+        link_options = [KeyValue("GITHUB_PULL_REQUEST|PR", "https://github.com/launchableinc/cli/pull/1/files")]
+        with self.assertRaises(BadCmdLineException):
             capture_links_from_options(link_options)
 
         # Infer kind
-        link_options = [("PR", "https://github.com/launchableinc/cli/pull/1")]
+        link_options = [KeyValue("PR", "https://github.com/launchableinc/cli/pull/1")]
         self.assertEqual(capture_links_from_options(link_options), [{
             "kind": LinkKind.GITHUB_PULL_REQUEST.name,
             "title": "PR",
@@ -67,7 +67,7 @@ class LinkTest(TestCase):
         }])
 
         # Explicit kind
-        link_options = [("GITHUB_PULL_REQUEST|PR", "https://github.com/launchableinc/cli/pull/1")]
+        link_options = [KeyValue("GITHUB_PULL_REQUEST|PR", "https://github.com/launchableinc/cli/pull/1")]
         self.assertEqual(capture_links_from_options(link_options), [{
             "kind": LinkKind.GITHUB_PULL_REQUEST.name,
             "title": "PR",
@@ -90,7 +90,7 @@ class LinkTest(TestCase):
         envs = {
             "GITHUB_PULL_REQUEST_URL": "https://github.com/launchableinc/cli/pull/1"
         }
-        link_options = [("GITHUB_PULL_REQUEST|PR", "https://github.com/launchableinc/cli/pull/2")]
+        link_options = [KeyValue("GITHUB_PULL_REQUEST|PR", "https://github.com/launchableinc/cli/pull/2")]
         self.assertEqual(capture_links(link_options, envs), [{
             "kind": LinkKind.GITHUB_PULL_REQUEST.name,
             "title": "PR",

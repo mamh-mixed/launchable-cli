@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase, mock
 
-from launchable.utils.authentication import authentication_headers, get_org_workspace
+from smart_tests.utils.authentication import authentication_headers, get_org_workspace
 
 
 class AuthenticationTest(TestCase):
@@ -12,18 +12,18 @@ class AuthenticationTest(TestCase):
         self.assertIsNone(workspace)
 
     @mock.patch.dict(os.environ,
-                     {"LAUNCHABLE_TOKEN": "v1:launchableinc/test:token"})
-    def test_get_org_workspace_valid_LAUNCHABLE_TOKEN(self):
+                     {"SMART_TESTS_TOKEN": "v1:launchableinc/test:token"})
+    def test_get_org_workspace_valid_SMART_TESTS_TOKEN(self):
         org, workspace = get_org_workspace()
         self.assertEqual("launchableinc", org)
         self.assertEqual("test", workspace)
 
     @mock.patch.dict(
         os.environ,
-        {"LAUNCHABLE_ORGANIZATION": "launchableinc", "LAUNCHABLE_WORKSPACE": "test"},
+        {"SMART_TESTS_ORGANIZATION": "launchableinc", "SMART_TESTS_WORKSPACE": "test"},
         clear=True,
     )
-    def test_get_org_workspace_LAUNCHABLE_ORGANIZATION_and_LAUNCHABLE_WORKSPACE(
+    def test_get_org_workspace_SMART_TESTS_ORGANIZATION_and_SMART_TESTS_WORKSPACE(
             self):
         org, workspace = get_org_workspace()
         self.assertEqual("launchableinc", org)
@@ -31,10 +31,10 @@ class AuthenticationTest(TestCase):
 
     @mock.patch.dict(
         os.environ,
-        {"LAUNCHABLE_TOKEN": "v1:token_org/token_wp:token",
-            "LAUNCHABLE_ORGANIZATION": "org", "LAUNCHABLE_WORKSPACE": "wp"},
+        {"SMART_TESTS_TOKEN": "v1:token_org/token_wp:token",
+            "SMART_TESTS_ORGANIZATION": "org", "SMART_TESTS_WORKSPACE": "wp"},
     )
-    def test_get_org_workspace_LAUNCHABLE_TOKEN_and_LAUNCHABLE_ORGANIZATION_and_LAUNCHABLE_WORKSPACE(
+    def test_get_org_workspace_SMART_TESTS_TOKEN_and_SMART_TESTS_ORGANIZATION_and_SMART_TESTS_WORKSPACE(
             self):
         org, workspace = get_org_workspace()
         self.assertEqual("token_org", org)
@@ -46,8 +46,8 @@ class AuthenticationTest(TestCase):
         self.assertEqual(len(header), 0)
 
     @mock.patch.dict(os.environ,
-                     {"LAUNCHABLE_TOKEN": "v1:launchableinc/test:token"})
-    def test_authentication_headers_LAUNCHABLE_TOKEN(self):
+                     {"SMART_TESTS_TOKEN": "v1:launchableinc/test:token"})
+    def test_authentication_headers_SMART_TESTS_TOKEN(self):
         header = authentication_headers()
         self.assertEqual(len(header), 1)
         self.assertEqual(
@@ -93,12 +93,12 @@ class AuthenticationTest(TestCase):
 
     @mock.patch.dict(
         os.environ,
-        {"LAUNCHABLE_TOKEN": "v1:launchableinc/test:token", "GITHUB_ACTIONS": "true", "GITHUB_RUN_ID": "1",
+        {"SMART_TESTS_TOKEN": "v1:launchableinc/test:token", "GITHUB_ACTIONS": "true", "GITHUB_RUN_ID": "1",
          "GITHUB_REPOSITORY": "launchableinc/test", "GITHUB_WORKFLOW": "build", "GITHUB_RUN_NUMBER": "1",
          "GITHUB_EVENT_NAME": "push", "GITHUB_SHA": "test"},
         clear=True,
     )
-    def test_authentication_headers_LAUNCHABLE_TOKEN_and_GitHub_Actions(self):
+    def test_authentication_headers_SMART_TESTS_TOKEN_and_GitHub_Actions(self):
         header = authentication_headers()
         self.assertEqual(len(header), 1)
         self.assertEqual(

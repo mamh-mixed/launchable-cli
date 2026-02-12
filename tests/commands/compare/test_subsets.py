@@ -3,13 +3,13 @@ from unittest import mock
 
 import responses
 
-from launchable.utils.http_client import get_base_url
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
 class SubsetsTest(CliTestCase):
 
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subsets(self):
         # Create subset-before.txt
         with open("subset-before.txt", "w") as f:
@@ -55,7 +55,7 @@ class SubsetsTest(CliTestCase):
 
         self.assertEqual(result.stdout, expect)
 
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subsets_when_new_tests(self):
         # Create subset-before.txt
         with open("subset-before.txt", "w") as f:
@@ -103,7 +103,7 @@ class SubsetsTest(CliTestCase):
 
         self.assertEqual(result.stdout, expect)
 
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subsets_when_deleted_tests(self):
         # Create subset-before.txt
         with open("subset-before.txt", "w") as f:
@@ -157,7 +157,7 @@ class SubsetsTest(CliTestCase):
         if os.path.exists("subset-after.txt"):
             os.remove("subset-after.txt")
 
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     @responses.activate
     def test_subsets_subset_ids(self):
         responses.add(

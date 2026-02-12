@@ -4,8 +4,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
-# hello smart tests
-from launchable.testpath import FilePathNormalizer, parse_test_path, unparse_test_path
+
+from smart_tests.testpath import FilePathNormalizer, parse_test_path, unparse_test_path
 
 
 class TestPathEncodingTest(unittest.TestCase):
@@ -134,7 +134,3 @@ class TestFilePathNormalizer(unittest.TestCase):
                 })
         except subprocess.CalledProcessError as e:
             self.fail("Failed to execute a command: {}\nSTDOUT: {}\nSTDERR: {}\n".                format(e, e.stdout, e.stderr))
-
-
-if __name__ == '__main__':
-    unittest.main()

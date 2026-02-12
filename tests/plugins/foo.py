@@ -1,15 +1,23 @@
+from typing import Annotated, List
+
 import click
 
-from launchable.test_runners import launchable
+import smart_tests.args4p.typer as typer
+from smart_tests.test_runners import smart_tests
 
 
-@click.argument('reports', required=True, nargs=-1)
-@launchable.record.tests
-def record_tests(client, reports):
+@smart_tests.record.tests
+def record_tests(
+    client,
+    reports: Annotated[List[str], typer.Argument(
+        multiple=True,
+        help="Test report files to process"
+    )],
+):
     for r in reports:
-        click.echo('foo:{}'.format(r))
+        click.echo(f'foo:{r}')
 
 
-@launchable.subset
+@smart_tests.subset
 def subset(client):
     click.echo("Subset!")

@@ -3,7 +3,7 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from launchable.utils.http_client import get_base_url
+from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
 
@@ -13,7 +13,7 @@ class ModelTest(CliTestCase):
     }
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_model(self):
         responses.replace(responses.GET, "{}/intake/organizations/{}/workspaces/{}/model-metadata".format(
             get_base_url(), self.organization, self.workspace), json=self.mock_json, status=200)
@@ -27,7 +27,7 @@ class ModelTest(CliTestCase):
         self.assertEqual(result.stdout, expect)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_model_json_format(self):
         responses.replace(responses.GET, "{}/intake/organizations/{}/workspaces/{}/model-metadata".format(
             get_base_url(), self.organization, self.workspace), json=self.mock_json, status=200)

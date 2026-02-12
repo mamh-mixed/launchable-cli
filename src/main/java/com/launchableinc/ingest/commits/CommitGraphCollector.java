@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -40,7 +41,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
@@ -304,6 +309,9 @@ public class CommitGraphCollector {
    *
    * @param commitSender Commits are written to streams provided by this {@link Supplier}, in the given
    *     chunk size.
+   * @param treeReceiver Receives file names (aka 'tree' in Git speak) that the CLI thinks the server needs,
+   *                     and respond with those that the server actually needs.
+   * @param fileSender   Receives the actual contents of the files that the server needs.
    */
   public void transfer(
     Collection<ObjectId> advertised, IOConsumer<ContentProducer> commitSender, TreeReceiver treeReceiver, IOConsumer<ContentProducer> fileSender, int chunkSize)
@@ -779,5 +787,22 @@ public class CommitGraphCollector {
     public void accept(VirtualFile f) {
       files.add(f);
     }
+  }
+
+  /**
+   * To assist troubleshooting, captue the network response into a local file and then replay.
+   */
+  private InputStream maybeDump(InputStream content, String env) throws IOException {
+    String file = System.getenv(env);
+    if (file==null) {
+      return content;
+    }
+    // write the content to a file for debugging purpose, but still return the content so that the program can continue
+    try (OutputStream out = new FileOutputStream(file)) {
+      IOUtils.copy(content, out);
+    }
+    content.close();
+
+    return new FileInputStream(file);
   }
 }

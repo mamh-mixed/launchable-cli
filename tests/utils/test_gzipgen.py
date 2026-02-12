@@ -1,7 +1,7 @@
 import gzip
 from unittest import TestCase
 
-from launchable.utils.gzipgen import compress
+from smart_tests.utils.gzipgen import compress
 
 
 class GzippenTest(TestCase):
@@ -9,5 +9,4 @@ class GzippenTest(TestCase):
         """Basic sanity test of """
         encoded = b''.join(compress([b'Hello', b' ', b'world']))
         msg = gzip.decompress(encoded)
-        print(msg)
         self.assertEqual(msg, b'Hello world')
