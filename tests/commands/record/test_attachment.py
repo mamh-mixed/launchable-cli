@@ -93,15 +93,15 @@ class AttachmentTest(CliTestCase):
                 responses.POST,
                 "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
                     get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
-                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="nested/debug.log"'})],
+                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="debug.log"'})],
                 status=200)
 
             expect = """
-| File             | Status                           |
-|------------------|----------------------------------|
-| app.log          | ⚠ Failed to record               |
-| nested/debug.log | ✓ Recorded successfully          |
-| binary.dat       | ⚠ Skipped: not a valid text file |
+| File       | Status                           |
+|------------|----------------------------------|
+| app.log    | ⚠ Failed to record               |
+| debug.log  | ✓ Recorded successfully          |
+| binary.dat | ⚠ Skipped: not a valid text file |
 """
 
             result = self.cli("record", "attachment", "--session", self.session, zip_path)
@@ -150,15 +150,15 @@ class AttachmentTest(CliTestCase):
                 responses.POST,
                 "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
                     get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
-                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="nested/debug.log"'})],
+                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="debug.log"'})],
                 status=200)
 
             result = self.cli("record", "attachment", "--session", self.session, "--include", "*.log", zip_path)
 
-            expect = """| File             | Status                  |
-|------------------|-------------------------|
-| app.log          | ✓ Recorded successfully |
-| nested/debug.log | ✓ Recorded successfully |
+            expect = """| File      | Status                  |
+|-----------|-------------------------|
+| app.log   | ✓ Recorded successfully |
+| debug.log | ✓ Recorded successfully |
 """
             self.assertEqual(expect, result.output)
 
@@ -196,7 +196,7 @@ class AttachmentTest(CliTestCase):
                 responses.POST,
                 "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
                     get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
-                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="app.1.log"'})],
+                match=[responses.matchers.header_matcher({"Content-Disposition": 'attachment;filename="nested-app.log"'})],
                 status=200)
 
             result = self.cli("record", "attachment", "--session", self.session, zip_path)
@@ -204,7 +204,7 @@ class AttachmentTest(CliTestCase):
             expect = """| File           | Status                  |
 |----------------|-------------------------|
 | app.log        | ✓ Recorded successfully |
-| nested/app.log | ✓ Recorded successfully |
+| nested-app.log | ✓ Recorded successfully |
 """
             self.assertEqual(expect, result.output)
 
@@ -228,7 +228,7 @@ class AttachmentTest(CliTestCase):
                 "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
                     get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
                 match=[responses.matchers.header_matcher(
-                    {"Content-Disposition": 'attachment;filename="{}"'.format(file_path.replace(' ', '-'))}
+                    {"Content-Disposition": 'attachment;filename="{}"'.format("app-log-file.txt")}
                 )],
                 status=200)
 

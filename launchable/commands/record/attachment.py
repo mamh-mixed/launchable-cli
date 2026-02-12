@@ -67,7 +67,7 @@ def attachment(
                             continue
 
                         file_name = normalize_filename(zip_info.filename)
-                        file_name = get_unique_filename(file_name)
+                        file_name = get_unique_filename(file_name, used_filenames)
                         status = post_attachment(
                             client, session, file_content, file_name)
                         summary_rows.append([file_name, status])
@@ -94,7 +94,7 @@ def attachment(
                             continue
 
                         file_name = normalize_filename(tar_info.name)
-                        file_name = get_unique_filename(file_name)
+                        file_name = get_unique_filename(file_name, used_filenames)
                         status = post_attachment(
                             client, session, file_content, file_name)
                         summary_rows.append([file_name, status])
@@ -109,7 +109,7 @@ def attachment(
                         continue
 
                     file_name = normalize_filename(a)
-                    file_name = get_unique_filename(file_name)
+                    file_name = get_unique_filename(file_name, used_filenames)
                     status = post_attachment(client, session, file_content, file_name)
                     summary_rows.append([file_name, status])
 
@@ -121,25 +121,37 @@ def attachment(
 
 def get_unique_filename(filepath: str, used_filenames: Set[str]) -> str:
     """
-    Get a unique filename by extracting the basename and appending .1, .2, etc. if needed.
-    Format: file.log, file.1.log, file.2.log
-    Adds the final name to used_filenames set.
+    Get a unique filename by extracting the basename and prepending parent folder if needed.
+    Strategy:
+    1. First occurrence: use basename (e.g., app.log)
+    2. Duplicate: prepend parent folder (e.g., nested-app.log)
+    3. Still duplicate: append .1, .2, etc. (e.g., nested-app.1.log)
     """
-    basename = os.path.basename(filepath)
+    filename = os.path.basename(filepath)
 
     # If basename is not used, return it
-    if basename not in used_filenames:
-        used_filenames.add(basename)
-        return basename
+    if filename not in used_filenames:
+        used_filenames.add(filename)
+        return filename
 
-    # Otherwise find the next available numbered version
-    name, ext = os.path.splitext(basename)
+    # Try prepending the parent directory name
+    parent_dir = os.path.basename(os.path.dirname(filepath))
+    if parent_dir:  # Has a parent directory
+        name, ext = os.path.splitext(filename)
+        filename = f"{parent_dir}-{name}{ext}"
+
+        if filename not in used_filenames:
+            used_filenames.add(filename)
+            return filename
+
+    # If still duplicate, append numbers
+    name, ext = os.path.splitext(filename)
     counter = 1
     while True:
-        new_name = f"{name}.{counter}{ext}"
-        if new_name not in used_filenames:
-            used_filenames.add(new_name)
-            return new_name
+        filename = f"{name}.{counter}{ext}"
+        if filename not in used_filenames:
+            used_filenames.add(filename)
+            return filename
         counter += 1
 
 
