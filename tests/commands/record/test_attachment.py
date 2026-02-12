@@ -161,3 +161,32 @@ class AttachmentTest(CliTestCase):
 | nested/debug.log | ✓ Recorded successfully |
 """
             self.assertIn(expect, result.output)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_attachment_with_whitespace_in_filename(self):
+        TEST_CONTENT = b"Test log content"
+
+        # emulate launchable record build & session
+        write_session(self.build_name, self.session_id)
+
+        # Create a file with whitespace in the name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = os.path.join(temp_dir, "app log file.txt")
+            with open(file_path, 'wb') as f:
+                f.write(TEST_CONTENT)
+
+            # Expect the filename with whitespace replaced by dashes in the Content-Disposition header
+            responses.add(
+                responses.POST,
+                "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions/{}/attachment".format(
+                    get_base_url(), self.organization, self.workspace, self.build_name, self.session_id),
+                match=[responses.matchers.header_matcher(
+                    {"Content-Disposition": 'attachment;filename="{}"'.format(file_path.replace(' ', '-'))}
+                )],
+                status=200)
+
+            result = self.cli("record", "attachment", "--session", self.session, file_path)
+
+            self.assert_success(result)
+            self.assertIn("✓ Recorded successfully", result.output)

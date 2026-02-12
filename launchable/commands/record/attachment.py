@@ -63,9 +63,10 @@ def attachment(
                                 [zip_info.filename, AttachmentStatus.SKIPPED_NON_TEXT])
                             continue
 
+                        file_name = normalize_filename(zip_info.filename)
                         status = post_attachment(
-                            client, session, file_content, zip_info.filename)
-                        summary_rows.append([zip_info.filename, status])
+                            client, session, file_content, file_name)
+                        summary_rows.append([file_name, status])
 
             # If tar file (tar, tar.gz, tar.bz2, tgz, etc.)
             elif tarfile.is_tarfile(a):
@@ -88,9 +89,10 @@ def attachment(
                                 [tar_info.name, AttachmentStatus.SKIPPED_NON_TEXT])
                             continue
 
+                        file_name = normalize_filename(tar_info.name)
                         status = post_attachment(
-                            client, session, file_content, tar_info.name)
-                        summary_rows.append([tar_info.name, status])
+                            client, session, file_content, file_name)
+                        summary_rows.append([file_name, status])
 
             else:
                 with open(a, mode='rb') as f:
@@ -101,8 +103,9 @@ def attachment(
                             [a, AttachmentStatus.SKIPPED_NON_TEXT])
                         continue
 
-                    status = post_attachment(client, session, file_content, a)
-                    summary_rows.append([a, status])
+                    file_name = normalize_filename(a)
+                    status = post_attachment(client, session, file_content, file_name)
+                    summary_rows.append([file_name, status])
 
     except Exception as e:
         client.print_exception_and_recover(e)
@@ -123,6 +126,13 @@ def matches_include_patterns(filename: str, include_patterns: Tuple[str, ...]) -
             return True
 
     return False
+
+
+def normalize_filename(filename: str) -> str:
+    """
+    Normalize filename by replacing whitespace with dashes.
+    """
+    return filename.replace(' ', '-')
 
 
 def valid_utf8_file(file_content: bytes) -> bool:
