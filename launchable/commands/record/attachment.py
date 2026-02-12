@@ -1,8 +1,9 @@
 import fnmatch
+import os
 import tarfile
 import zipfile
 from io import BytesIO
-from typing import Optional, Tuple
+from typing import Optional, Set, Tuple
 
 import click
 from tabulate import tabulate
@@ -41,6 +42,8 @@ def attachment(
 ):
     client = LaunchableClient(app=context.obj)
     summary_rows = []
+    used_filenames: Set[str] = set()
+
     try:
         session = require_session(session)
         assert session is not None
@@ -64,6 +67,7 @@ def attachment(
                             continue
 
                         file_name = normalize_filename(zip_info.filename)
+                        file_name = get_unique_filename(file_name)
                         status = post_attachment(
                             client, session, file_content, file_name)
                         summary_rows.append([file_name, status])
@@ -90,6 +94,7 @@ def attachment(
                             continue
 
                         file_name = normalize_filename(tar_info.name)
+                        file_name = get_unique_filename(file_name)
                         status = post_attachment(
                             client, session, file_content, file_name)
                         summary_rows.append([file_name, status])
@@ -104,6 +109,7 @@ def attachment(
                         continue
 
                     file_name = normalize_filename(a)
+                    file_name = get_unique_filename(file_name)
                     status = post_attachment(client, session, file_content, file_name)
                     summary_rows.append([file_name, status])
 
@@ -111,6 +117,30 @@ def attachment(
         client.print_exception_and_recover(e)
 
     display_summary_as_table(summary_rows)
+
+
+def get_unique_filename(filepath: str, used_filenames: Set[str]) -> str:
+    """
+    Get a unique filename by extracting the basename and appending .1, .2, etc. if needed.
+    Format: file.log, file.1.log, file.2.log
+    Adds the final name to used_filenames set.
+    """
+    basename = os.path.basename(filepath)
+
+    # If basename is not used, return it
+    if basename not in used_filenames:
+        used_filenames.add(basename)
+        return basename
+
+    # Otherwise find the next available numbered version
+    name, ext = os.path.splitext(basename)
+    counter = 1
+    while True:
+        new_name = f"{name}.{counter}{ext}"
+        if new_name not in used_filenames:
+            used_filenames.add(new_name)
+            return new_name
+        counter += 1
 
 
 def matches_include_patterns(filename: str, include_patterns: Tuple[str, ...]) -> bool:
