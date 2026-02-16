@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Test Suite" time="1.234" tests="2" failures="0">
+  <testsuite name="Suite 1" timestamp="2025-10-27T01:20:06" tests="2" file="tests/test_example.py" time="1.234" failures="0">
+    <testcase name="test_case_1" time="0.500" classname="TestExample">
+    </testcase>
+    <testcase name="test_case_2" time="0.734" classname="TestExample">
+    </testcase>
+  </testsuite>
+</testsuites>

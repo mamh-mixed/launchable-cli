@@ -169,16 +169,20 @@ class CommonRecordTestImpls:
                          source_roots: Annotated[list[str], typer.Argument(
                              multiple=True,
                              help="Source directories containing test report files"
-                         )]):
+                         )],
+                         file_path_attribute: Annotated[list[str], typer.Option(
+                             "--file-path-attribute",
+                             multiple=True,
+                             help="Attributes to look for file paths in test reports (e.g., name, classname, file, filepath)"
+                         )] = ["file", "filepath"]):
             def path_builder(
                 case: TestCase, suite: TestSuite, report_file: str
             ) -> TestPath:
                 def find_filename():
                     """look for what looks like file names from test reports"""
                     for e in [case, suite]:
-                        for a in ["file", "filepath"]:
-                            filepath = e._elem.attrib.get(a)
-                            if filepath:
+                        for a in file_path_attribute:
+                            if filepath := e._elem.attrib.get(a):
                                 return filepath
                     return None  # failing to find a test name
 
@@ -188,9 +192,9 @@ class CommonRecordTestImpls:
 
                 # default test path in `subset` expects to have this file name
                 test_path = [client.make_file_path_component(filepath)]
-                if suite.name:
+                if suite.name and suite.name != filepath:
                     test_path.append({"type": "testsuite", "name": suite.name})
-                if case.name:
+                if case.name and case.name != filepath:
                     test_path.append({"type": "testcase", "name": case.name})
                 return test_path
 
