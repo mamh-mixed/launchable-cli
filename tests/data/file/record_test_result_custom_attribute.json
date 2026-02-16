@@ -23,7 +23,7 @@
       "testPath": [
         {
           "type": "file",
-          "name": "tests/test_custom.py"
+          "name": "tests/test_custom2.py"
         },
         {
           "type": "testsuite",
