@@ -41,3 +41,4 @@
 	releaseBranch = v1
 	versionFile = -
 	changelog = false
+	fixedMajorVersion = v1
