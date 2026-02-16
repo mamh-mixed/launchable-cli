@@ -38,7 +38,7 @@ from . import launchable
 #
 
 
-def _ts_to_iso(ts: Optional[float]) -> Optional[str]:
+def _timestamp_to_iso(ts: Optional[float]) -> Optional[str]:
     # convert to ISO-8601 formatted date
     if ts is None:
         return None
@@ -336,22 +336,22 @@ class PytestJSONReportParser:
                         props = None
 
                 # extract raw timestamps
-                start_ts = data.get("start")
-                stop_ts = data.get("stop")
+                start_timestamp = data.get("start")
+                stop_timestamp = data.get("stop")
 
                 # convert to ISO-8601
-                start_iso = _ts_to_iso(start_ts)
-                stop_iso = _ts_to_iso(stop_ts)
+                start_timestamp_iso_format = _timestamp_to_iso(start_timestamp)
+                end_timestamp_iso_format = _timestamp_to_iso(stop_timestamp)
 
                 print(
-                    f"DEBUG pytest timing start={start_iso}, stop={stop_iso}"
+                    f"DEBUG pytest timing start={start_timestamp_iso_format}, stop={end_timestamp_iso_format}"
                 )
 
                 event_data = {}
-                if start_iso:
-                    event_data["start_timestamp"] = start_iso
-                if stop_iso:
-                    event_data["stop_timestamp"] = stop_iso
+                if start_timestamp_iso_format:
+                    event_data["start_timestamp"] = start_timestamp_iso_format
+                if end_timestamp_iso_format:
+                    event_data["stop_timestamp"] = end_timestamp_iso_format
 
                 test_path = _parse_pytest_nodeid(nodeid)
                 for path in test_path:
@@ -360,7 +360,8 @@ class PytestJSONReportParser:
 
                 data_payload = event_data if event_data else None
 
-                # stop_iso is being passed as timestamp as it reflects event finalization (start + duration = stop)
+                # end_timestamp_iso_format is being passed as timestamp as it reflects event finalization
+                # start + duration = stop
                 # sending both start and stop time in the event data field
                 yield CaseEvent.create(
                     test_path=test_path,
@@ -368,5 +369,5 @@ class PytestJSONReportParser:
                     status=status,
                     stdout=stdout,
                     stderr=stderr,
-                    timestamp=stop_iso,
+                    timestamp=end_timestamp_iso_format,
                     data=data_payload)
