@@ -30,9 +30,23 @@ class SessionId:
         '''This is the method in which we parse the user input, so be defensive'''
         if id.startswith('@'):
             file_path = id[1:]
+            # Earlier versions of PowerShell write Unicode BOM when redirecting output to a file.
+            # https://github.com/PowerShell/PowerShell/issues/8592
+            # Since we tell people to redirect `record session` output to a file, here we can
+            # encounter such files. Here's the scheme to cope with this.
+            #
+            # First we try utf-8-sig, which handles UTF-8 BOM correctly.
+            # our session ID only uses ASCII chars, so unless the writer used non ascii compatible encoding
+            # (e.g., EBCDIC but those are very very unlikely), this will read the file correctly.
+            # If the writer used UTF-16 (e.g., legacy PowerShell on Windows), we'll get a decode error, and
+            # then we try UTF-16, which handles BOM correctly.
             try:
-                with open(file_path, 'r') as f:
-                    id = f.read().strip()
+                try:
+                    with open(file_path, 'r', encoding='utf-8-sig') as f:
+                        id = f.read().strip()
+                except UnicodeDecodeError:
+                    with open(file_path, 'r', encoding='utf-16') as f:
+                        id = f.read().strip()
             except FileNotFoundError:
                 raise BadCmdLineException(f"Session file '{file_path}' not found.")
             except IOError as e:
