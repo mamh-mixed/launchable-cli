@@ -1,0 +1,53 @@
+{
+  "events": [
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "tests/test_example.py"
+        },
+        {
+          "type": "testsuite",
+          "name": "Suite 1"
+        },
+        {
+          "type": "testcase",
+          "name": "test_case_1"
+        }
+      ],
+      "duration": 0.5,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "tests/test_example.py"
+        },
+        {
+          "type": "testsuite",
+          "name": "Suite 1"
+        },
+        {
+          "type": "testcase",
+          "name": "test_case_2"
+        }
+      ],
+      "duration": 0.734,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": null
+    }
+  ],
+  "testRunner": "file",
+  "group": "",
+  "noBuild": false,
+  "flavors": [],
+  "testSuite": ""
+}
