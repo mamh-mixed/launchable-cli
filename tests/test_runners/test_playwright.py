@@ -64,3 +64,19 @@ class PlaywrightTest(CliTestCase):
                  'playwright', '--json', str(self.test_files_dir.joinpath("report.json")))
         json_payload = json.loads(gzip.decompress(self.find_request('/events', 1).request.body).decode())
         self.assertEqual(_test_test_path_status(json_payload, target_test_path, CaseEvent.TEST_FAILED), True)
+
+    @responses.activate
+    @mock.patch.dict(os.environ,
+                     {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_record_test_with_json_option_adds_prefix_from_config(self):
+        report_file = str(self.test_files_dir.joinpath("report_with_prefix.json"))
+
+        result = self.cli('record', 'tests', '--session', self.session,
+                          'playwright', '--json', report_file)
+
+        self.assert_success(result)
+
+        payload = json.loads(gzip.decompress(self.find_request('/events').request.body).decode())
+        test_paths = [unparse_test_path(event.get("testPath")) for event in payload.get("events")]
+        self.assertIn("file=packages/e2e/tests/a.spec.ts#testcase=smoke › passes", test_paths)
+        self.assertIn("file=packages/e2e/tests/b.spec.ts#testcase=smoke › already prefixed", test_paths)

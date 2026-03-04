@@ -3,7 +3,9 @@
 # https://playwright.dev/
 #
 import json
+import os
 from typing import Dict, Generator, List
+from pathlib import Path
 
 import click
 from junitparser import TestCase, TestSuite  # type: ignore
@@ -173,12 +175,53 @@ class JSONReportParser:
             click.echo("Can't find test results from {}. Make sure to confirm report file.".format(
                 report_file), err=True)
 
+        test_prefix = self._compute_test_prefix(data)
         for s in suites:
             # The title of the root suite object contains the file name.
-            test_file = str(s.get("title", ""))
+            test_file = self._resolve_test_file(str(s.get("title", "")), test_prefix)
 
             for event in self._parse_suites(test_file, s, []):
                 yield event
+
+    def _compute_test_prefix(self, report: Dict) -> str:
+        """
+        Playwright JSON stores test `file` paths relative to `config.rootDir`.
+        Our CLI wants paths relative to the Playwright config directory
+        (usually the project/repo root), so we compute:
+            relpath(root_dir, base_dir)
+        where base_dir = dirname(configFile).
+
+        Example:
+            configFile = /repo/playwright.config.ts
+            rootDir    = /repo/tests
+            relpath(...) -> "tests"
+        """
+        config: Dict = report.get("config", {})
+        config_file = str(config.get("configFile", ""))
+        root_dir = str(config.get("rootDir", ""))
+        if not config_file or not root_dir:
+            return ""
+
+        base_dir = Path(config_file).parent
+        try:
+            test_prefix = Path(root_dir).relative_to(base_dir).as_posix()
+        except ValueError:
+            return ""
+
+        if test_prefix == ".":
+            return ""
+
+        return test_prefix
+
+    def _resolve_test_file(self, test_file: str, test_prefix: str) -> str:
+        if not test_prefix or not test_file:
+            return test_file
+
+        # Guard against duplicate paths when report data is already prefixed.
+        if test_file.startswith(test_prefix):
+            return test_file
+
+        return Path(test_prefix, test_file).as_posix()
 
     def _parse_suites(self, test_file: str, suite: Dict[str, Dict], test_case_names: List[str] = []) -> List:
         events = []
