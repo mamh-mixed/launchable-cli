@@ -10,7 +10,7 @@ import click
 from junitparser import TestCase, TestSuite  # type: ignore
 
 from ..commands.record.case_event import CaseEvent
-from ..testpath import TestPath
+from ..testpath import TestPath, prepend_path_if_missing, relative_subpath
 from . import launchable
 
 TEST_CASE_DELIMITER = " › "
@@ -177,7 +177,7 @@ class JSONReportParser:
         root_dir_relpath = self._compute_root_dir_relpath(data)
         for s in suites:
             # The title of the root suite object contains the file name.
-            test_file = self._resolve_test_file(str(s.get("title", "")), root_dir_relpath)
+            test_file = prepend_path_if_missing(str(s.get("title", "")), root_dir_relpath)
 
             for event in self._parse_suites(test_file, s, []):
                 yield event
@@ -201,26 +201,7 @@ class JSONReportParser:
         if not config_file or not root_dir:
             return ""
 
-        base_dir = Path(config_file).parent
-        try:
-            root_dir_relpath = Path(root_dir).relative_to(base_dir).as_posix()
-        except ValueError:
-            return ""
-
-        if root_dir_relpath == ".":
-            return ""
-
-        return root_dir_relpath
-
-    def _resolve_test_file(self, test_file: str, root_dir_relpath: str) -> str:
-        if not root_dir_relpath or not test_file:
-            return test_file
-
-        # Guard against duplicate paths when report data is already prefixed.
-        if test_file.startswith(root_dir_relpath):
-            return test_file
-
-        return Path(root_dir_relpath, test_file).as_posix()
+        return relative_subpath(root_dir, str(Path(config_file).parent))
 
     def _parse_suites(self, test_file: str, suite: Dict[str, Dict], test_case_names: List[str] = []) -> List:
         events = []
