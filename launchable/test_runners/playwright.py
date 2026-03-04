@@ -174,15 +174,15 @@ class JSONReportParser:
             click.echo("Can't find test results from {}. Make sure to confirm report file.".format(
                 report_file), err=True)
 
-        test_prefix = self._compute_test_prefix(data)
+        root_dir_relpath = self._compute_root_dir_relpath(data)
         for s in suites:
             # The title of the root suite object contains the file name.
-            test_file = self._resolve_test_file(str(s.get("title", "")), test_prefix)
+            test_file = self._resolve_test_file(str(s.get("title", "")), root_dir_relpath)
 
             for event in self._parse_suites(test_file, s, []):
                 yield event
 
-    def _compute_test_prefix(self, report: Dict) -> str:
+    def _compute_root_dir_relpath(self, report: Dict) -> str:
         """
         Playwright JSON stores test `file` paths relative to `config.rootDir`.
         Our CLI wants paths relative to the Playwright config directory
@@ -203,24 +203,24 @@ class JSONReportParser:
 
         base_dir = Path(config_file).parent
         try:
-            test_prefix = Path(root_dir).relative_to(base_dir).as_posix()
+            root_dir_relpath = Path(root_dir).relative_to(base_dir).as_posix()
         except ValueError:
             return ""
 
-        if test_prefix == ".":
+        if root_dir_relpath == ".":
             return ""
 
-        return test_prefix
+        return root_dir_relpath
 
-    def _resolve_test_file(self, test_file: str, test_prefix: str) -> str:
-        if not test_prefix or not test_file:
+    def _resolve_test_file(self, test_file: str, root_dir_relpath: str) -> str:
+        if not root_dir_relpath or not test_file:
             return test_file
 
         # Guard against duplicate paths when report data is already prefixed.
-        if test_file.startswith(test_prefix):
+        if test_file.startswith(root_dir_relpath):
             return test_file
 
-        return Path(test_prefix, test_file).as_posix()
+        return Path(root_dir_relpath, test_file).as_posix()
 
     def _parse_suites(self, test_file: str, suite: Dict[str, Dict], test_case_names: List[str] = []) -> List:
         events = []
