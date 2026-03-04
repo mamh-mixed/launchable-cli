@@ -3,9 +3,8 @@
 # https://playwright.dev/
 #
 import json
-import os
-from typing import Dict, Generator, List
 from pathlib import Path
+from typing import Dict, Generator, List
 
 import click
 from junitparser import TestCase, TestSuite  # type: ignore
