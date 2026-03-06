@@ -1,4 +1,5 @@
-# Git files
-.git
+# Git files exclude config
+# Don't exclude entire .git because setuptools-scm need git metadata for package builds
+.git/config
 .gitignore
 .gitattributes
