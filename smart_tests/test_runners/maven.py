@@ -169,12 +169,15 @@ def record_tests(
     )],
 ):
     client.path_builder = junit5_nested_class_path_builder(client.path_builder)
+
+    # Override report method to filter out non-JUnit report files
     original_report = client.report
+
     IGNORED_FILES = {'failsafe-summary.xml', 'testng-results.xml'}
 
     def report_with_filter(junit_report_file: str):
         if not any(junit_report_file.endswith(f) for f in IGNORED_FILES):
             original_report(junit_report_file)
 
-    client.report = report_with_filter
+    client.report = report_with_filter  # type: ignore[method-assign]
     smart_tests.CommonRecordTestImpls.load_report_files(client=client, source_roots=reports)

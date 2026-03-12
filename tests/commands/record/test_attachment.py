@@ -7,7 +7,6 @@ from unittest import mock
 
 import responses  # type: ignore
 
-from build.lib.smart_tests.utils.session import write_session
 from smart_tests.utils.http_client import get_base_url
 from tests.cli_test_case import CliTestCase
 
@@ -161,7 +160,7 @@ class AttachmentTest(CliTestCase):
             self.assertEqual(expect, result.output)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_attachment_with_identical_file_names(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create temporary files
@@ -216,12 +215,9 @@ class AttachmentTest(CliTestCase):
             self.assertEqual(expect, result.output)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_attachment_with_whitespace_in_filename(self):
         TEST_CONTENT = b"Test log content"
-
-        # emulate launchable record build & session
-        write_session(self.build_name, self.session_id)
 
         # Create a file with whitespace in the name
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -245,7 +241,7 @@ class AttachmentTest(CliTestCase):
             self.assertIn("✓ Recorded successfully", result.output)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_attachment_duplicate_file_paths(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create temporary files

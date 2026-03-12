@@ -53,7 +53,7 @@ def attachment(
                         if zip_info.is_dir():
                             continue
 
-                        if not matches_include_patterns(zip_info.filename, include_patterns):
+                        if not matches_include_patterns(zip_info.filename, tuple(include_patterns)):
                             continue
 
                         file_content = zip_file.read(zip_info.filename)
@@ -80,7 +80,7 @@ def attachment(
                         if tar_info.isdir():
                             continue
 
-                        if not matches_include_patterns(tar_info.name, include_patterns):
+                        if not matches_include_patterns(tar_info.name, tuple(include_patterns)):
                             continue
 
                         file_obj = tar_file.extractfile(tar_info)
