@@ -1,25 +1,26 @@
 import fnmatch
+import os
 import tarfile
 import zipfile
 from io import BytesIO
-from typing import Annotated, List, Tuple
+from typing import Annotated, List, Optional, Set, Tuple
 
 import click
+from tabulate import tabulate
 
 import smart_tests.args4p.typer as typer
 from smart_tests.utils.session import SessionId, get_session
 
 from ... import args4p
 from ...app import Application
-from ...utils.fail_fast_mode import warn_and_exit_if_fail_fast_mode
 from ...utils.smart_tests_client import SmartTestsClient
-from tabulate import tabulate
 
 
 class AttachmentStatus:
     SUCCESS = "✓ Recorded successfully"
     FAILED = "⚠ Failed to record"
     SKIPPED_NON_TEXT = "⚠ Skipped: not a valid text file"
+    SKIPPED_DUPLICATE = "⚠ Skipped: duplicate"
 
 
 @args4p.command(help="Record attachment information")
@@ -39,6 +40,8 @@ def attachment(
 ):
     client = SmartTestsClient(app=app)
     summary_rows = []
+    used_filenames: Set[str] = set()
+
     try:
         # Note: Call get_session method to check test session exists
         _ = get_session(session, client)
@@ -60,9 +63,15 @@ def attachment(
                                 [zip_info.filename, AttachmentStatus.SKIPPED_NON_TEXT])
                             continue
 
+                        file_name = get_unique_filename(zip_info.filename, used_filenames)
+                        if not file_name:
+                            summary_rows.append(
+                                [zip_info.filename, AttachmentStatus.SKIPPED_DUPLICATE])
+                            continue
+
                         status = post_attachment(
-                            client, session, file_content, zip_info.filename)
-                        summary_rows.append([zip_info.filename, status])
+                            client, session, file_content, file_name)
+                        summary_rows.append([file_name, status])
 
             # If tar file (tar, tar.gz, tar.bz2, tgz, etc.)
             elif tarfile.is_tarfile(a):
@@ -85,9 +94,15 @@ def attachment(
                                 [tar_info.name, AttachmentStatus.SKIPPED_NON_TEXT])
                             continue
 
+                        file_name = get_unique_filename(tar_info.name, used_filenames)
+                        if not file_name:
+                            summary_rows.append(
+                                [tar_info.name, AttachmentStatus.SKIPPED_DUPLICATE])
+                            continue
+
                         status = post_attachment(
-                            client, session, file_content, tar_info.name)
-                        summary_rows.append([tar_info.name, status])
+                            client, session, file_content, file_name)
+                        summary_rows.append([file_name, status])
 
             else:
                 with open(a, mode='rb') as f:
@@ -98,15 +113,55 @@ def attachment(
                             [a, AttachmentStatus.SKIPPED_NON_TEXT])
                         continue
 
-                    status = post_attachment(client, session, file_content, a)
-                    summary_rows.append([a, status])
+                    file_name = get_unique_filename(a, used_filenames)
+                    if not file_name:
+                        summary_rows.append(
+                            [a, AttachmentStatus.SKIPPED_DUPLICATE])
+                        continue
+
+                    status = post_attachment(client, session, file_content, file_name)
+                    summary_rows.append([file_name, status])
+
     except Exception as e:
         client.print_exception_and_recover(e)
 
     display_summary_as_table(summary_rows)
 
 
-def matches_include_patterns(filename: str, include_patterns: List[str]) -> bool:
+def get_unique_filename(filepath: str, used_filenames: Set[str]) -> Optional[str]:
+    """
+    Get a unique filename by extracting the basename and prepending parent folders if needed.
+    Strategy:
+    1. First occurrence: use basename (e.g., app.log)
+    2. Duplicate: prepend parent directories until unique
+    """
+    # Normalize path separators to forward slash (archives always use forward slash in both linux, and windows)
+    normalized_path = filepath.replace(os.sep, '/')
+    normalized_path = normalize_filename(normalized_path)
+
+    basename = normalized_path.split('/')[-1]
+
+    # If basename is not used, return it
+    if basename not in used_filenames:
+        used_filenames.add(basename)
+        return basename
+
+    # Try prepending parents from nearest to farthest
+    path_parts = normalized_path.split('/')
+    parent_parts = [p for p in path_parts[:-1] if p]
+
+    prefixed_name = basename
+    for parent in reversed(parent_parts):
+        prefixed_name = f"{parent}/{prefixed_name}"
+
+        if prefixed_name not in used_filenames:
+            used_filenames.add(prefixed_name)
+            return prefixed_name
+
+    return None
+
+
+def matches_include_patterns(filename: str, include_patterns: Tuple[str, ...]) -> bool:
     """
     Check if a file should be included based on the include patterns.
     If no patterns are specified, all files are included.
@@ -119,6 +174,13 @@ def matches_include_patterns(filename: str, include_patterns: List[str]) -> bool
             return True
 
     return False
+
+
+def normalize_filename(filename: str) -> str:
+    """
+    Normalize filename by replacing whitespace with dashes.
+    """
+    return filename.replace(' ', '-')
 
 
 def valid_utf8_file(file_content: bytes) -> bool:

@@ -1,18 +1,18 @@
 import glob
 import os
 import re
-from typing import Annotated
-from typing import Dict, List, Tuple
+from typing import Annotated, Dict, List
 
 import click
 
 import smart_tests.args4p.typer as typer
 from smart_tests.utils import glob as uglob
 from smart_tests.utils.java import junit5_nested_class_path_builder
-from . import smart_tests
+
 from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.tests import RecordTests
 from ..commands.subset import Subset
+from . import smart_tests
 
 # Surefire has the default inclusion pattern
 # https://maven.apache.org/surefire/maven-surefire-plugin/test-mojo.html#includes
@@ -169,4 +169,12 @@ def record_tests(
     )],
 ):
     client.path_builder = junit5_nested_class_path_builder(client.path_builder)
+    original_report = client.report
+    IGNORED_FILES = {'failsafe-summary.xml', 'testng-results.xml'}
+
+    def report_with_filter(junit_report_file: str):
+        if not any(junit_report_file.endswith(f) for f in IGNORED_FILES):
+            original_report(junit_report_file)
+
+    client.report = report_with_filter
     smart_tests.CommonRecordTestImpls.load_report_files(client=client, source_roots=reports)
