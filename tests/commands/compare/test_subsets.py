@@ -214,3 +214,136 @@ class SubsetsTest(CliTestCase):
         ]:
             for cell in expected_row:
                 self.assertIn(cell, output)
+
+    def test_wrap_data(self):
+        """Test that wrap_data breaks paths at separators."""
+        from smart_tests.commands.compare.subsets import wrap_data
+
+        # Short path - no wrapping needed
+        short = "Changed file: aaa.py"
+        self.assertEqual(wrap_data(short, width=30), short)
+
+        # Empty string
+        self.assertEqual(wrap_data("", width=30), "")
+
+        # Long path - should wrap at /
+        long_path = "Changed file: src/mongo/db/telemetry/telemetry_thread_base.cpp"
+        wrapped = wrap_data(long_path, width=30)
+
+        # Verify it contains newlines
+        self.assertIn("\n", wrapped)
+
+        # Verify no unwanted spaces around path separators
+        self.assertNotIn(" /", wrapped)
+
+        # Verify content is preserved (just reformatted)
+        unwrapped = wrapped.replace("\n", "")
+        self.assertEqual(unwrapped, long_path)
+
+        # Windows path test
+        windows_path = "Changed file: C:\\Users\\test\\very\\long\\windows\\path\\file.cpp"
+        wrapped_win = wrap_data(windows_path, width=30)
+        self.assertIn("\n", wrapped_win)
+        self.assertNotIn(" \\", wrapped_win)
+
+        # Verify content preservation
+        self.assertEqual(wrapped_win.replace("\n", ""), windows_path)
+
+    def test_get_column_width(self):
+        """Test that get_column_width() calculates widths based on terminal size."""
+        from smart_tests.commands.compare.subsets import get_column_width
+
+        # Test with a wide terminal (e.g., 160 columns)
+        # Available width = 160 - 36 (fixed columns) = 124
+        # Per column = 124 / 2 = 62
+        with mock.patch("shutil.get_terminal_size") as mock_terminal:
+            mock_terminal.return_value = os.terminal_size((160, 24))
+            width = get_column_width()
+            self.assertEqual(width, 62)
+
+        # Test with standard terminal (80 columns)
+        # Available width = 80 - 36 = 44
+        # Per column = 44 / 2 = 22, but minimum is 30
+        with mock.patch("shutil.get_terminal_size") as mock_terminal:
+            mock_terminal.return_value = os.terminal_size((80, 24))
+            width = get_column_width()
+            self.assertEqual(width, 30)  # Should hit minimum
+
+        # Test with narrow terminal (60 columns)
+        # Should still return minimum of 30
+        with mock.patch("shutil.get_terminal_size") as mock_terminal:
+            mock_terminal.return_value = os.terminal_size((60, 24))
+            width = get_column_width()
+            self.assertEqual(width, 30)  # Should hit minimum
+
+        # Test with very wide terminal (200 columns)
+        # Available width = 200 - 36 = 164
+        # Per column = 164 / 2 = 82
+        with mock.patch("shutil.get_terminal_size") as mock_terminal:
+            mock_terminal.return_value = os.terminal_size((200, 24))
+            width = get_column_width()
+            self.assertEqual(width, 82)
+
+        # Test fallback when get_terminal_size raises exception
+        with mock.patch("shutil.get_terminal_size") as mock_terminal:
+            mock_terminal.side_effect = Exception("Terminal size unavailable")
+            width = get_column_width()
+            self.assertEqual(width, 30)  # Should fall back to default
+
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    @responses.activate
+    def test_subsets_with_long_paths_wrapped(self):
+        """Test that long file paths in Reason column are wrapped properly."""
+        long_path1 = "src/mongo/db/telemetry/telemetry_thread_base.cpp"
+        long_path2 = "jstests/concurrency/fsm_workloads/timeseries/timeseries_raw_data_operations.js"
+
+        responses.add(
+            responses.GET,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset/200",
+            json={
+                "subsetting": {"id": 200},
+                "testPaths": [
+                    {"testPath": [{"type": "file", "name": long_path1}],
+                     "duration": 10, "density": 0.9,
+                     "reason": f"Changed file: {long_path1}"}
+                ],
+                "rest": []
+            },
+            status=200
+        )
+
+        responses.add(
+            responses.GET,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset/201",
+            json={
+                "subsetting": {"id": 201},
+                "testPaths": [
+                    {"testPath": [{"type": "file", "name": long_path2}],
+                     "duration": 10, "density": 0.85,
+                     "reason": f"Changed file: {long_path2}"}
+                ],
+                "rest": []
+            },
+            status=200
+        )
+
+        result = self.cli('compare', 'subsets',
+                          '--subset-id-before', '200',
+                          '--subset-id-after', '201',
+                          mix_stderr=False)
+
+        self.assert_success(result)
+
+        # Verify output contains the summary
+        self.assertIn("PTS subset change summary:", result.stdout)
+        self.assertIn("Changed file:", result.stdout)
+
+        # Verify the long paths are present (even if wrapped)
+        self.assertIn("telemetry_thread_base.cpp", result.stdout)
+        self.assertIn("timeseries_raw_data_operations.js", result.stdout)
+
+        # Verify no line has excessive length (wrapped properly)
+        for line in result.stdout.split('\n'):
+            # Allow some buffer for separator lines
+            if line.strip() and not line.startswith('─'):
+                self.assertLessEqual(len(line), 150)

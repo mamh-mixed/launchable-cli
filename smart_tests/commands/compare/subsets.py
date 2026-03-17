@@ -1,3 +1,6 @@
+import re
+import shutil
+import textwrap
 from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
@@ -192,11 +195,52 @@ def _from_subset_ids(client: SmartTestsClient, subset_id_before: int, subset_id_
 
     # Display results in a tabular format
     headers = ["Δ Rank", "Subset Rank", "Test Name", "Reason", "Density"]
+    column_width = get_column_width()
     tabular_data = [
-        (rank, after, test_name, reason, density)
+        (rank, after, wrap_data(test_name, width=column_width), wrap_data(reason, width=column_width), density)
         for rank, after, test_name, reason, density in rows
     ]
     click.echo_via_pager(summary + "\n" + tabulate(tabular_data, headers=headers, tablefmt="simple"))
+
+
+def wrap_data(data: str, width: int = 30) -> str:
+
+    if not data:
+        return data
+
+    # Add space after / and \ to allow wrapping at these points
+    formatted_data = re.sub(r'([/\\])', r'\1 ', data)
+    wrapped = textwrap.fill(formatted_data, width=width)
+    # Remove the added spaces
+    wrapped = wrapped.replace("/ ", "/").replace("\\ ", "\\")
+    return wrapped
+
+
+def get_column_width() -> int:
+
+    try:
+        # Get terminal size, fallback to 80x24 if not detectable
+        terminal_size = shutil.get_terminal_size(fallback=(80, 24))
+        terminal_width = terminal_size.columns
+
+        # Estimate space needed for fixed columns and table formatting:
+        # - "Δ Rank" column: ~10 chars
+        # - "Subset Rank" column: ~12 chars
+        # - "Density" column: ~8 chars
+        # - Table separators and padding: ~6 chars
+        fixed_width = 36
+
+        # Calculate available width for the two wrappable columns
+        available_width = terminal_width - fixed_width
+
+        # Split equally between Test Name and Reason columns
+        column_width = available_width // 2
+
+        # Ensure minimum width of 30 characters
+        return max(30, column_width)
+    except Exception:
+        # If anything goes wrong, fall back to default
+        return 30
 
 
 def _from_files(file_before: Path, file_after: Path):
