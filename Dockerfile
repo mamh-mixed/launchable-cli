@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-slim AS builder
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -13,15 +13,21 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 WORKDIR /src
 COPY . .
 
-# Install dependencies and build the package using uv
-# This works with normal Git repositories (non-worktree)
-RUN uv sync --frozen --no-dev
+# Build wheel for distribution (standard Python package)
+RUN uv build --wheel --out-dir /wheels
 
+FROM python:3.13-slim
+
+# Install runtime dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends openjdk-21-jre-headless git && \
     rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m smart-tests && chown -R smart-tests:smart-tests /src
+# Install wheel system-wide to /usr/local/bin
+RUN --mount=type=bind,from=builder,source=/wheels,target=/wheels \
+    pip install --no-cache-dir /wheels/*.whl
+
+RUN useradd --system --no-create-home smart-tests
 USER smart-tests
 
 ENTRYPOINT ["smart-tests"]
