@@ -1,3 +1,5 @@
+This is a CLI to interact with CloudBees Smart Tests.
+
 # Usage
 
 See https://help.launchableinc.com/resources/cli-reference/ and
@@ -88,6 +90,13 @@ uv add some-package
 # Add development dependency
 uv add --dev some-dev-package
 ```
+
+## Adding new command
+`smart_tests/args4p` defines a small command line argument parsing framework for this CLI. See its README.md for
+the capabilities.
+
+`smart_tests/__main__.py` defines the top level commands. Follow the code from there to see where sub-commands
+are registered.
 
 ## Updating Python Version
 
