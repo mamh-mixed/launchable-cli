@@ -145,3 +145,6 @@ bazel-*
 
 .DS_Store
 .idea/*
+
+# Docs bundled from docsite repo at build time; populated by `uv build` or `smart-tests get docs` in dev
+smart_tests/docs/

@@ -61,6 +61,6 @@ build-backend = "setuptools.build_meta"
 packages = ["smart_tests"]
 
 [tool.setuptools.package-data]
-smart_tests = ["jar/exe_deploy.jar"]
+smart_tests = ["jar/exe_deploy.jar", "docs/**/*"]
 
 [tool.setuptools_scm]
