@@ -115,6 +115,21 @@ When updating the Python version requirement, update the following files:
 Create new release on Github, then Github Actions automatically uploads the
 module to PyPI.
 
+## How to update bundled documentation
+
+The product documentation lives in `smart_tests/docs/` and is bundled into the
+distributed package. To pull in the latest from the docsite repository:
+
+```shell
+uv run poe update-docs
+```
+
+Users can extract the bundled docs to the current directory with:
+
+```shell
+smart-tests get docs
+```
+
 ## How to update smart_tests/jar/exe_deploy.jar
 
 ```
