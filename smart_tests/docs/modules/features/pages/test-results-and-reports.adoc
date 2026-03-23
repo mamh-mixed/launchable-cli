@@ -1,0 +1,24 @@
+= Test Reports
+:slug: test-results-and-reports
+
+You can view test reports in the {PRODUCT} web app as soon as you start sending test results
+ to {PRODUCT} using the {PRODUCT} CLI. {PRODUCT} provides a richer view of test results, helping developers triage and quickly fix failures.
+
+image::ROOT:test-session-details-with-content.png[]
+
+For quick access to test results, the {PRODUCT} CLI prints out a link to this page every time you record test results:
+
+image::ROOT:link-to-results-example.png[]
+
+In addition, the *Test Sessions* page shows all of your sessions in one place for easy navigation. No more digging around build logs:
+
+image::ROOT:test-sessions-layout.png[]
+
+== Test Status
+
+{PRODUCT} defines the following statuses. For example, let's say 100 tests were run, 10 failed, and 3 of them flaked. This means 90 tests passed, but 3 of them passed after a number of retries, and 10 tests kept failing throughout.
+
+* Success: A test that passed.
+* Failure: A test that failed in all executions.
+* Flake: A test failure that eventually succeeded after a number of retries within the same test session.
+* Skip: A test that was skipped.

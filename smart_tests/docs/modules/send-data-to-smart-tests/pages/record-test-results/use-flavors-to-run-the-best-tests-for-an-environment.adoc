@@ -1,0 +1,78 @@
+:slug: use-flavors-to-run-the-best-tests-for-an-environment
+= Use 'flavors' to run the best tests for an environment
+
+Capturing test reports and selecting tests to run in multiple environments (for example, browser tests, mobile tests, etc.)
+
+[NOTE]
+--
+This page relates to xref:send-data-to-smart-tests:record-test-results/record-test-results.adoc[Record test results with {PRODUCT}].
+--
+
+Lots of teams run the same tests across several different environments. For example, a UI test suite might be run in several browsers in parallel. Or perhaps you need to build a slightly different version of a mobile app for different locales and need to run the same tests across all of them.
+
+In these scenarios, a test result is not just a test result: it is the combination of the test _and_ the environment that it was run in. A test might pass in one environment but fail in another.
+
+{PRODUCT} supports these scenarios with a concept called *flavors* .
+
+.Flavors
+image::ROOT:flavors.png[Flavors,role="screenshot"]
+
+When submitting test results using `smart-tests record tests`, additional metadata in the form of key-value pairs using the `--flavor` option can also be submitted.
+
+For example:
+
+[source,role="default-expanded"]
+----
+# run tests in Chrome and report results
+cypress run --reporter junit --reporter-options "mochaFile=report/test-output-chrome.xml"
+
+smart-tests record tests cypress --build [BUILD NAME] --session [SESSION NAME] --flavor browser=chrome report/test-output-chrome.xml
+
+# run tests in Firefox and report results
+cypress run --reporter junit --reporter-options "mochaFile=report/test-output-firefox.xml"
+
+smart-tests record tests cypress --build [BUILD NAME] --session [SESSION NAME] --flavor browser=firefox report/test-output-firefox.xml
+----
+
+And so on. (You can submit multiple key-value pairs, too: `--flavor key=value --flavor key2=value2` )
+
+Later, when you want to request a subset of tests, include the same key-value pairs to get a subset of tests specifically selected for that flavor.
+
+For example:
+
+[source,role="default-expanded"]
+----
+# get a subset for Chrome, run it, then report results
+find ./cypress/integration | smart-tests subset cypress --build [BUILD NAME] --session [SESSION NAME] --confidence 90% --flavor browser=chrome > subset-chrome.txt
+
+cypress run --spec "$(cat subset-chrome.txt)" --reporter junit --reporter-options "mochaFile=report/test-output-chrome.xml"
+
+smart-tests record tests cypress --build [BUILD NAME] --session [SESSION NAME] --flavor browser=chrome report/test-output-chrome.xml
+
+# get a subset for Firefox, run it, then report results
+find ./cypress/integration | smart-tests subset --build [BUILD NAME] --session [SESSION NAME] --confidence 90% --flavor browser=firefox cypress > subset-firefox.txt
+
+cypress run --spec "$(cat subset-firefox.txt)" --reporter junit --reporter-options "mochaFile=report/test-output-firefox.xml"
+
+smart-tests record tests cypress --build [BUILD NAME] --session [SESSION NAME] --flavor browser=firefox report/test-output-firefox.xml
+----
+
+This feature lets you select the right tests to run based on the changes being tested _and_ the environment they are being run in.
+
+[NOTE]
+--
+If your workflow involves creating a session externally using `smart-tests record session` , you should set `--flavor` in that command. Using `smart-tests subset` or `smart-tests record tests` will be ignored.
+--
+
+For example:
+
+[source,role="default-expanded"]
+----
+smart-tests record session --build [BUILD NAME] --session chrome-session --flavor browser=chrome
+
+find ./cypress/integration | smart-tests subset cypress --session chrome-session --confidence 90% > subset-chrome.txt
+
+cypress run --spec "$(cat subset-chrome.txt)" --reporter junit --reporter-options "mochaFile=report/test-output-chrome.xml"
+
+smart-tests record tests cypress --session chrome-session report/test-output-chrome.xml
+----

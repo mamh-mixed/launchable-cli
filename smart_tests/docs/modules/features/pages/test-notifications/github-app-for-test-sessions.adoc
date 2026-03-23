@@ -1,0 +1,22 @@
+= GitHub app for test sessions
+:slug: github-app-for-test-sessions
+
+Developers can get convenient and timely access to the details of the tests run in their GitHub pull requests, so that they can immediately start working on failures, even before the whole CI process finishes.  These are delivered as comments to pull requests.
+
+They can also quickly access associated workflows and test files via links provided in the {PRODUCT} web app.
+
+image::ROOT:github-comment.png[]
+
+== Configuration and features
+
+First, link:https://github.com/apps/launchable-app/installations/new[install the {PRODUCT} GitHub app] . Your GitHub org admin might have to approve that process.
+
+Next, verify that your test session is associated with a GitHub pull request. From link:https://app.launchableinc.com/[the {PRODUCT} webapp] , find a test session that should be associated with a GitHub pull request.  If you see the dropdown as shown below, you are fully integrated. This association happens automatically when the {PRODUCT} CLI detects environment variables that are set by typical CI systems to indicate that the test is running for a GitHub pull request.
+
+image::ROOT:screenshot-2024-04-29-at-2-14-11-pm.png[]
+
+Selecting "View workflow run" takes you to the workflow in GitHub Actions that this test session was triggered from. Clicking "View pull request" will take you directly to the pull request page for this session.
+
+Additionally, once the sendGitHub app is integrated, you will also be able to jump directly to failing tests that are tied to files stored in sendGitHub repositories. To access this, navigate to any test session page with a failure. Once there, you will see a column at the bottom of the page that says "Failed tests". For each failed test, you will see an ellipses to the far right, as shown below. Once clicked, you will see an "Open in sendGitHub" link. This allows you to open this test file directly in sendGitHub.
+
+image::ROOT:screenshot-2024-04-29-at-1-48-30-pm.png[]

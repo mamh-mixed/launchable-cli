@@ -1,0 +1,14 @@
+name: cloudbees-smart-tests
+title: CloudBees Smart Tests
+version: latest
+start_page: ROOT:index.adoc
+nav:
+  - modules/ROOT/nav.adoc
+asciidoc:
+  attributes:
+    sectanchors: ""
+    experimental: ""
+    toc: ""
+    toc-title: On this page
+    toc-placement: manual
+    toclevels: 1@

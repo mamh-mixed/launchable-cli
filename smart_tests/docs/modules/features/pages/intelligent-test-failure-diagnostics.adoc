@@ -1,0 +1,47 @@
+= Intelligent Test Failure Diagnostics
+:slug: intelligent-test-failure-diagnostics
+
+Test failure triage is not easy and can be time-consuming for both dev and QA teams. Determining whether issues are new or recurring and keeping track of them can be daunting tasks.
+
+Due to this overhead, test failure triaging can take up a significant amount of time and hinder teams that want to develop and release software quickly.
+
+{PRODUCT}'s *Intelligent Test Failure Diagnostics* , or ITFD, * * helps alleviate test triaging overhead and streamlines the process for Dev and QA teams. ITFD is a collection of various features found throughout the web app, which will be reviewed in this article.
+
+== Test Session-level Issues
+
+"Is there an unique underlying issue?" is the first question that teams ask when multiple tests fail in a test-session. {PRODUCT} has up-leveled this concept as a first class citizen. If there are multiple failures in a test session, it will group all similar failures with the help of Generative AI. Individuals involved in test failure triaging can then quickly review these issues. You can see an example of this below:
+
+As you send test session data to {PRODUCT}, an Issues tab will be visible inside each test session on the web app.
+
+image::ROOT:screenshot-2024-05-15-at-4-50-56-pm.png[]
+
+== Daily Report Email
+
+You can also configure the {PRODUCT} web app to send daily reports containing all Issues found in test sessions from each day. Developers and QAs can leverage these in daily triage meetings, where they can quickly discuss the top-level Issues instead of iterating over each failure.
+
+Configure the Daily Report Email at the workspace level in the web app. From the main page of the web app, click the cog icon in the upper left-hand pane to access the settings page. Once on the settings page, scroll down until you see the *Daily Report Email * section. It allows you to configure this report to be sent via email and on your chosen schedule. You can find an example of this below:
+
+image::ROOT:screenshot-2024-05-15-at-5-09-04-pm.png[]
+
+As far as the email report is concerned, you can find an example of that below:
+
+image::ROOT:triage-email-demo.avif[]
+
+== Workspace-level Issues (Beta feature)
+
+A workspace runs multiple test sessions. Each test session uncovers new underlying Issues. In addition to viewing the new Issues, teams care about tracking Issues across multiple test sessions and multiple branches. The Issues pane surfaces this information.
+
+From the {PRODUCT} web app's main page, there is a link to the left-hand pane titled *Issues* . Here, you can view all issues at the workspace level, filtered by branch. The branch can be configured in the top left corner of the page.
+
+[NOTE]
+--
+To properly track branch information, the `--lineage` option must be added to various CLI commands. You can read more about that option on the https://www.launchableinc.com/docs/resources/cli-reference/[CLI reference page] .
+--
+
+image::ROOT:screenshot-2024-05-15-at-5-06-32-pm.png[]
+
+From this page, you can see each Issue and its unique ID. Other relevant details are included, such as the number of times failures have occurred for each Issue and the number of associated test cases.
+
+The unique ID for each Issue is clickable, and will display a page that includes additional details about each associated failing test case and test sessions in which these failures occurred. You can find an example below:
+
+image::ROOT:screenshot-2024-05-15-at-5-21-37-pm.png[]

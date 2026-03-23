@@ -1,0 +1,31 @@
+= PTS - Best Practices & Checklist
+
+Here are a few practices that we recommend for your team. As you start using *Predictive Test Selection* for subsetting your test runs – they will come in handy.
+
+[IMPORTANT]
+====
+Best practices to remember before setting PTS.
+
+* *Failure rate of tests:*  
+  A failure rate of *5–20%* yields the most useful confidence curve. However, the model can adjust both ways:
+  - If failures are too few, the team faces the challenge of identifying rare issues, which the model addresses through intelligent test selection. With some modifications, you can also ensure all tests eventually run across subsets.  
+  - If failures are too high, the model still optimizes by reducing the number of tests executed, and issue grouping helps minimize the cognitive load during triage. However, in this scenario, the confidence curve becomes less informative.
+
+* *Tests organized in groups or sub-suites:*  
+  Depending on how tests are organized and run, the instrumentation might be slightly different.  
+  See link:#separating-test-suites[Separating out test suites].
+
+* *Flakiness:*  
+  Our model is trained to handle a typical degree of flakiness, but if flakiness is your number one problem, we should chat about it!
+====
+
+[NOTE]
+====
+A short checklist as you think about your test suite. This helps you assess what/where the impact will be.
+
+1. *What kind of tests are these?* (unit tests, integration tests, E2E tests. You might have your own terminology; that’s fine!) You typically provide the test suite name as an option in the CLI.
+2. *When do you run in your software development lifecycle?* (on every git push, when a developer opens a PR, after a git merge, on a schedule (hourly, nightly...), triggered manually (by whom?))
+3. *How many times a day/week/month does this suite run?*
+4. *How long does this suite take to complete, usually?*
+5. *Are tests run in multiple environments?* (if environment, e.g. chrome vs safari etc., is important, then that information will be passed using the `--flavor` option)
+====

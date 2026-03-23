@@ -1,0 +1,73 @@
+= Workspace
+:slug: workspace
+
+A *workspace* contains all your *test sessions* and *builds* for a specific test suite. Each workspace belongs to an *organization* .
+
+{PRODUCT} takes the data you send to your workspace and uses it to provide added value, such as Insights and Predictive Test Selection.
+
+[#test-suites-and-workspaces]
+== Test suites and workspaces
+
+As mentioned, a workspace should house data for a specific test suite. This means that your team might need multiple workspaces in your organization. You can switch between workspaces in your organization using the dropdown menu in the left navigation.
+
+[NOTE]
+--
+If you need to create another workspace in your organization, contact your customer success manager or email link:https://support.cloudbees.com[CloudBees Support].
+--
+
+However, "test suite" is an ambiguous term that means different things to different teams, so let's expand on this.
+
+=== Suites divided by test types and/or test runners
+
+Many teams already divide their tests into logical groups based on:
+
+. the *type* of test (e.g., unit tests vs. UI tests, etc.),
+. the *tech stack* used to run those tests (e.g., Maven for unit tests vs. Cypress for UI tests, etc.), or
+. both (in most cases)
+
+If your team thinks about test suites this way, the decision should be straightforward: for example, you should send all your Maven unit tests into one workspace and all your Cypress UI tests into another.
+
+=== Suites divided by test characteristics
+
+If your team does _not_ think about test suites this way - for example, perhaps you use a custom test runner that abstracts away some of the tech stack differences - then you should divide your tests into different workspaces. All the test info you send to a specific workspace should exhibit similar characteristics, such as:
+
+. *Test count and test duration* - For example, unit test suites tend to have lots of very short tests; in contrast, UI test suites tend to have fewer tests that take longer to run
+. *Overall duration* - some test suites take minutes, whereas others can take hours of machine time to run
+. *Frequency* - Many teams run different suites in different phases of their software delivery lifecycle, usually based on how long they take to run
+. *Failures* - Some test suites fail more often than others; within those failures, sometimes lots of tests fail versus only a few. Similarly, some suites are more *flaky* than others
+
+Common characteristics between tests in a workspace are important for two reasons:
+
+. Test insights are aggregated at the workspace level. If you mix tests with different characteristics, insights such as flakiness scoring will be less useful
+. Predictive Test Selection models are evaluated at the workspace level. If you mix tests with many different characteristics, choosing the correct optimization target will be harder.
+
+[#sub-suites-within-larger-test-suites]
+=== Sub-suites within larger test suites
+
+Sometimes teams consider small groups of tests _within_ larger suites as suites also.
+
+For example, a team might have a large group of tests called a "Regression test suite." Then, within that larger group, they divide tests into sub-suites based on components, like "Authentication," "API," etc. You might call these "sub-suites."
+
+Sometimes the entire test suite runs (perhaps nightly), and other times perhaps only sub-suites are run.
+
+If this applies to your team, we recommend using a single workspace for the entire _larger_ suite. In the example above, that team would have one workspace for the "Regression test suite."
+
+[NOTE]
+--
+If you need to create another workspace in your organization, contact your customer success manager or email link:https://support.cloudbees.com[CloudBees Support].
+--
+
+[#workspace-settings]
+== Workspace settings
+
+Workspace settings are found under the Settings tab on the dashboard.
+
+.Settings tab on dashboard
+image::ROOT:sending-data/create-api-key.png[Settings tab on dashboard,role=screenshot]
+
+[#workspace-api-key]
+=== Workspace API key
+
+Each workspace gets it own API key for CLI authentication. API keys are created from the dashboard Settings tab. For more information, refer to xref:send-data-to-smart-tests:getting-started/getting-started.adoc#create-and-set-your-api-key[Getting started].
+
+For security reasons, API keys can't be recovered once they've been created. If you lose your workspace API key, you must create a new one and update your CI scripts.

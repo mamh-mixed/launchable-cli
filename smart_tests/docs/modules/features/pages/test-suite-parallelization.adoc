@@ -1,0 +1,6 @@
+= Test Suite Parallelization
+:slug: test-suite-parallelization
+
+Using duration information from past test runs, {PRODUCT} can automatically create evenly-sized bins of tests for you to run your test suite in several parallel workers. This can reduce the effective length of your test suite drastically.
+
+For instructions on how to do this, see xref:features:test-suite-parallelization/parallelize-your-test-suite-with-the-smart-tests-cli.adoc[Parallelizing your test suite with the {PRODUCT} CLI] .

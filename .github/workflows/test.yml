@@ -55,18 +55,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - name: Check out docsite for bundling
-        uses: actions/checkout@v4
-        with:
-          repository: cloudbees/docsite-cloudbees-smart-tests
-          token: ${{ secrets.DOCSITE_GITHUB_TOKEN }}
-          path: docsite
-          sparse-checkout: docs
-
       - name: Test package build
         run: uv build
-        env:
-          DOCSITE_DOCS_PATH: docsite/docs
 
       - name: Type check
         run: uv run poe type

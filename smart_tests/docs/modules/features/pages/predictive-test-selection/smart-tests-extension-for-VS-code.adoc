@@ -1,0 +1,35 @@
+include::ROOT:partial$abbr.adoc[]
+
+= {PRODUCT} extension for Visual Studio Code
+
+{PRODUCT} extension for Visual Studio Code is ideal when you want to quickly sanity check your local commit before pushing the changes back to the team repository. You can easily use Predictive Test Selection on your local machine, outside CI.
+
+== Requirements
+
+The following are required to use {PRODUCT} extension for Visual Studio Code:
+
+* link:https://pypi.org/project/launchable/[{PRODUCT} CLI]
+* link:https://marketplace.visualstudio.com/items?itemName=ms-python.python[Python extension for VS Code]
+
+== Usage
+
+. Install link:https://marketplace.visualstudio.com/items?itemName=launchable.vscode-launchable[{PRODUCT} extension for VS Code].
+. Click the {PRODUCT} icon, which appears in the Activity bar.
+. Press the  button *Start Test*.
+. Enter the API key.
+. Choose your Test runner.
+. Results will start appearing, after the test execution finishes.
+
+== Supported test runners
+
+Currently, {PRODUCT} extension for VS Code, supports the following test runners:
+
+- maven
+- rspec
+- go-test
+- pytest
+
+[NOTE]
+--
+If not using any of these, then use the `file` profile.
+--

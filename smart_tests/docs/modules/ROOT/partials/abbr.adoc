@@ -1,0 +1,11 @@
+//include user-defined abbreviation for conditional directives for this specific product repo
+include::ROOT:partial$conditionals.adoc[]
+
+//include shared abbreviations across all docsite repos
+include::docsite-global::partial$abbr.adoc[]
+
+//add additional attributes specific to this component ONLY below this line
+//attributes that should be available to all docs and training go in the docsite-global abbr.adoc file
+
+//set the value of {PRODUCT} that should be used throughout this component
+:PRODUCT: CloudBees Smart Tests

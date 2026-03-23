@@ -1,0 +1,31 @@
+= Test suite
+:slug: test-suite
+
+If you are running different test suites against the same build, separating them into different "test suites" would improve the quality of data analysis throughout our system.
+
+== What is a test suite?
+
+Teams regularly group test cases into logical groups based on one or more combinations of:
+
+. the type of test (e.g., unit tests vs. UI tests).
+. the tech stack used to run those tests (e.g., Maven for unit tests vs. Cypress for UI tests).
+. when & where they run (e.g., nightly vs every change, in the CI system vs in the staging environment.)
+
+When thinking about test suites this way, the definition is more straightforward: for example, all the Maven unit tests become one test suite, and all the Cypress UI tests become another test suite.
+
+== How do you benefit from test suites?
+
+When you record test suites:
+
+* You can easily focus on test sessions & issues just from a particular test suite
+
+== How do you record test suite?
+
+When you invoke the `smart-tests record session` command, specify the additional `--test-suite` option and give it a test suite name.
+
+[source,shell]
+----
+$ smart-tests record session --test-suite "ui tests" ...
+----
+
+If using the `smart-tests record session` command explicitly as per _managing complex test session layout_, then the `--test-suite` option should be used with that command instead of `record tests`.

@@ -1,0 +1,105 @@
+= Test Session
+:slug: test-session
+
+== Overview
+
+After running your test suite against a xref:concepts:build.adoc[Build] in your CI system, you record your test results in {PRODUCT} using the CLI. Those results are recorded against a *test session* .
+
+Therefore, a test session is a record of:
+
+. A certain list of tests that ran
+. How long each test took to run
+. Each test's pass/fail/skipped status
+. Aggregate statistics about the above (e.g., total duration, total count, and total passed/failed/skipped counts)
+
+image::ROOT:object-model-june.png[]
+
+== Test sessions across {PRODUCT}
+
+Test sessions are a key {PRODUCT} concept and, as such, are used for lots of purposes.
+
+=== Test results and reports
+
+xref:features:test-results-and-reports.adoc[Test results and reports] are organized by test sessions. Each test session has a details page that shows aggregate statistics about the session, including test counts, total duration, and failed tests.
+
+=== Insights
+
+xref:concepts:insight.adoc[Insights], particularly xref:features:trends.adoc[Trends], are aggregated by test session. For example, the _Test session duration_ and _Test session frequency_ insights show data aggregated across test sessions in a workspace.
+
+=== Predictive Test Selection
+
+Test sessions are used for evaluating xref:features:predictive-test-selection.adoc[Predictive Test Selection] models. For example, the Confidence curve is built by running existing test sessions through the model to see how long it would have taken for a model to find a failing test in a failing run. Therefore, the length of the X-axis of the Confidence curve corresponds with the length of your longest recent test session.
+
+[#test-session-layouts]
+== Test session layouts
+
+Different teams organize their tests in different ways, called "layouts."
+
+Your team's layout impacts how you should record tests in a workspace. This section outlines a few common layouts, including guidance on when you might want to split your runs into multiple test sessions against a single build. For guidance on splitting tests between _workspaces_, refer to xref:concepts:workspace.adoc[Workspace] and, in particular, xref:concepts:workspace.adoc#test-suites-and-workspaces[Test suites and workspaces].
+
+=== Default layout
+
+In many cases, builds and test sessions map 1:1. For example, a developer pushes a change, the change is built, and the build is tested. The test runner (e.g., pytest) is run once with a single list of tests.
+
+The CLI handles this default case without any extra steps. Just run `smart-tests record tests` at the end of your run to capture test results in a single session.
+
+. Test session definition 1
+image::ROOT:test-session-definition.png[Test session definition 1,role="screenshot"]
+
+=== Run tests in different environments
+
+Some teams run their tests across several environments. For example, UI tests might be run in different browsers. In this case, your build will have multiple test sessions per build: one per environment.
+
+.Test session definition 2
+image::ROOT:test-session-definition-2.png[Test session definition 2,role="screenshot"]
+
+Test sessions have an optional attribute called `flavor` that handles this. To implement this test session layout, see xref:send-data-to-smart-tests:record-test-results/use-flavors-to-run-the-best-tests-for-an-environment.adoc[Use 'flavors' to run the best tests for an environment].
+
+[#parallel-tests]
+=== Run tests in parallel
+
+Parallelization is a highly effective strategy for reducing test feedback delay. Depending on how you parallelize your tests and how you want to analyze them in {PRODUCT}, you may want to create multiple test sessions per build.
+
+==== Automatically generated parallel bins
+
+Some test runners support automatic test parallelization. In this scenario, the test runner typically lets you define how many workers to distribute tests via a configuration option. You kick off tests once, and then the test runner automatically distributes tests into bins for each worker. At the end of the run, test reports are often recorded in a single location on the same machine where tests were kicked off.
+
+This scenario _does not_ warrant separate test sessions for each worker. Since the parallelization process is automatic and opaque, the instrumentation is the same as the *default layout* described above.
+
+.Test session definition 3
+image::ROOT:test-session-definition-3.png[Test session definition 3,role="screenshot"]
+
+The main difference to note is that the test session duration shown in {PRODUCT} will be higher than the "wall clock time" perceived by developers since test reports include machine time and don't know about parallelization. Divide the test session duration by your parallelization factor to get the wall clock time.
+
+[WARNING]
+--
+If your test runner are automatically distributes tests to parallel workers but _does not_ deposit test result files to a location on the original machine, you'll need to manually create a test session before you run tests. For more information, refer to xref:send-data-to-smart-tests:record-test-results/manage-complex-test-session-layouts.adoc#combine-test-reports-from-multiple-runs[Combine test reports from multiple runs].
+--
+[[static-bins]]
+==== Static bins
+
+Some teams parallelize their tests by manually splitting them into _static_ lists of tests (otherwise known as *bins* ). They might organize tests by functional area (for easier triage), typical duration (to create bins of roughly equal length), or something else.
+
+In this scenario, the test runner is individually invoked once per bin, like this:
+
+.Test session definition 4
+image::ROOT:test-session-definition-4.png[Test session definition 4,role="screenshot"]
+
+This gives you two options for aggregating reports into test sessions:
+
+. *One session per bin* _(purple boxes)_. This option is preferred if:
+.. You have fewer than ~10 bins.
+.. You plan to use Predictive Test Selection because a 1:1:1 relationship between test runner invocations, test sessions, and subset requests is preferred for the best performance.
+. *One session per pipeline* _(orange box)_. This option is preferred if:
+.. You have more than ~10 bins. At this scale, it becomes less useful to analyze tests at the bin level and more useful to analyze them at the pipeline level.
+
+Ultimately, you are the expert on your test suite layout, so you can aggregate at the hierarchy level that makes sense to you. Depending on your choice, you may need to see /docs/concepts/test-session/#managing-test-sessions-explicitly[#Managing test sessions explicitly].
+
+[#managing-test-sessions-explicitly]
+=== Managing test sessions explicitly
+
+In most cases, the CLI will manage test sessions on your behalf. The `smart-tests record tests` command and `smart-tests subset` command will automatically create a test session where needed.
+
+However, if your build, test, and/or test report collection processes occur across several machines/processes, you'll probably need to manage test sessions explicitly. This requires explicitly creating a test session using `smart-tests record session` and then passing the session value through your pipeline for use in `smart-tests subset` and `smart-tests record tests` .
+
+For a description on how to do this, refer to xref:send-data-to-smart-tests:record-test-results/manage-complex-test-session-layouts.adoc[Manage complex test session layouts].

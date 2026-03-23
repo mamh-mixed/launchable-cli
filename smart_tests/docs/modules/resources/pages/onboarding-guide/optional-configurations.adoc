@@ -1,0 +1,105 @@
+= Optional configurations for your use-case
+
+As you think about bringing in {PRODUCT}, there are a few configuration topology options to think about.
+
+== Simple configurations
+
+=== Attach log files for a test session run
+
+{PRODUCT} uses log files from test runs to further analyze test results and help diagnose failures.
+
+*Implementation:*  
+Logs produced during test sessions can be submitted as attachments.
+
+link:#how-the-command-works[Here’s how the command works.]
+
+*Value unlocked:*
+- Issues dashboard (identifies new, resolved, and ongoing issues across multiple runs)
+
+---
+
+=== Single source repository (correlate commit data with test failures for Predictive Test Selection)
+
+If you plan to use PTS, sending build information is critical to correlate commit data with test failures.
+
+*Implementation:*  
+To record a build, run `{PRODUCT} record build` before creating a build in your CI script.
+
+link:#how-the-command-works[Here’s how the command works.]
+
+*Value unlocked:*
+- Predictive Test Selection factors in commit information to predict what tests to run.
+
+---
+
+=== Same test suite runs in multiple different environments
+
+For cases where your test results depend on the browser or runtime environment.
+
+*Implementation:*  
+When submitting test results using `{PRODUCT} record tests`, you can submit additional metadata as key-value pairs using the `--flavor` option.
+
+link:#how-the-command-works[Here’s how the command works]
+
+*Value unlocked:*
+- Predictive Test Selection can find tailored tests to run for specific environments.
+
+---
+
+=== Multiple test suites run against the same build sent over to {PRODUCT}
+
+If different test suites are run against the same build, separate them into distinct “test suites” to improve data analysis across the system.
+
+*Implementation:*  
+When invoking the `{PRODUCT} record tests` command, specify the `--test-suite` option and assign it a test suite name.
+
+link:#how-the-command-works[Here’s how the command works]
+
+*Value unlocked:*
+- Improved quality of data analysis through the platform  
+- UI allows drill-down by test suite for detailed analysis
+
+---
+
+=== Multiple repositories combined in one build, then tested
+
+If builds are created by combining code from multiple repositories, this setup applies.
+
+*Implementation:*  
+Invoke `{PRODUCT} record build` with multiple `--source` options to denote them.
+
+link:#how-the-command-works[Here’s how the command works]
+
+*Value unlocked:*
+- Enables multi-repo data correlation within a single build.
+
+---
+
+== Complex configurations
+
+=== Build and test processes happen on different machines
+
+*Implementation:*  
+You’ll need to manually create a test session ID to run tests.
+
+link:#help-doc[Read this help doc further to understand setup]
+
+---
+
+=== Combining test reports from multiple runs
+
+*Implementation:*  
+Some pipelines execute multiple test runs against a build, outputting separate reports across several machines. Depending on your setup (see link:#test-session[Test Session]), you may want to merge these into a single test session.
+
+link:#help-doc[Read this help doc further to understand setup]
+
+---
+
+=== Multiple repositories built/deployed separately then tested together (e.g. micro-services)
+
+*Implementation:*  
+Some teams run regression tests against environments where multiple services have been deployed. Each service is built from code in its own repository (or set of repositories).
+
+link:#help-doc[Read this help doc further to understand setup]
+
+---

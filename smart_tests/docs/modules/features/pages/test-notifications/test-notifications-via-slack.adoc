@@ -1,0 +1,173 @@
+= Test Notifications via Slack
+:slug: test-notifications-via-slack
+
+{PRODUCT}'s test notification feature notifies developers via Slack when their test sessions finish so they can immediately take action on the results, whether to triage failures or merge a PR. Developers can create subscriptions to receive personal notifications about test sessions run against their branches/pull requests or other test sessions they care about.
+
+image::ROOT:slack-desktop-with-app-messages.png[]
+
+== Getting started
+
+To set up notifications:
+
+. Start sending data to {PRODUCT}.
+. Install the {PRODUCT} Slack app in your Slack workspace.
+. Link your {PRODUCT} account and your Slack account.
+. Create your first notification subscription in Slack.
+
+== Sending data to {PRODUCT}
+
+To begin sending data to {PRODUCT}, follow the steps in xref:send-data-to-smart-tests:send-data-to-smart-tests.adoc[Send data to {PRODUCT}]. You must have test sessions recorded in your {PRODUCT} workspace to receive notifications about them.
+
+== Install the {PRODUCT} Slack app
+
+. Log into the https://app.launchableinc.com/[{PRODUCT} dashboard].
+. Navigate to Test Notifications.
+. Select btn:[Install Slack App] in the Slack app section. This will open the Slack app authorization flow. You may need to log in to Slack at this stage.
+. Authorize the app to install it.
+. Done!
+
+== Link your {PRODUCT} and Slack accounts
+
+Once the {PRODUCT} Slack app has been installed, you and your teammates can link your {PRODUCT} and Slack accounts. This lets you set up subscriptions via the app.
+
+[NOTE]
+--
+If you haven't signed up for {PRODUCT}, or are not a member of your team's {PRODUCT} organization, request an /docs/concepts/organization/#organization-invitation-link[#Organization invitation link] so you can sign up (if needed) and join.
+--
+
+You communicate with the app through direct messages:
+
+. In Slack, select the New message icon in the top section of the left navigation (or use the Command+N or Control+N keyboard shortcut) to compose a new message.
+. In the "To:" field, enter *{PRODUCT}* and select the app from the dropdown list.
+. In the message text field, enter */smart-tests link* and hit Enter.
+. Select the button in the response message to initiate the flow to connect your {PRODUCT} account to your Slack account.
+
+== Create a notification subscription
+
+After linking your {PRODUCT} and Slack accounts, create your first notification subscription.
+
+=== Via UI
+
+After linking your account, create a new subscription from the home tab of the {PRODUCT} app in Slack:
+
+image::ROOT:subscription-ux.png[]
+
+=== Via message
+
+Create a subscription by sending a message to the {PRODUCT} app. The syntax for creating a subscription is:
+
+`/smart-tests subscribe <WORKSPACE> <KEY>=<VALUE>`
+
+* `<WORKSPACE>` is the workspace's name containing the test sessions you want to be notified about.
+* `<KEY>=<VALUE>` is a key-value pair that contains the CI environment variable and value that indicates the test sessions you want to subscribe to (e.g., `GITHUB_ACTOR=octocat` ). More on this below ⤵
+
+==== Common key-value pairs for subscriptions
+
+Typically, you will want to be notified about _your_ test runs. Each CI system has an environment variable that indicates the user that kicked off a build or pipeline.
+
+For example, GitHub Actions has an environment variable called `GITHUB_ACTOR` . So if you use GitHub Actions, you can subscribe to your test runs using a command such as:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> GITHUB_ACTOR=<YOUR_GITHUB_USERNAME>`
+
+The tabbed section below describes how to compose `/smart-tests subscribe` for major CI tools:
+
+[.multilanguage-custom-table, options="header", cols="5"]
+|===
+| Azure DevOps
+| CircleCI
+| GitHub Actions
+| GitLab CI
+| Jenkins
+
+a|
+
+|===
+|Environment variable |`BUILD_REQUESTEDFOREMAIL`
+|Description |The person who pushed or checked in the changes.
+|===
+
+|Example:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> Build.RequestedForEmail=<YOUR_EMAIL_ADDRESS>`
+
+a| 
+[cols="1,1"]
+|===
+|Environment variable |`CIRCLE_USERNAME`
+|Description |The GitHub or Bitbucket username of the user who triggered the pipeline (only if the user has a CircleCI account).
+|===
+
+|Example:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> CIRCLE_USERNAME=<YOUR_GITHUB_OR_BITBUCKET_USERNAME>`
+
+a| 
+[cols="1,1"]
+|===
+|Environment variable |`GITHUB_ACTOR`
+|Description |The name of the person or app that initiated the workflow. For example, `octocat`.
+|===
+
+|Example:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> GITHUB_ACTOR=<YOUR_GITHUB_USERNAME>`
+
+a| [NOTE]
+--
+GitLab CI has 2 environment variables you can use.
+--
+
+[cols="1,1"]
+|===
+|Environment variable |`GITLAB_USER_EMAIL`
+|Description |The email of the user who started the job.
+|===
+
+|Example:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> GITLAB_USER_EMAIL=<YOUR_GITLAB_EMAIL_ADDRESS>`
+
+[cols="1,1"]
+|===
+|Environment variable |`GITLAB_USER_LOGIN`
+|Description |The login username of the user who started the job.
+|===
+
+|Example:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> GITLAB_USER_LOGIN=<YOUR_GITLAB_USERNAME>`
+
+a| [NOTE]
+--
+Requires the *build user vars* Jenkins plugin: https://plugins.jenkins.io/build-user-vars-plugin/[https://plugins.jenkins.io/build-user-vars-plugin/]
+--
+
+[cols="1,1"]
+|===
+|Environment variable |`BUILD_USER_EMAIL`
+|Description |Email address of the user who started the build.
+|===
+
+|Example:
+
+`/smart-tests subscribe <YOUR_SMART_TESTS_WORKSPACE> BUILD_USER_EMAIL=<YOUR_EMAIL_ADDRESS>`
+
+|===
+
+==== Other key-value pairs
+
+Since the subscription mechanism is based on CI environment variables, you have a lot of flexibility regarding subscriptions. CI tools expose many environment variables, (and you can add your own) that you can pass into `/smart-tests subscribe` to create custom subscriptions. For more info, refer to your CI tool's documentation.
+
+== Receive notifications
+
+Once you have set up a subscription, the {PRODUCT} app will send you a personal message each time a new test session matching the subscription criteria is recorded:
+
+[cols="1,1", options="header"]
+|===
+|Passing notification |Failing notification
+
+|image:https://www.datocms-assets.com/59840/1673618053-passing-session-notification.png[Passing notification]
+|image:https://www.datocms-assets.com/59840/1673618081-failed-session-notification.png[Failing notification]
+|===
+
+Failing notifications include a link to view test results in {PRODUCT} and a quick summary of failing tests, including annotations for Unhealthy Tests. This helps you get started triaging without checking your email over and over.
