@@ -260,7 +260,56 @@ class RecordTests:
         for t in glob.iglob(os.path.join(base, pattern), recursive=True):
             self.report(t)
 
+    def upload_raw_file(self, file_path: str) -> bool:
+
+        try:
+            # Debug: verify we're using the right code
+            self.logger.debug("Using updated upload_raw_file method")
+
+            # Build the full URL with /intake prefix
+            path = f"/intake/organizations/{self.org}/workspaces/{self.workspace}/{self.session.subpath('test_result_file')}"
+            url = f"{self.client.base_url()}{path}"
+
+            with open(file_path, 'rb') as f:
+                files = {'file': (os.path.basename(file_path), f)}
+                headers = self.client.http_client._headers(compress=False)
+                # Remove Content-Type header to let requests set it for multipart
+                headers.pop('Content-Type', None)
+
+                response = self.client.http_client.session.request(
+                    'POST',
+                    url,
+                    files=files,
+                    headers=headers,
+                    timeout=(5, 60),
+                    verify=(not self.client.http_client.skip_cert_verification)
+                )
+
+                if response.status_code == 200:
+                    self.logger.debug(f"Uploaded raw test result file: {file_path}")
+                    return True
+                else:
+                    self.logger.warning(
+                        f"Failed to upload raw test result file {file_path}: "
+                        f"HTTP {response.status_code} - {response.reason}"
+                    )
+                    return False
+
+        except Exception as e:
+            self.logger.warning(f"Error uploading raw test result file {file_path}: {str(e)}")
+            return False
+
+    def upload_raw_files(self) -> None:
+
+        if self.reports and not self.dry_run:
+            self.logger.debug(f"Uploading {len(self.reports)} raw test result file(s)")
+            for report_file in self.reports:
+                self.upload_raw_file(report_file)
+
     def run(self):
+        # Upload raw test result files before parsing
+        self.upload_raw_files()
+
         count = 0  # count number of test cases sent
         is_observation = False
 
