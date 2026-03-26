@@ -13,10 +13,12 @@ from smart_tests.commands.inspect import inspect
 from smart_tests.commands.record import record
 from smart_tests.commands.stats import stats
 from smart_tests.commands.subset import subset
+from smart_tests.commands.update import update
 from smart_tests.commands.verify import verify
 
 cli = Group(name="cli", callback=Application)
 cli.add_command(record)
+cli.add_command(update)
 cli.add_command(subset)
 # TODO: main.add_command(split_subset)
 cli.add_command(verify)

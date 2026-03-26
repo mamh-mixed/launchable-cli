@@ -33,9 +33,11 @@ def Argument(
     return _Argument(name=None, type=type, multiple=multiple, required=required, metavar=metavar, help=help, default=default)
 
 
-class Exit(Exception):
+class Exit(BaseException):
     '''
-    Raise this exception to exit the CLI with the given exit code
+    Raise this exception to exit the CLI with the given exit code.
+    Extends BaseException (not Exception) so that broad `except Exception` handlers in user code
+    do not accidentally swallow it — analogous to Java's Error vs Exception distinction.
     '''
 
     def __init__(self, code: int):

@@ -71,7 +71,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                "timestamp": None
+                "timestamp": None,
+                "components": []
             }, payload)
 
     @responses.activate
@@ -112,7 +113,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                "timestamp": None
+                "timestamp": None,
+                "components": []
             }, payload)
 
     @responses.activate
@@ -151,7 +153,8 @@ class BuildTest(CliTestCase):
                         },
                     ],
                     "links": [],
-                    "timestamp": None
+                    "timestamp": None,
+                    "components": []
                 }, payload)
 
         finally:
@@ -191,7 +194,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                'timestamp': None
+                'timestamp': None,
+                "components": []
             }, payload)
         responses.calls.reset()
 
@@ -223,7 +227,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                "timestamp": None
+                "timestamp": None,
+                "components": []
             }, payload)
         responses.calls.reset()
 
@@ -255,7 +260,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                "timestamp": None
+                "timestamp": None,
+                "components": []
             }, payload)
         responses.calls.reset()
         self.assertIn("Invalid repository name B in a --branch option.", result.output)
@@ -295,7 +301,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                "timestamp": None
+                "timestamp": None,
+                "components": []
             }, payload)
         responses.calls.reset()
 
@@ -367,7 +374,8 @@ class BuildTest(CliTestCase):
                     },
                 ],
                 "links": [],
-                "timestamp": "2025-01-23T12:34:56+00:00"
+                "timestamp": "2025-01-23T12:34:56+00:00",
+                "components": []
             }, payload)
 
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
@@ -412,7 +420,8 @@ class BuildTest(CliTestCase):
                     {"title": "url", "url": "https://smart-tests.test", "kind": "CUSTOM_LINK"},
                     {"title": "build", "url": "https://build.smart-tests.test", "kind": "CUSTOM_LINK"},
                 ],
-                "timestamp": None
+                "timestamp": None,
+                "components": []
             }, payload)
 
         # with invalid kind
@@ -505,3 +514,47 @@ class BuildTest(CliTestCase):
             "--build",
             self.build_name)
         self.assert_success(result)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
+    @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
+    def test_with_components(self):
+        result = self.cli(
+            "record", "build",
+            "--build", self.build_name,
+            "--branch", "main",
+            "--no-commit-collection",
+            "--commit", ".=abc123",
+            "--component", "payment=staging-payment-svc",
+            "--component", "auth=staging-auth-svc",
+        )
+        self.assert_success(result)
+
+        payload = json.loads(responses.calls[1].request.body.decode())
+        self.assert_json_orderless_equal(
+            {
+                "buildNumber": "123",
+                "lineage": "main",
+                "commitHashes": [{"repositoryName": ".", "commitHash": "abc123", "branchName": ""}],
+                "links": [],
+                "timestamp": None,
+                "components": [
+                    {"name": "payment", "build": "staging-payment-svc"},
+                    {"name": "auth", "build": "staging-auth-svc"},
+                ],
+            }, payload)
+
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_duplicate_component_name(self):
+        result = self.cli(
+            "record", "build",
+            "--build", self.build_name,
+            "--branch", "main",
+            "--no-commit-collection",
+            "--commit", ".=abc123",
+            "--component", "payment=svc-a",
+            "--component", "payment=svc-b",
+        )
+        self.assert_exit_code(result, 1)
+        self.assertIn("Duplicate component name: 'payment'", result.output)
