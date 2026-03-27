@@ -1,0 +1,32 @@
+:slug: deal-with-shallow-clones
+= Deal with shallow clones
+
+[NOTE]
+--
+This page relates to xref:send-data-to-smart-tests:record-builds/record-builds.adoc[Record builds with {PRODUCT}].
+--
+
+== Git shallow  clone & problem it creates
+
+Git shallow clone is a technique often used in build/test environments to speed up the cloning of Git repositories. For more information, refer to link:https://www.perforce.com/blog/vcs/git-beyond-basics-using-shallow-clones[https://www.perforce.com/blog/vcs/git-beyond-basics-using-shallow-clones].
+
+When you are recording builds from a shallowly cloned workspace, we won't be able to collect all the commits we can use to make predictions. So it's worth fixing this problem, although this is not a show-stopper for {PRODUCT}.
+
+== Solution: Set up the collection process
+
+In this approach, we set up a dedicated process with the sole purpose of collecting commits. Keep this separate from your {CI} jobs that use shallow clones, to keep those nimble.
+
+. Create a recurring job on your CI system with connected persistent storage. Initially, you run `git clone` to set up a full clone of the repository, then when it runs again later, you execute `git fetch --all` , which incrementally fetches all the commits from the server.
+
+. Once the local Git repository is populated with the updated commits from the server, run `smart-tests record commit --source DIR` (where `DIR` points to the local workspace, so probably just `.`), which processes the additional commits obtained. This operation should be pretty fast.
+
+The frequency of this recurring job should be higher than the time lag between the commit getting pushed to the repository and starting the test process. For example, if your build is a C++ project that takes 1 hour to build before it gets to testing, then the frequency of the commit collection jobs can be every 30 minutes. If you are unsure, every 5 minutes is probably a good start.
+
+The persistent storage makes incremental `git fetch` fast, but this setup will survive the occasional loss of the persistent storage. It's just that the first run after such a loss will be slow.
+
+Instead of or in addition to the periodic execution, you can execute this job whenever new builds happen. Doing so will reduce the chance that some of the commits do not make it into {PRODUCT} by the time the test suite runs.
+
+[WARNING]
+--
+Persistent storage is not always a viable option, for example with cloud CI providers. If this is not an adequate solution in your situation, please contact support so that we can improve this further.
+--

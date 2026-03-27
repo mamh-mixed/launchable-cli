@@ -1,0 +1,95 @@
+include::ROOT:partial$abbr.adoc[]
+
+= Smart subset optimization targets
+
+== The case for composing your own subsets
+
+Modern software teams juggle with flaky tests, resource limits, tight deadlines, and evolving codebases leading to challenges in their testing environment.
+
+{PRODUCT}’s composable subsets give you full control to navigate these problems – build your own test subset by using tools like optimization targets, sorting rules, and filters to control which tests you would like to run – all in a single command!
+
+.Subset formation flow
+image::ROOT:smart-subset-formation-flow.png[Subset formation flow,role="screenshot"]
+
+Here are a few possible usage methods, backed by scenarios you may relate with:
+
+== How to make nightly test runs more slim without missing any regressions
+
+You want to ensure code coverage and run the entire test suite, but each run takes up too much time and the feedback to developers is late.
+
+With smart subsetting, you could compose a subset that takes significantly lesser time to run. At the same time you can make sure that a mix of most likely to fail tests and the ones which haven’t been run at all, are selected.
+
+Here’s how you would write the CLI command:
+
+[source,shell]
+----
+smart-tests subset --goal-spec "select(timePercentage=25%),sortByNotRecentlySelected()"
+----
+
+To ensure 100% coverage, you would run this subset 3 times. (That’s possible now due to the time savings from the model’s smart subsets!)
+
+[NOTE]
+====
+This example uses 25%, but the optimal percentage and frequency can vary by team. To ensure full test suite coverage, run the subset multiple times (e.g., three runs of 33% each or two runs of 50%), based on your chosen subset size.
+====
+
+.Rotate and optimize coverage
+image::ROOT:illustration-rotate-optimize-coverage.png[Rotate and optimize coverage,role="screenshot"]
+
+== Ignore flakes: Reduce noise by ignoring flaky tests
+
+Flaky tests may be causing frequent failures leading to too much noise. This can cause delays and be frustrating for your team. However, removing these tests from the suite altogether is also not an option.
+
+With smart subsetting, you could compose a subset that ignores all tests that are flaky beyond a certain threshold, while still catching failures up to a high confidence level.
+
+Here’s how you would write the CLI command:
+
+[source,shell]
+----
+smart-tests subset --goal-spec "dropFlakyTests(score=0.5),select(confidence=95%)"
+----
+
+.Ignore flakes and catch failures
+image::ROOT:illustration-ignore-flakes-1.png[Ignore flakes and catch failures,role="screenshot"]
+
+== How to combine rule-based static test selection and AI-based dynamic test selection
+
+To prepare for release, it may be critical for your team to always run a set of pre-defined tests to ensure they are not failing. Along with that, you want to shorten the suite’s run time too.
+
+With smart subsetting, you could compose a subset which always includes tests provided by attaching a test prioritization file as a part of the command.
+
+[source,shell]
+----
+smart-tests subset --goal-spec "prioritizeByTestMapping(),select(confidence=80%)"
+----
+
+[NOTE]
+====
+To use this feature, specify the `--prioritized-tests-mapping` option.
+====
+
+.Full test suite vs. whitelist mapped tests
+image::ROOT:illustion-run-whitelisted-tests-1.png[Full test suite vs. whitelist mapped tests,role="screenshot"]
+
+== Run recently failed tests: Prioritize tests that have failed recently
+
+Tests that have failed in recent runs point to unstable or problematic areas in your codebase. You want to ensure code quality, but also reduce the time it takes to run the entire suite.
+
+With smart subsetting, you could compose subsets which prioritize recently failed tests to be re-run promptly in upcoming test runs, while shortening the test run time.
+
+[source,shell]
+----
+smart-tests subset --goal-spec "prioritizeRecentlyFailed(time=24h),select(timePercentage=50%)"
+----
+
+.Run recently failed tests
+image::ROOT:illustration-run-recently-failed-tests.png[Run recently failed tests,role="screenshot"]
+
+{PRODUCT}’s composable mechanism enables you to address these situations and more by defining custom sequences of operations to build your subsets.
+
+== Why this matters for your team?
+
+1. Cut costs and save on cloud resources.
+2. Shorter feedback loops for developers.
+3. No need to make trade-offs: Get both speed and test coverage while reducing costs and enhancing developer productivity.
+

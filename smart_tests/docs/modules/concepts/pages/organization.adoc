@@ -1,0 +1,45 @@
+= Organization
+:slug: organization
+
+The *organization* is the top-level object in the {PRODUCT} object model.
+
+== Users and workspaces
+
+*Users* are members of organizations. *Workspaces* belong to organizations.
+
+A user may be a member of only one organization at a time. All members of an organization can access all workspaces in that organization.
+
+If your organization has multiple workspaces, you can navigate between them using the dropdown in the left navigation.
+
+Contact your customer success manager if you'd like to create a new workspace in your organization.
+
+== Organization settings
+
+Organization settings can be found on the settings page in any _workspace_ in your organization:
+
+image::ROOT:smart-tests_settings_20220613.png[]
+
+=== Automatic Organization Discovery
+
+This feature allows users on the same email domain to automatically join a specified {PRODUCT} organization upon signing up.
+
+To enable this feature for your organization, mailto:support@launchableinc.com[contact us] . It is not shown in the UI.
+
+=== Organization invitation link
+
+Create an invitation link to invite your teammates to access the {PRODUCT} dashboard. Just create a single link and share it with your team. They'll be prompted to join your organization after they click the link and sign up for an account. Alternatively, contact us to enable Automatic Organization Discovery (above).
+
+image::ROOT:smart-tests_invite_url_20220613.png[]
+
+[NOTE]
+--
+Invitation links expire after 90 days. After that, simply create a new one.
+--
+
+=== SAML 2.0
+
+{PRODUCT} supports SAML 2.0 for SSO authentication. Most Identity Providers (e.g. Okta, OneLogin, etc.) support SAML 2.0 for SSO.
+
+Contact your customer success manager to enable this feature for your organization. You'll need to provide {PRODUCT} an X.509 signing certificate from your Identity Provider in PEM or CER format.
+
+After SAML is enabled for your organization, all organization members must log in with SAML using an account under your email domain. They can't log in with their previous credentials, such as an email and password combination or a GitHub account.

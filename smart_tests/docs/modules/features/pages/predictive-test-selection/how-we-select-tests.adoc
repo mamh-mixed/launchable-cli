@@ -1,0 +1,19 @@
+include::ROOT:partial$abbr.adoc[]
+= How we select tests
+
+
+Predictive test selection (PTS) focuses on semantic similarity between the application source code and the test source code. For example, when you modify the order processing part of the application, the AI looks for tests that are "relevant". A test case that places an order would be deemed more relevant than a test case that checks the user registration page, for example.
+
+In order to do this, we preprocess the source code of the application and the tests to extract features that represent the semantics of the code. This happens during the `record build` invocations, incrementally, as your application and test source code evolve. The global context of the application as a whole is taken into account, as well as the local context of each file.
+
+When a subset is requested, we first compute the "change under test"—what application code has changed? For nightly tests, this is the delta from the previous night's run. For a pull request, this is all the changes in the pull request. This is a behavior you can influence.
+
+From the change under test, we compute the semantic similarity between the change and the tests.
+All the tests are ranked in order of similarity. The top of this list is selected. How many tests get selected depends on the optimization target you choose (e.g., 10% of tests, all tests with relevance above 80%, etc.). Depending on other goals set, this behavior is further affected by other considerations, such as the last time a test failed, how flaky a test is, and so on.
+
+
+== What we don't do: code coverage
+
+PTS currently does not depend on code coverage information. This allows us to work with any programming language and test framework, without slowing down test executions or adding runtime instrumentation that increases installation complexity.
+
+This approach also makes {PRODUCT} an excellent fit for distributed systems and end-to-end tests, where test and application execution happen simultaneously over a distance in ways that are hard to track.

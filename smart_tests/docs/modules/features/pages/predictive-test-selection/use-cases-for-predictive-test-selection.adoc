@@ -1,0 +1,75 @@
+= Use-cases for Predictive Test Selection
+
+[[use-case-1]]
+== Use-case 1: In-place subset of a test suite
+
+*Challenge:*  
+An existing test suite may be taking a long time to run. Some teams’ capacity for executing tests is finite and limited, yet the demand to run tests is too high. Even in cases where test execution capacity is scalable and elastic, the number of tests are so many that it’s costing too much money.
+
+To that end, the team would want to shorten the execution time of that test suite.
+
+[NOTE]
+====
+This use-case also serves to enhance developer productivity, especially when merging changes.
+Test failures arising from flaky tests often lead to frustration and unnecessary delays.
+====
+
+*Proposed Solution:*  
+Introduce a subset in place. Run a subset of tests at the same stage of your software delivery lifecycle.
+
+*Value unlocked by the use-case:*
+
+1. *Reduction in test runtime:*  
+   The Time Savings Report gives the amount of time saved running a test suite.
+   - Lower machine costs (cloud compute costs, mobile devices, cheaper UI testing with Selenium, etc.)
+2. *More frequent runs:*  
+   Since test runtime reduces, your team can run tests more frequently and test more often (if desired).  
+   - Optimized resource allocation (instead of running tests that don’t fail, use your testing budget to run tests that fail).
+
+=== Implement the solution
+
+This is the easiest use-case to implement with {PRODUCT}. A {PRODUCT} subset is used to replace the current full test execution.
+
+Adding a defensive run:  
+After subsetting your tests, you should make sure to run the full suite of tests at some point later in your pipeline.  
+This enables you to catch any issues that may not be caught by the subset.
+
+For example, once you start running a subset of an integration test suite that runs on pull requests, you should make sure to run the *full* integration test suite after a PR is merged (and record the outcome of those runs with `{PRODUCT} record tests`).
+
+.Use case 1 example flow
+image::ROOT:use-case-1.png[Use case 1 example flow,role="screenshot"]
+
+'''
+
+[[use-case-2]]
+== Use-case 2: Shift-left a test suite to find issues earlier in the pipeline
+
+*Challenge:*  
+The feedback on changes may be coming in too late because the tests are towards the right in your delivery pipeline (e.g. UI tests, E2E, nightly tests).  
+These are run infrequently because of long runtimes. In several teams, another common challenge is that their main/dev branch is too unstable, causing QA engineers a lot of overhead to deal with failures.
+
+*Proposed Solution:*  
+Run a subset of tests earlier in your software delivery lifecycle (“shift left”).
+
+*Value unlocked by the use-case:*
+
+1. *Ensure a stable main/dev branch,* maintain release readiness, and reduce effort in tracking failures.  
+2. *Faster feedback time* by running tests earlier (e.g. a nightly test run can be run on every PR, or every hour to get fast feedback; reducing feedback time by hours if not days).  
+3. *More testing by more frequent test runs:*  
+   - Optimized resource allocation (instead of running tests that don’t fail, use your testing budget to run tests that fail and run them more often).
+
+=== Implement the solution
+
+If you aim to run a short subset of a long test suite earlier in the development process,  
+you may need to set up a new pipeline to run tests in that development phase.  
+For example, if you currently run a long nightly test suite and want to run a subset every hour,  
+you may need to create a pipeline to build, deploy, and run the subset if one doesn’t already exist.
+
+You will also want to continue running the full test suite every night
+(and recording the outcome of those runs with `{PRODUCT} record tests`).
+
+.Use case 2 example flow
+image::ROOT:use-case-2.png[Use case 2 example flow,role="screenshot"]
+
+'''
+

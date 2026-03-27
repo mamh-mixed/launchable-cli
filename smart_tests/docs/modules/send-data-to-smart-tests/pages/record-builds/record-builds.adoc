@@ -1,0 +1,44 @@
+= Record builds
+include::ROOT:partial$abbr.adoc[]
+:slug: record-builds
+
+== Background
+
+Each xref:concepts:test-session.adoc[test session] is associated with a xref:concepts:build.adoc[build].
+In particular, with xref:features:predictive-test-selection.adoc[predictive test selection] tests are selected based on the Git changes in a build (among other data).
+
+== Record builds
+
+To record a build, run `smart-tests record build` before creating a build in either your {CI} or organizations CI script:
+
+[source,bash]
+----
+smart-tests record build --build <BUILD NAME> --source src=<PATH TO SOURCE>
+----
+For more information on the `record build` command, refer to xref:resources:cli-reference.adoc[CLI reference - Command:record build].
+
+* With the `--build` option, assign a unique identifier to this build. This value will be used later when test results are recorded. For tips on choosing this value, refer to xref:send-data-to-smart-tests:record-builds/choose-a-value-for-build-name.adoc[Choose a value for build name].
+* The `--source` option points to the local copy of the Git repository (or repositories) used to produce this build, such as `.` or `src`.
+** Make sure to point to a full clone of each repository, not a partial clone.
+** *GitHub Actions users:* if using `actions/checkout` to check out the current repo, set the `fetch-depth: 0`.
+** Refer to xref:send-data-to-smart-tests:record-builds/record-builds-from-multiple-repositories.adoc[Record builds from multiple repositories].
+
+View recorded builds on the menu:Builds[] dashboard.
+
+.Builds dashboard
+image::ROOT:sending-data/builds-dashboard.png[Builds dashboard,role="screenshot"]
+
+== Record test results against your builds
+
+After you record a build, you can record test results against it by updating the `smart-tests record tests` invocation(s) created after following xref:send-data-to-smart-tests:record-test-results/record-test-results.adoc[Record test results with the {PRODUCT} CLI]:
+
+[source]
+----
+# before
+smart-tests record tests --no-build <TOOL> <PATH TO REPORTS>
+
+# after
+smart-tests record tests --build <BUILD NAME> --session <SESSION_NAME> <TOOL> <PATH TO REPORTS>
+----
+
+If done correctly, you will see the corresponding build name for each test session on the Test session section on the {PRODUCT} dashboard.

@@ -1,0 +1,20 @@
+= Object model
+:slug: object-model
+
+{PRODUCT}'s object model includes concepts that reflect objects in your development/CI environment (like xref:concepts:build.adoc[Build] and xref:concepts:test-session.adoc[Test Session]) alongside objects which are value-add concepts unique to {PRODUCT} like xref:concepts:subset.adoc[Subset] and xref:concepts:insight.adoc[Insight].
+
+The diagram below illustrates how these objects relate to one another: which entities own others, which ones are associated only as context, and how information flows through the system. It is intended to help build a clear mental model of the product and understand the role of each entity you interact with.
+
+image::ROOT:object-model-v2.png[]
+
+
+For more information, refer to:
+
+* xref:concepts:organization.adoc[Organization]
+* xref:concepts:workspace.adoc[Workspace]
+* xref:concepts:build.adoc[Build]
+* xref:concepts:test-session.adoc[Test Session]
+* xref:concepts:subset.adoc[Subset]
+* xref:concepts:insight.adoc[Insight]
+* xref:concepts:branch.adoc[Branch]
+* xref:concepts:test-suite.adoc[Test Suite]

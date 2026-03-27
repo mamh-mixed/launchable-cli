@@ -1,0 +1,71 @@
+= Viewing time savings
+:slug: viewing-time-savings
+
+You can view aggregate time savings from Predictive Test Selection on the *Time Savings* page. Time savings is the test execution time hypothetically saved by not executing all tests via Predictive Test Selection.
+
+image::ROOT:smart-tests-monthly-time-saved.png[]
+
+You can also view time savings for an individual test session in the *Subset Impact* section of a test session row. Generally speaking, though, this page explains the monthly report page.
+
+== Month
+
+Time Savings is aggregated by month based on the timestamp of the test session.
+
+A test session is not closed until seven days after creation. Until then, you can record test results. Time Savings values are only official after that point. This means it takes seven days for last month’s values to finalize, hence the yellow "Not Final Yet" badge.
+
+== PTS Test Sessions (count)
+
+This is the number of test sessions for which time savings was calculated. This number might be slightly lower than the total number of sessions with subset requests.
+
+Reasons for this include:
+
+. no tests were reported for the session
+. too many recorded tests had no past history and/or
+. the test session had too many subset requests
+
+== Duration
+
+Time savings is “the test execution time hypothetically saved by not executing all tests [using Predictive Test Selection]."
+
+Since you didn't execute these tests, we do not know the actual test time. However, based on the historical test executions, we can estimate the time it would have taken to execute.
+
+[NOTE]
+--
+{PRODUCT} learns about test durations from the JUnit reports you record. Therefore they represent machine time.
+--
+
+We use *up to 90 days of test execution results* to estimate the time to execute a test.
+
+=== Total Duration Without {PRODUCT}
+
+For each test session, we estimate how long your test sessions *would have* taken this long to run in total. We use each xref:concepts:subset.adoc[Subset] Test List to calculate this. Then we sum this up for all test sessions.
+
+This calculation handles various edge cases described in the below table.
+
+|===
+|Test recorded in test session? |Recorded in last 90 days? |Duration used in calculation
+
+|Yes
+|N/A
+|Actual recorded duration
+
+|No
+|Yes
+|Average duration over last 90 days
+
+|No
+|No
+|Average duration of all tests in the test session
+|===
+
+=== Total Duration With {PRODUCT}
+
+Difference between Time Saved and Total Duration Without {PRODUCT}.
+
+Note that because all tests in the input list are included in `Total Duration Without {PRODUCT}` -- even if they aren't recorded -- the recorded duration for a test session can be different than this value if you don't record all subset tests (or if tests are new).
+
+=== Time Saved
+
+For each test session, we take the sum of the estimated duration of all unrecorded remainder/rest tests, using the average duration of each test over the last 90 days. This value is shown on each test session row in the {PRODUCT} web app.
+
+Then, for the Time Savings page, then we sum this for all test sessions grouped by month.

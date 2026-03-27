@@ -1,0 +1,87 @@
+:slug: ensure-record-tests-always-runs
+= Ensure record tests always runs
+
+[NOTE]
+--
+This page relates to xref:send-data-to-smart-tests:record-test-results/record-test-results.adoc[Record test results with {PRODUCT}].
+--
+
+The `smart-tests record tests` command must be executed after you run tests.
+However, some tools exit the build process as soon as the test process finishes, preventing this from happening.
+
+The way to fix this depends on your CI tool:
+
+== Jenkins
+
+For declarative Pipeline jobs, use the link:https://www.jenkins.io/doc/book/pipeline/syntax/#post[`post { always { ... } }`] option:
+
+[source]
+----
+pipeline {
+  ...
+  sh 'bundle exec rails test -v $(cat smart-tests-subset.txt)'
+  ...
+  post {
+    always {
+      sh 'smart-tests record tests <BUILD NAME> [OPTIONS]'
+    }
+  }
+}
+----
+
+For scripted pipeline jobs, the `catchError` step should be used as described here: link:https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/#catcherror-catch-error-and-set-build-result-to-failure[https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/#catcherror-catch-error-and-set-build-result-to-failure].
+
+[NOTE]
+--
+This is unnecessary for Maven builds that use the `-Dmaven.test.failure.ignore` option.
+--
+
+== CircleCI
+
+CircleCI has the `when: always` option, described here: link:https://circleci.com/docs/reference/configuration-reference/#the-when-attribute[].
+
+[source]
+----
+- jobs:
+  - test:
+    ...
+    - run:
+        name: Run tests
+        command: bundle exec rails test -v $(cat smart-tests-subset.txt)
+    - run:
+        name: Record test results
+        command: smart-tests record tests <BUILD NAME> [OPTIONS]
+        when: always
+----
+
+== GitHub Actions
+
+GitHub Action has the `if: ${{ always() }}` option, described here: link:https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#always[].
+
+[source]
+----
+jobs:
+  test:
+    steps:
+      ...
+      - name: Run tests
+        run: bundle exec rails test -v $(cat smart-tests-subset.txt)
+      - name: Record test result
+        run: smart-tests record tests <BUILD NAME> [OPTIONS]
+        if: always()
+----
+
+== Bash
+
+If you run tests on your local or other CI, you can use `trap`:
+
+[source]
+----
+function record() {
+  smart-tests record tests <BUILD NAME> [OPTIONS]
+}
+# set a trap to send test results to {PRODUCT} for this build either tests succeed/fail
+trap record EXIT SIGHUP
+
+bundle exec rails test
+----

@@ -1,0 +1,7 @@
+= Test Notifications
+:slug: test-notifications
+
+{PRODUCT} supports various ways to notify engineers as soon as tests fail, so that developers & QA people can immediately start analyzing the problems and working toward a resolution.
+
+* xref:features:test-notifications/github-app-for-test-sessions.adoc[Test Notifications via GitHub PR]
+* xref:features:test-notifications/test-notifications-via-slack.adoc[Test Notifications via Slack]

@@ -1,0 +1,11 @@
+= Predictive Test Selection
+:slug: predictive-test-selection
+
+*Predictive Test Selection* uses large language models (LLMs) to understand your code changes and automatically identify the most relevant tests to run.
+
+By analyzing both source code and test files, {PRODUCT} builds a deep understanding of how your code is structured and how different components relate to one another. Using commit information, it calculates the similarity between changed files and test files to determine which tests are most likely impacted — producing an optimized test execution plan where critical tests are prioritized and redundant ones are safely skipped.
+
+With Predictive Test Selection, {PRODUCT} brings code-aware test execution intelligence to your CI process — helping teams run fewer but relevant tests, gain faster feedback, and ship high-quality software with confidence.
+
+.Predictive test selection overview
+image::ROOT:pts-v2-working.png[Predictive test selection overview,role="screenshot"]

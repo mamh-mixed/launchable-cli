@@ -1,0 +1,12 @@
+:slug: attach-log-files
+= Attach log files
+
+Logs produced during the test execution can be submitted as attachments. {PRODUCT} uses these log files to further analyze test results and assists users to diagnose test failures.
+
+The command is as follows:
+
+`smart-tests record attachment <FILE1> <FILE2> ...`
+
+* `--session <SESSION ID STRING>` , which you can use if you have a complex test session layout. For more information, refer to xref:send-data-to-smart-tests:record-test-results/manage-complex-test-session-layouts.adoc[Manage complex test session layouts].
+
+File names (excluding directories) are used as an identity of the log files. These identities should stay the same from one test session to next. If you are submitting multiple log files, each of them should have different identities.

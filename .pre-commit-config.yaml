@@ -3,6 +3,7 @@ repos:
     rev: v4.0.1
     hooks:
     - id: end-of-file-fixer
+      exclude: ^smart_tests/docs/
 
   - repo: https://github.com/PyCQA/flake8
     rev: 7.0.0

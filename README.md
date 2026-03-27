@@ -1,3 +1,5 @@
+This is a CLI to interact with CloudBees Smart Tests.
+
 # Usage
 
 See https://help.launchableinc.com/resources/cli-reference/ and
@@ -89,6 +91,13 @@ uv add some-package
 uv add --dev some-dev-package
 ```
 
+## Adding new command
+`smart_tests/args4p` defines a small command line argument parsing framework for this CLI. See its README.md for
+the capabilities.
+
+`smart_tests/__main__.py` defines the top level commands. Follow the code from there to see where sub-commands
+are registered.
+
 ## Updating Python Version
 
 When updating the Python version requirement, update the following files:
@@ -105,6 +114,21 @@ When updating the Python version requirement, update the following files:
 
 Create new release on Github, then Github Actions automatically uploads the
 module to PyPI.
+
+## How to update bundled documentation
+
+The product documentation lives in `smart_tests/docs/` and is bundled into the
+distributed package. To pull in the latest from the docsite repository:
+
+```shell
+uv run poe update-docs
+```
+
+Users can extract the bundled docs to the current directory with:
+
+```shell
+smart-tests get docs
+```
 
 ## How to update smart_tests/jar/exe_deploy.jar
 

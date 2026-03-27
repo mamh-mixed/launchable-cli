@@ -1,0 +1,9 @@
+include::ROOT:partial$abbr.adoc[]
+:slug: getting-started
+= Getting Started
+
+After reviewing the xref:ROOT:index.adoc[Product Overview], you can sign up for a {PRODUCT} account at https://app.launchableinc.com/signup[https://app.launchableinc.com/signup].
+
+After creating your user account and verifying your email address (if necessary), you'll be prompted to create an xref:concepts:organization.adoc[Organization].or your company and a xref:concepts:workspace.adoc[Workspace].or your test suite.
+
+Then you can start sending data. For more information, refer to xref:send-data-to-smart-tests:send-data-to-smart-tests.adoc[Send data to {PRODUCT}].

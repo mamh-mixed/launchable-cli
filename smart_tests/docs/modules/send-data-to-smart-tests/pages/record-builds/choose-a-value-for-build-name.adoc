@@ -1,0 +1,59 @@
+:slug: choose-a-value-for-build-name
+= Choose a value for build name
+
+[NOTE]
+--
+This page relates to xref:send-data-to-smart-tests:record-builds/record-builds-from-multiple-repositories.adoc[Record builds from multiple repositories].
+--
+
+Your CI process probably already relies on some identifier to distinguish different builds. Such an identifier might be called a build number, build ID, etc. Most CI systems automatically make these values available via built-in environment variables. This makes it easy to pass this value into `record build`:
+
+[cols="1,1,1", options="header"]
+.System-specific build name values
+|===
+|CI system |Suggested <BUILD NAME> value |Documentation
+
+|Azure DevOps Pipelines
+|`Build.BuildId`
+|https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables[Azure DevOps Pipelines variables]
+
+|Bitbucket Pipelines
+|`BITBUCKET_BUILD_NUMBER`
+|https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/[Bitbucket Pipelines variables]
+
+|CircleCI
+|`CIRCLE_BUILD_NUM`
+|https://circleci.com/docs/reference/variables/#built-in-environment-variables[CircleCI environment variables]
+
+|GitHub Actions
+|`GITHUB_RUN_ID`
+|https://docs.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables[GitHub Actions environment variables]
+
+|GitLab CI
+|`CI_JOB_ID`
+|https://docs.gitlab.com/ee/ci/variables/predefined_variables.html[GitLab CI predefined variables]
+
+|GoCD
+|`GO_PIPELINE_LABEL`
+|https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables[GoCD environment variables]
+
+|Jenkins
+|`BUILD_TAG`
+|https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables[{JOSS}]
+
+|Travis CI
+|`TRAVIS_BUILD_NUMBER`
+|https://docs.travis-ci.com/user/environment-variables/#default-environment-variables[Travis CI environment variables]
+|===
+
+Other examples:
+
+* If your build produces an artifact or file that is later retrieved for testing, then the `sha1sum` of the file itself would be a good build name as it is unique.
+* If you are building a Docker image, its content hash can be used as the unique identifier of a build: `docker inspect -f "{{.Id}}"` .
+
+[WARNING]
+--
+{PRODUCT} discourages using a Git commit hash (or the output of `git-describe` ) if there is only one source code repository.
+
+It's not uncommon for teams to produce multiple builds from the same commit that are still considered different builds.
+--

@@ -1,0 +1,12 @@
+= Branch
+:slug: branch
+
+Branch is an attribute of a xref:concepts:build.adoc[build] that tracks which branch of development the build came from. This information helps you focus on the area you want to look into. For example, if you are responsible for the overall quality in the "main" branch, then tests run against builds from the "main" branch are of interest, but tests running in the feature branches might not be.
+
+By default, branch information is obtained automatically from the Git workspace when `smart-tests record build` runs.
+
+== Manual branch configuration
+
+If your build setup is complex, for example if your build spans multiple Git repositories, then you will be asked to record this information explicitly via `smart-tests record build --branch NAME` option.
+
+In these situations, the notion of "branch' starts to deviate from that of Git branch, but conceptually there's still a logical thread of development, and you should be able to name it. Really the key idea here is that when you have parallel threads of developments (such as production vs dev, or version4 vs version5), we'd like to be able to separate them.

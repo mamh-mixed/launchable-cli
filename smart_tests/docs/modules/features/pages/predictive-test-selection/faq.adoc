@@ -1,0 +1,73 @@
+include::ROOT:partial$abbr.adoc[]
+
+= FAQ
+:slug: faq
+
+== Problems that Predictive Test Selection can solve
+
+=== Key value proposition: Ship code faster by testing faster
+
+Software development teams are pressured to deliver code faster while maintaining high quality.
+
+There are numerous approaches to help teams deliver code faster: building a CI pipeline, automating tests, and continuously delivering code to production. However, none address the problem that running tests (long or short) is the bottleneck in delivering software.
+
+image::ROOT:testing-bottleneck-infinity.png[]
+
+{PRODUCT}'s solution is to intelligently prioritize tests to reduce testing times without sacrificing quality. Developers get feedback much earlier in the development cycle. {PRODUCT} helps teams ship code faster by _testing_ faster.
+
+=== Where does {PRODUCT} Predictive Test Selection fit into my development pipeline?
+
+{PRODUCT} Predictive Test Selection is test agnostic - send data from the test suites that cause the most pain in your delivery cycle. {PRODUCT} can help reduce the time it takes to run them - delivering feedback earlier.
+
+image::ROOT:test-pyramid.png[]
+
+==== How do I use {PRODUCT} Predictive Test Selection to change my testing lifecycle?
+
+You can use Predictive Test Selection for either *Shift left* or *In-place reduction* .
+
+Think of *Shift left* as an approach to test for risks earlier by testing earlier (typically by moving some nightly tests earlier) in your pipeline.
+
+Think of *In-place reduction* as an approach to provide faster feedback by running fewer tests in one stage (typically, tests run on each `git push` ) by shifting less important tests to a later stage.
+
+==== Does Predictive Test Selection only work for "greenfield" or "brownfield" applications?
+
+Predictive Test Selection helps in both use cases.
+
+The key question is, "Where are developers seeing pain from long testing times?" The answer tends to be different for different teams. Some teams want to cut down long integration test cycle times (from hours to minutes); this typically is the case in brownfield applications. Others want to cut down unit test cycles for faster feedback to developers (from 30 minutes to less than 5 minutes); this typically is the case in greenfield applications.
+
+[NOTE]
+--
+The key is to bring {PRODUCT} in as early as you can so that you can get the benefit of shipping code faster earlier.
+--
+
+==== Does Predictive Test Selection work for microservices? Monoliths?
+
+A question with a similar flavor to "greenfield or brownfield applications" with a similar answer. Predictive Test Selection works equally well in both cases and solves similar challenges in both cases.
+
+*Monoliths* : Teams with monoliths typically use {PRODUCT} for the "nightly" test scenario. The team has accumulated a lot of tests over a period of time that cannot be run on every push. These teams look to shift left these nightly tests to provide feedback to developers as early as possible. Some teams use {PRODUCT} to help speed up unit or acceptance tests as the number of tests has increased.
+
+*Microservices* : Unit tests for individual microservices tend to run quickly for most organizations. However, the integration testing scenario remains a challenge (just as with monoliths). Thus, teams typically use {PRODUCT} to help with integration testing scenarios. Teams that really care about having a fast dev loop on every `git push` use {PRODUCT} to optimize their unit tests.
+
+== {PRODUCT}'s Impact
+
+=== What impact can {PRODUCT} Predictive Test Selection make?
+
+The key component that helps {PRODUCT} learn well is that the test suite should be run reasonably frequently and have *some failures* . Typically, teams see a 60-80% reduction in test times without impacting quality.
+
+The primary reason that teams like https://www.launchableinc.com/customers/reducing-test-runtime-for-a-ruby-on-rails-application/[Manba] use {PRODUCT} is that it has enabled the team to ship code faster and push more changes through.
+
+[quote, Masayuki Oguni, CEO and Lead Developer]
+My test runtime went down 90 percent! Deployment to Heroku went from 30 to 10 minutes. It is great, just great!
+
+Larger teams have focused on improving developer productivity times and increasing software delivery velocity. See case studies of an https://www.launchableinc.com/customers/bmw-uses-launchable-to-optimize-testing-and-reduce-costs/[auto manufacturer] and a https://www.launchableinc.com/customers/silicon-valley-icon-improves-developer-happiness/[Silicon Valley Unicorn] using {PRODUCT}
+
+== Responses to key questions from customers
+
+=== Do I end up testing less with Predictive Test Selection?
+
+*Key Idea: You are testing more frequently* . In short, the answer is no: teams tend to test _more_ frequently. Because {PRODUCT} reduces testing times, you can execute more test runs as a result. The tests in each run are dynamically selected for every code change.
+
+=== What happens to the tests that are not run? This will surely impact quality!
+
+*Key idea: Defensive runs* . We ask our customers to view {PRODUCT} as a way to speed up tests and ship code faster. The tests that are not run as part of the subset should be run as part of a *defensive* run. The defensive run captures any tests that escape through the subset. The defensive run is instrumented to send us the test rests, and thus {PRODUCT} uses this run (in addition to the subset) to train the model.
+

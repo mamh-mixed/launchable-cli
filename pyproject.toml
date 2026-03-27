@@ -52,6 +52,7 @@ lint-warn = "flake8 --count --exit-zero --max-complexity=15 --max-line-length=13
 test = "python -m unittest"
 test-xml = "python -m test-runner"
 type = "mypy smart_tests tests"
+update-docs = "bash scripts/update_docs.sh"
 
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm"]
@@ -61,6 +62,6 @@ build-backend = "setuptools.build_meta"
 packages = ["smart_tests"]
 
 [tool.setuptools.package-data]
-smart_tests = ["jar/exe_deploy.jar"]
+smart_tests = ["jar/exe_deploy.jar", "docs/**/*"]
 
 [tool.setuptools_scm]

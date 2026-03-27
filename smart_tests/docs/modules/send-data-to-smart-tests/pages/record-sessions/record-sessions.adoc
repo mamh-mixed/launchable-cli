@@ -1,0 +1,96 @@
+include::ROOT:partial$abbr.adoc[]
+
+= Record sessions
+:slug: record-sessions
+
+[NOTE]
+--
+Before you start recording test sessions, consider your xref:concepts:test-session.adoc[Test Session Layouts].
+--
+
+{PRODUCT} uses your test results from each test session to provide testing insights and recommendations.
+
+After running the `record build` command, execute the `record session` command to create test sessions in your workspace.
+
+The general structure of this command is as follows:
+
+[source,bash]
+----
+smart-tests record session
+--build <BUILD NAME>
+--test-suite <TEST SUITE NAME>
+> smart-tests-session.txt
+----
+
+* `--build <BUILD NAME>`
+** Use if you recorded a build before running tests (_for Predictive test selection only_). For more information, refer to xref:record-builds/record-builds.adoc[Record builds with the {PRODUCT} CLI].
+
+* `--test-suite <TEST SUITE NAME>`
+** Use to set test suites. For more information, refer to xref:concepts:test-suite.adoc[Test suite].
+
+[#record-session]
+== Record a session
+
+. Run the `record session` command in your terminal. For example:
++
+[source,bash]
+----
+{PRODUCT} record session
+--build "Build 1"
+--test-suite "e2e"
+> smart-tests-session.txt
+----
++
+. After running the `record session` command, view your test sessions in the {PRODUCT} dashboard.
++
+[NOTE]
+--
+The dashboard will display empty test session(s), until the `record tests` command is run. Once that command is executed, the dashboard will populate with test sessions, test results, and insights.
+--
++
+.Test Session tab on dashboard
+image::ROOT:sending-data/record-session.png[Test session tab on dashboard,role="screenshot"]
++
+. Select a test session to view the session details.
++
+.. View session details using the dashboard. Such as;
++
+... Test session summary (Build name, flavors, test suite, session duration, and more.)
+
+... Test session details (Filters specific to the session, such as issues, failed tests, and more.)
+
+... (Optional) Select btn:[View in Jenkins] to export and view test details in a Jenkins file.
+
+... (Optional) Select the image:ROOT:icons/icon-vertical-three-dots-dark.png[three-dots] to download the test session details to a CSV file.
++
+.. View test details using the filters. Such as;
++
+... Select menu:Issues[] to view the issues related to the test session.
++
+For more information, refer to xref:features:intelligent-test-failure-diagnostics.adoc[Intelligent Test Failure Diagnostics].
+
+... Select menu:Failed tests[] to view the failed tests in the test session.
+
+... Select menu:Flakes[] to view which tests were flaky in the test session.
++
+For more information, refer to <<#test-session-status,Test status definitions>>.
+
+... Select menu:Commits[] to view the details and number of commits related to the test session.
++
+. Select btn:[View Logs] to view the session logs. The Log Search tab on the dashboard displays.
++
+.. Select the desired log file to view the session logs related to the test session. For more information, refer  to xref:record-test-results/attach-log-files.adoc[Attach log files to test sessions].
+
+[#test-session-status]
+== Test status definitions
+
+The following define the status criteria used in the test session details:
+
+* Success: A test the passed.
+* Failure: A test that failed in all executions.
+* Flake: A test failure that eventually passed after several retries within the same test session.
+* Skip: A test that was not executed.
+
+
+For more information about test sessions, refer to xref:concepts:test-session.adoc[Test session layouts].
+
