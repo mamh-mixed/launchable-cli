@@ -1,7 +1,6 @@
 from typing import Annotated
 
 import click
-from requests import HTTPError
 
 import smart_tests.args4p.typer as typer
 from smart_tests import args4p
@@ -31,6 +30,15 @@ def alias(
     tracking_client = TrackingClient(Command.UPDATE_ALIAS, app=app)
     client = SmartTestsClient(app=app, tracking_client=tracking_client)
     set_fail_fast_mode(client.is_fail_fast_mode())
+
+    # TODO: It's not entirely clear to me which layer is responsible for URL encoding
+    # this validation logic was copied from record/build.py
+    if "/" in alias_name or "%2f" in alias_name.lower():
+        click.echo("--alias must not contain a slash and an encoded slash", err=True)
+        raise typer.Exit(1)
+    if "%25" in alias_name:
+        click.echo("--alias must not contain encoded % (%25)", err=True)
+        raise typer.Exit(1)
 
     try:
         res = client.request("put", f"builds/aliases/{alias_name}", payload={"build": build_name})
