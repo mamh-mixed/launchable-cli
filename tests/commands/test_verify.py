@@ -1,8 +1,13 @@
+import os
 from subprocess import CalledProcessError
 from unittest import TestCase
 from unittest.mock import patch
 
+import responses  # type: ignore
+
 from smart_tests.commands.verify import check_java_version, compare_java_version, compare_version, parse_version
+from smart_tests.utils.http_client import get_base_url
+from tests.cli_test_case import CliTestCase
 
 
 class VersionTest(TestCase):
@@ -51,3 +56,54 @@ class VersionTest(TestCase):
         mock_run.side_effect = CalledProcessError(1, 'java -version')
         result = check_java_version('java')
         self.assertEqual(result, -1)
+
+
+class VerifyCommandTest(CliTestCase):
+    """Test the verify command with display names"""
+
+    @responses.activate
+    @patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_verify_shows_display_name(self):
+        """Test that verify displays organizationDisplayName and workspaceDisplayName from API response"""
+        verification_url = f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/verification"
+
+        # Mock server response with displayName fields
+        responses.add(
+            responses.GET,
+            verification_url,
+            json={
+                "organization": self.organization,
+                "organizationDisplayName": "My Company",
+                "workspace": self.workspace,
+                "workspaceDisplayName": "Production"
+            },
+            status=200
+        )
+
+        result = self.cli("verify")
+        self.assert_success(result)
+
+        # Verify displayName appears in output
+        self.assertIn("'My Company'", result.output)
+        self.assertIn("'Production'", result.output)
+
+    @responses.activate
+    @patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_verify_fallback_when_no_display_name(self):
+        """Test that verify falls back to org/workspace when displayName not in response"""
+        verification_url = f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/verification"
+
+        # Mock server response without displayName fields
+        responses.add(
+            responses.GET,
+            verification_url,
+            json={},
+            status=200
+        )
+
+        result = self.cli("verify")
+        self.assert_success(result)
+
+        # Should show original org/workspace names
+        self.assertIn(f"'{self.organization}'", result.output)
+        self.assertIn(f"'{self.workspace}'", result.output)

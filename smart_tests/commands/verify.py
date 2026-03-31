@@ -80,20 +80,12 @@ def verify(app_instance: Application):
     client = SmartTestsClient(tracking_client=tracking_client, app=app_instance)
     java = get_java_command()
 
-    # Print the system information first so that we can get them even if there's
-    # an issue.
-
-    click.echo("Organization: " + repr(org))
-    click.echo("Workspace: " + repr(workspace))
-    click.echo("Proxy: " + repr(os.getenv("HTTPS_PROXY")))
-    click.echo("Platform: " + repr(platform.platform()))
-    click.echo("Python version: " + repr(platform.python_version()))
-    click.echo("Java command: " + repr(java))
-    click.echo("smart-tests version: " + repr(version))
-
     # raise an error here after we print out the basic diagnostics if LAUNCHABLE_TOKEN is not set.
     ensure_org_workspace()
 
+    # Fetch display names from the verification endpoint
+    org_display = org
+    workspace_display = workspace
     try:
         res = client.request("get", "verification")
         if res.status_code == 401:
@@ -111,6 +103,15 @@ def verify(app_instance: Application):
             )
             raise typer.Exit(2)
         res.raise_for_status()
+
+        # Parse display names from response, with fallback to original values
+        try:
+            data = res.json()
+            org_display = data.get("organizationDisplayName", org)
+            workspace_display = data.get("workspaceDisplayName", workspace)
+        except Exception:
+            # If JSON parsing fails, continue with original values
+            pass
     except Exception as e:
         tracking_client.send_error_event(
             event_name=Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
@@ -118,6 +119,15 @@ def verify(app_instance: Application):
             api="verification",
         )
         client.print_exception_and_recover(e)
+
+    # Print the system information after fetching display names
+    click.echo("Organization: " + repr(org_display))
+    click.echo("Workspace: " + repr(workspace_display))
+    click.echo("Proxy: " + repr(os.getenv("HTTPS_PROXY")))
+    click.echo("Platform: " + repr(platform.platform()))
+    click.echo("Python version: " + repr(platform.python_version()))
+    click.echo("Java command: " + repr(java))
+    click.echo("smart-tests version: " + repr(version))
 
     if java is None:
         msg = "Java is not installed. Install Java version 8 or newer to use the Smart Tests CLI."
