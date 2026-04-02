@@ -3,6 +3,7 @@ import glob
 import os
 import re
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from http import HTTPStatus
 from typing import Callable, Dict, Generator, List, Optional, Sequence, Tuple, Union
 
@@ -580,17 +581,33 @@ def tests(
 
                 start = time_ns()
                 exceptions = []
-                for chunk in ichunked(tc, post_chunk):
-                    p, es = payload(
-                        cases=chunk,
-                        test_runner=test_runner,
-                        group=group,
-                        test_suite_name=test_suite if test_suite else "",
-                        flavors=dict(flavor),
-                    )
+                futures = []
+                first = True
+                max_workers = 3
 
-                    send(p)
-                    exceptions.extend(es)
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    for chunk in ichunked(tc, post_chunk):
+                        p, es = payload(
+                            cases=chunk,
+                            test_runner=test_runner,
+                            group=group,
+                            test_suite_name=test_suite if test_suite else "",
+                            flavors=dict(flavor),
+                        )
+
+                        exceptions.extend(es)
+
+                        if first:
+                            # First chunk must be synchronous to handle no-build mode
+                            # where the response sets the session ID for subsequent requests
+                            send(p)
+                            first = False
+                        else:
+                            futures.append(executor.submit(send, p))
+
+                    # Wait for all parallel uploads and propagate any exceptions
+                    for future in as_completed(futures):
+                        future.result()
                 end = time_ns()
                 tracking_client.send_event(
                     event_name=Tracking.Event.PERFORMANCE,
