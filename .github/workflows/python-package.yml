@@ -81,7 +81,7 @@ jobs:
           # to prevent this type of problems, but that file is intentionally kept out of Git, and I was afraid
           # of changing  that. So here I'm just pinning this to a version known to work. v1 is in the maintenance
           # mode, so this bandaid should last long enough.
-          pip install pipenv==2026.0.3
+          pip install 'pipenv<=2026.0.3'
           pipenv install --dev --python ${{ matrix.python-version }}
     - name: Build
       run: |
