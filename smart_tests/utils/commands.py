@@ -10,6 +10,7 @@ class Command(Enum):
     COMMIT = 'COMMIT'
     DETECT_FLAKE = 'DETECT_FLAKE'
     GATE = 'GATE'
+    UPDATE_ALIAS = 'UPDATE_ALIAS'
 
     def display_name(self):
         return self.value.lower().replace('_', ' ')

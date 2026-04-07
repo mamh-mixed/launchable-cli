@@ -87,6 +87,13 @@ def build(
         help="Set external link of a title and url",
         type=parse_key_value,
     )] = [],
+    components: Annotated[List[KeyValue], typer.Option(
+        "--component",
+        multiple=True,
+        help="Include another build as a named component. Format: NAME=BUILD_OR_ALIAS",
+        metavar="NAME=BUILDNAME",
+        type=parse_key_value,
+    )] = [],
 ):
 
     # Parse key-value pairs for commits
@@ -303,6 +310,19 @@ def build(
         def compute_links():
             return capture_links(link_options=links, env=os.environ)
 
+        def compute_components():
+            for c in components:
+                if not c.key:
+                    click.echo("Component name must not be empty", err=True)
+                    raise typer.Exit(1)
+            names_seen: set = set()
+            for c in components:
+                if c.key in names_seen:
+                    click.echo(f"Duplicate component name: '{c.key}'", err=True)
+                    raise typer.Exit(1)
+                names_seen.add(c.key)
+            return [{"name": c.key, "build": c.value} for c in components]
+
         try:
             lineage = branch or ws[0].branch
             if lineage is None:
@@ -319,6 +339,7 @@ def build(
                 } for w in ws],
                 "links": compute_links(),
                 "timestamp": parsed_timestamp.isoformat() if parsed_timestamp else None,
+                "components": compute_components(),
             }
 
             res = client.request("post", "builds", payload=payload)
