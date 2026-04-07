@@ -558,3 +558,45 @@ class BuildTest(CliTestCase):
         )
         self.assert_exit_code(result, 1)
         self.assertIn("Duplicate component name: 'payment'", result.output)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_include_environment(self):
+        from smart_tests.utils.http_client import get_base_url
+        aliases_url = (
+            f"{get_base_url()}/intake/organizations/{self.organization}"
+            f"/workspaces/{self.workspace}/builds/aliases"
+        )
+        responses.add(responses.GET, aliases_url, json=[
+            {"alias": "deployment:staging:payment", "buildName": "payment-main-137"},
+            {"alias": "deployment:staging:auth", "buildName": "auth-main-42"},
+        ], status=200)
+
+        result = self.cli(
+            "record", "build",
+            "--build", self.build_name,
+            "--branch", "main",
+            "--no-commit-collection",
+            "--commit", ".=abc123",
+            "--include-environment", "staging",
+        )
+        self.assert_success(result)
+
+        post_call = next(c for c in responses.calls if c.request.method == "POST" and "builds" in c.request.url)
+        payload = json.loads(post_call.request.body.decode())
+        self.assert_json_orderless_equal(
+            {
+                "buildNumber": "123",
+                "lineage": "main",
+                "commitHashes": [{"repositoryName": ".", "commitHash": "abc123", "branchName": ""}],
+                "links": [],
+                "timestamp": None,
+                "components": [
+                    {"name": "payment", "build": "payment-main-137"},
+                    {"name": "auth", "build": "auth-main-42"},
+                ],
+            }, payload)
+
+        from urllib.parse import unquote
+        get_call = next(c for c in responses.calls if c.request.method == "GET" and "aliases" in c.request.url)
+        self.assertIn("deployment:staging:*", unquote(get_call.request.url))
