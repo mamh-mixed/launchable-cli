@@ -11,6 +11,7 @@ class Command(Enum):
     DETECT_FLAKE = 'DETECT_FLAKE'
     GATE = 'GATE'
     UPDATE_ALIAS = 'UPDATE_ALIAS'
+    RECORD_DEPLOYMENT = 'RECORD_DEPLOYMENT'
 
     def display_name(self):
         return self.value.lower().replace('_', ' ')
