@@ -561,6 +561,9 @@ class BuildTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    # to tests on GitHub Actions
+    @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": ""})
+    @mock.patch.dict(os.environ, {"GITHUB_PULL_REQUEST_URL": ""})
     def test_include_environment(self):
         from smart_tests.utils.http_client import get_base_url
         aliases_url = (
@@ -578,6 +581,7 @@ class BuildTest(CliTestCase):
             "--branch", "main",
             "--no-commit-collection",
             "--commit", ".=abc123",
+            "--repo-branch-map", ".=AIENG-404",
             "--include-environment", "staging",
         )
         self.assert_success(result)
@@ -588,7 +592,7 @@ class BuildTest(CliTestCase):
             {
                 "buildNumber": "123",
                 "lineage": "main",
-                "commitHashes": [{"repositoryName": ".", "commitHash": "abc123", "branchName": ""}],
+                "commitHashes": [{"repositoryName": ".", "commitHash": "abc123", "branchName": "AIENG-404"}],
                 "links": [],
                 "timestamp": None,
                 "components": [
