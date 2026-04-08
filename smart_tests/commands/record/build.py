@@ -324,9 +324,12 @@ def build(
                 json = res.json()
                 if len(json) == 0:
                     warn_and_exit_if_fail_fast_mode(f"Error: no such environment: {include_environment}")
+                click.echo("Components in this environment:")
                 for alias_obj in json:
                     service = alias_obj["alias"].split(":", 2)[2]
-                    all_components.append(KeyValue(key=service, value=alias_obj["buildName"]))
+                    point_to = alias_obj["buildName"]
+                    all_components.append(KeyValue(key=service, value=point_to))
+                    click.echo(f"  - {service} -> {point_to}")
 
             for c in all_components:
                 if not c.key:
