@@ -94,6 +94,11 @@ def build(
         metavar="NAME=BUILDNAME",
         type=parse_key_value,
     )] = [],
+    include_environment: Annotated[str | None, typer.Option(
+        "--include-environment",
+        help="Include all services deployed to this environment as components. See 'record deployment' command.",
+        metavar="NAME",
+    )] = None,
 ):
 
     # Parse key-value pairs for commits
@@ -311,17 +316,32 @@ def build(
             return capture_links(link_options=links, env=os.environ)
 
         def compute_components():
-            for c in components:
+            all_components = list(components)
+            if include_environment:
+                res = client.request("get", "builds/aliases",
+                                     params={"name": f"deployment:{include_environment}:*"})
+                res.raise_for_status()
+                json = res.json()
+                if len(json) == 0:
+                    warn_and_exit_if_fail_fast_mode(f"Error: no such environment: {include_environment}")
+                click.echo("Components in this environment:")
+                for alias_obj in json:
+                    service = alias_obj["alias"].split(":", 2)[2]
+                    point_to = alias_obj["buildName"]
+                    all_components.append(KeyValue(key=service, value=point_to))
+                    click.echo(f"  - {service} -> {point_to}")
+
+            for c in all_components:
                 if not c.key:
                     click.echo("Component name must not be empty", err=True)
                     raise typer.Exit(1)
             names_seen: set = set()
-            for c in components:
+            for c in all_components:
                 if c.key in names_seen:
                     click.echo(f"Duplicate component name: '{c.key}'", err=True)
                     raise typer.Exit(1)
                 names_seen.add(c.key)
-            return [{"name": c.key, "build": c.value} for c in components]
+            return [{"name": c.key, "build": c.value} for c in all_components]
 
         try:
             lineage = branch or ws[0].branch

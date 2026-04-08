@@ -11,6 +11,9 @@ class Command(Enum):
     DETECT_FLAKE = 'DETECT_FLAKE'
     GATE = 'GATE'
     UPDATE_ALIAS = 'UPDATE_ALIAS'
+    RECORD_DEPLOYMENT = 'RECORD_DEPLOYMENT'
+
+    # when you add a new constant here, the server also needs to get a new constant in cli_tracking.proto
 
     def display_name(self):
         return self.value.lower().replace('_', ' ')
