@@ -3,6 +3,7 @@ import glob
 import os
 import re
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from time import time_ns
 from typing import Annotated, Callable, Dict, Generator, List, Tuple, Union
@@ -408,19 +409,27 @@ class RecordTests:
                     print(unparse_test_path(t['testPath']))
                 return
 
+            MAX_UPLOAD_WORKERS = 3
             start = time_ns()
             exceptions = []
-            for chunk in ichunked(tc, self.post_chunk):
-                p, es = payload(
-                    cases=chunk,
-                    test_runner=self.app.test_runner,
-                    group=self.group,
-                    test_suite_name="",  # test_suite option was removed
-                    flavors={},  # flavor option was removed
-                )
 
-                send(p)
-                exceptions.extend(es)
+            with ThreadPoolExecutor(max_workers=MAX_UPLOAD_WORKERS) as executor:
+                futures = []
+
+                for chunk in ichunked(tc, self.post_chunk):
+                    p, es = payload(
+                        cases=chunk,
+                        test_runner=self.app.test_runner,
+                        group=self.group,
+                        test_suite_name="",  # test_suite option was removed
+                        flavors={},  # flavor option was removed
+                    )
+                    exceptions.extend(es)
+                    futures.append(executor.submit(send, p))
+
+                for future in as_completed(futures):
+                    future.result()
+
             end = time_ns()
             self.tracking_client.send_event(
                 event_name=Tracking.Event.PERFORMANCE,

@@ -33,6 +33,10 @@ from ..utils.smart_tests_client import SmartTestsClient
 from ..utils.typer_types import Duration, Fraction, Percentage, parse_duration, parse_fraction, parse_percentage
 from .test_path_writer import TestPathWriter
 
+LARGE_TEST_PATHS_THRESHOLD = 100000
+DEFAULT_CONNECT_TIMEOUT = 5
+LARGE_PAYLOAD_CONNECT_TIMEOUT = 60
+
 
 class SubsetUseCase(str, Enum):
     ONE_COMMIT = "one-commit"
@@ -562,7 +566,10 @@ class Subset(TestPathWriter):
         # temporarily extend the timeout because subset API response has become slow
         # TODO: remove this line when API response return response
         # within 300 sec
-        timeout = (5, 300)
+        connect_timeout = DEFAULT_CONNECT_TIMEOUT
+        if (len(self.test_paths) >= LARGE_TEST_PATHS_THRESHOLD):
+            connect_timeout = LARGE_PAYLOAD_CONNECT_TIMEOUT
+        timeout = (connect_timeout, 300)
         payload = self.get_payload()
 
         if self.is_non_blocking:
