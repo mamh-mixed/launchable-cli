@@ -9,20 +9,42 @@ from smart_tests.utils.link import LinkKind
 from tests.cli_test_case import CliTestCase
 
 
+def _clean_github_env():
+    """
+    Returns a dict of environment variables with GitHub-specific variables cleared.
+    This is more maintainable than using clear=True, which requires manually re-adding
+    all necessary environment variables like SMART_TESTS_BASE_URL.
+
+    When tests run on GitHub Actions, various GITHUB_* environment variables are set
+    that affect link capture behavior and authentication headers. By explicitly clearing
+    only these variables (instead of using clear=True), we preserve other important
+    environment variables like SMART_TESTS_BASE_URL that may be set in the test environment.
+    """
+    return {
+        # Clear GitHub Actions variables that affect test behavior
+        'GITHUB_ACTIONS': '',
+        'GITHUB_PULL_REQUEST_URL': '',
+        'GITHUB_RUN_ID': '',
+        'GITHUB_REPOSITORY': '',
+        'GITHUB_WORKFLOW': '',
+        'GITHUB_RUN_NUMBER': '',
+        'GITHUB_EVENT_NAME': '',
+        'GITHUB_SHA': '',
+        'GITHUB_JOB': '',
+        # Set required test variables
+        'SMART_TESTS_TOKEN': CliTestCase.smart_tests_token,
+        'LANG': 'C.UTF-8',  # Required by CliRunner().invoke()
+    }
+
+
 class SessionTest(CliTestCase):
     """
-    This test needs to specify `clear=True` in mocking because the test is run on GithubActions.
-    Otherwise GithubActions will export $GITHUB_* variables at runs.
+    Tests for the 'record session' command.
+    Uses _clean_github_env() to isolate from GitHub Actions environment variables.
     """
 
     @responses.activate
-    @mock.patch.dict(os.environ, {
-        "SMART_TESTS_TOKEN": CliTestCase.smart_tests_token,
-        # LANG=C.UTF-8 is needed to run CliRunner().invoke(command).
-        # Generally it's provided by shell. But in this case, `clear=True`
-        # removes the variable.
-        'LANG': 'C.UTF-8',
-    }, clear=True)
+    @mock.patch.dict(os.environ, _clean_github_env())
     def test_run_session(self):
         result = self.cli(
             "record", "session", "--build", self.build_name,
@@ -40,7 +62,7 @@ class SessionTest(CliTestCase):
         }, payload)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token, 'LANG': 'C.UTF-8'}, clear=True)
+    @mock.patch.dict(os.environ, _clean_github_env())
     def test_run_session_with_flavor(self):
         result = self.cli("record", "session", "--build", self.build_name,
                           "--test-suite", "test-suite",
@@ -69,10 +91,7 @@ class SessionTest(CliTestCase):
         self.assertIn("but got 'only-key'", result.output)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {
-        "SMART_TESTS_TOKEN": CliTestCase.smart_tests_token,
-        'LANG': 'C.UTF-8',
-    }, clear=True)
+    @mock.patch.dict(os.environ, _clean_github_env())
     def test_run_session_with_observation(self):
         result = self.cli(
             "record", "session", "--build", self.build_name,
@@ -90,7 +109,7 @@ class SessionTest(CliTestCase):
         }, payload)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token, 'LANG': 'C.UTF-8'}, clear=True)
+    @mock.patch.dict(os.environ, _clean_github_env())
     def test_run_session_with_timestamp(self):
         result = self.cli("record", "session", "--build", self.build_name,
                           "--test-suite", "test-suite",
@@ -108,7 +127,7 @@ class SessionTest(CliTestCase):
         }, payload)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token, 'LANG': 'C.UTF-8'}, clear=True)
+    @mock.patch.dict(os.environ, _clean_github_env())
     def test_run_session_with_link(self):
         result = self.cli("record", "session", "--build", self.build_name,
                           "--test-suite", "test-suite",
@@ -129,10 +148,10 @@ class SessionTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {
+        **_clean_github_env(),
         "LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token,
-        'LANG': 'C.UTF-8',
         "GITHUB_PULL_REQUEST_URL": "https://github.com/launchableinc/cli/pull/1",
-    }, clear=True)
+    })
     def test_run_session_with_links(self):
         # Endpoint to assert
         endpoint = "{}/intake/organizations/{}/workspaces/{}/builds/{}/test_sessions".format(
@@ -208,10 +227,7 @@ class SessionTest(CliTestCase):
         self.assertIn("Invalid url 'https://github.com/launchableinc/cli/pull/2/files' passed to --link option", result.output)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {
-        "SMART_TESTS_TOKEN": CliTestCase.smart_tests_token,
-        'LANG': 'C.UTF-8',
-    }, clear=True)
+    @mock.patch.dict(os.environ, _clean_github_env())
     def test_run_session_with_no_build(self):
         result = self.cli(
             "record", "session", "--no-build",
