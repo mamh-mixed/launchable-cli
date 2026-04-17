@@ -16,6 +16,15 @@ from ..testpath import TestPath, parse_test_path, unparse_test_path
 from . import smart_tests
 
 
+def _needs_test_path_file(client: Subset) -> bool:
+    """Check if the client requires test paths to be provided via a file."""
+    if client.is_get_tests_from_previous_sessions:
+        return False
+    if client.input_snapshot_id is not None:
+        return False
+    return True
+
+
 @smart_tests.subset
 def subset(
     client: Subset,
@@ -31,7 +40,7 @@ def subset(
     considered as a comment and ignored.
     """
 
-    if not client.is_get_tests_from_previous_sessions and test_path_file is None:
+    if _needs_test_path_file(client) and test_path_file is None:
         raise BadCmdLineException("Missing argument 'TEST_PATH_FILE'.")
 
     if client.is_output_exclusion_rules:
@@ -39,7 +48,7 @@ def subset(
             "Don't need to use `--output-exclusion-rules` option. Please use `--rest` option and use it for exclusion"
         )
 
-    if not client.is_get_tests_from_previous_sessions:
+    if _needs_test_path_file(client):
         assert test_path_file is not None  # Guaranteed by earlier check
         with open(test_path_file, 'r') as f:
             tps = [s.strip() for s in f.readlines()]
