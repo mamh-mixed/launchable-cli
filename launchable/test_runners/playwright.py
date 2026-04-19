@@ -207,10 +207,10 @@ class JSONReportParser:
     def _config_dir(self, report: Dict) -> str:
         config: Dict = report.get("config", {})
         config_file = str(config.get("configFile", ""))
-        if not config_file:
-            return ""
+        if config_file:
+            str(Path(config_file).parent)
 
-        return str(Path(config_file).parent)
+        return ""
 
     def _resolve_test_file(self, test_file: str, root_dir_relpath: str, config_dir: str) -> str:
         test_file = prepend_path_if_missing(test_file, root_dir_relpath)
