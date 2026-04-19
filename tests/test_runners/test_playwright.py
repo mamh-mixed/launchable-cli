@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import unittest
+from pathlib import Path
 from unittest import mock
 
 import responses  # type: ignore
@@ -80,3 +81,29 @@ class PlaywrightTest(CliTestCase):
         test_paths = [unparse_test_path(event.get("testPath")) for event in payload.get("events")]
         self.assertIn("file=packages/e2e/tests/a.spec.ts#testcase=smoke › passes", test_paths)
         self.assertIn("file=packages/e2e/tests/b.spec.ts#testcase=smoke › already prefixed", test_paths)
+
+    @responses.activate
+    @mock.patch.dict(os.environ,
+                     {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_record_test_with_json_option_respects_base_path(self):
+        project_root = Path(self.dir, "repo")
+        base_path = project_root / "packages" / "e2e"
+        base_path.mkdir(parents=True, exist_ok=True)
+
+        report = self.load_json_from_file(self.test_files_dir.joinpath("report_with_prefix.json"))
+        report["config"]["configFile"] = str(project_root / "playwright.config.ts")
+        report["config"]["rootDir"] = str(base_path)
+
+        report_file = Path(self.dir, "report_with_prefix_base.json")
+        with report_file.open("w") as f:
+            json.dump(report, f)
+
+        result = self.cli('record', 'tests', '--session', self.session, '--base', str(base_path),
+                          'playwright', '--json', str(report_file))
+
+        self.assert_success(result)
+
+        payload = json.loads(gzip.decompress(self.find_request('/events').request.body).decode())
+        test_paths = [unparse_test_path(event.get("testPath")) for event in payload.get("events")]
+        self.assertIn("file=tests/a.spec.ts#testcase=smoke › passes", test_paths)
+        self.assertIn("file=tests/b.spec.ts#testcase=smoke › already prefixed", test_paths)

@@ -175,9 +175,10 @@ class JSONReportParser:
                 report_file), err=True)
 
         root_dir_relpath = self._compute_root_dir_relpath(data)
+        config_dir = self._config_dir(data)
         for s in suites:
             # The title of the root suite object contains the file name.
-            test_file = prepend_path_if_missing(str(s.get("title", "")), root_dir_relpath)
+            test_file = self._resolve_test_file(str(s.get("title", "")), root_dir_relpath, config_dir)
 
             for event in self._parse_suites(test_file, s, []):
                 yield event
@@ -196,12 +197,29 @@ class JSONReportParser:
             relpath(...) -> "tests"
         """
         config: Dict = report.get("config", {})
-        config_file = str(config.get("configFile", ""))
+        config_dir = self._config_dir(report)
         root_dir = str(config.get("rootDir", ""))
-        if not config_file or not root_dir:
+        if not config_dir or not root_dir:
             return ""
 
-        return relative_subpath(root_dir, str(Path(config_file).parent))
+        return relative_subpath(root_dir, config_dir)
+
+    def _config_dir(self, report: Dict) -> str:
+        config: Dict = report.get("config", {})
+        config_file = str(config.get("configFile", ""))
+        if not config_file:
+            return ""
+
+        return str(Path(config_file).parent)
+
+    def _resolve_test_file(self, test_file: str, root_dir_relpath: str, config_dir: str) -> str:
+        test_file = prepend_path_if_missing(test_file, root_dir_relpath)
+        if not self.client.base_path or not config_dir:
+            return test_file
+
+        # When --base is set, hand an absolute path to make_file_path_component()
+        # so its existing base_path relativization works as intended.
+        return str(Path(config_dir, test_file).absolute())
 
     def _parse_suites(self, test_file: str, suite: Dict[str, Dict], test_case_names: List[str] = []) -> List:
         events = []
