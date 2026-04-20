@@ -208,7 +208,7 @@ class JSONReportParser:
         config: Dict = report.get("config", {})
         config_file = str(config.get("configFile", ""))
         if config_file:
-            return str(Path(config_file).parent)
+            return Path(config_file).parent.as_posix()
 
         return ""
 
@@ -217,7 +217,7 @@ class JSONReportParser:
         if self.client.base_path and config_dir:
             # When --base is set, hand an absolute path to make_file_path_component()
             # so its existing base_path relativization works as intended.
-            return str(Path(config_dir, test_file).absolute())
+            return Path(config_dir, test_file).absolute().as_posix()
 
         return test_file
 
