@@ -81,21 +81,14 @@ class PlaywrightTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ,
                      {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @unittest.skipIf(
+        sys.platform.startswith("win"),
+        "The base path fixture uses POSIX-style paths"
+    )
     def test_record_test_with_json_option_respects_base_path(self):
-        project_root = Path(self.dir, "repo")
-        base_path = project_root / "packages" / "e2e"
-        base_path.mkdir(parents=True, exist_ok=True)
-
-        report = self.load_json_from_file(self.test_files_dir.joinpath("report_with_prefix.json"))
-        report["config"]["configFile"] = str(project_root / "playwright.config.ts")
-        report["config"]["rootDir"] = str(base_path)
-
-        report_file = Path(self.dir, "report_with_prefix_base.json")
-        with report_file.open("w") as f:
-            json.dump(report, f)
-
-        result = self.cli('record', 'tests', '--session', self.session, '--base', str(base_path),
-                          'playwright', '--json', str(report_file))
+        result = self.cli('record', 'tests', '--session', self.session,
+                          '--base', str(self.test_files_dir.joinpath("packages", "e2e")),
+                          'playwright', '--json', str(self.test_files_dir.joinpath("report_with_json_base.json")))
 
         self.assert_success(result)
         self.assert_record_tests_payload('record_test_result_with_json_base.json')
