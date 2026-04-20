@@ -208,7 +208,7 @@ class JSONReportParser:
         config: Dict = report.get("config", {})
         config_file = str(config.get("configFile", ""))
         if config_file:
-            str(Path(config_file).parent)
+            return str(Path(config_file).parent)
 
         return ""
 
