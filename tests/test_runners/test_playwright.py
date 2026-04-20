@@ -76,11 +76,7 @@ class PlaywrightTest(CliTestCase):
                           'playwright', '--json', report_file)
 
         self.assert_success(result)
-
-        payload = json.loads(gzip.decompress(self.find_request('/events').request.body).decode())
-        test_paths = [unparse_test_path(event.get("testPath")) for event in payload.get("events")]
-        self.assertIn("file=packages/e2e/tests/a.spec.ts#testcase=smoke › passes", test_paths)
-        self.assertIn("file=packages/e2e/tests/b.spec.ts#testcase=smoke › already prefixed", test_paths)
+        self.assert_record_tests_payload('record_test_result_with_prefix.json')
 
     @responses.activate
     @mock.patch.dict(os.environ,
@@ -102,8 +98,4 @@ class PlaywrightTest(CliTestCase):
                           'playwright', '--json', str(report_file))
 
         self.assert_success(result)
-
-        payload = json.loads(gzip.decompress(self.find_request('/events').request.body).decode())
-        test_paths = [unparse_test_path(event.get("testPath")) for event in payload.get("events")]
-        self.assertIn("file=tests/a.spec.ts#testcase=smoke › passes", test_paths)
-        self.assertIn("file=tests/b.spec.ts#testcase=smoke › already prefixed", test_paths)
+        self.assert_record_tests_payload('record_test_result_with_json_base.json')
