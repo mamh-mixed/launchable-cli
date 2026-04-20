@@ -199,6 +199,9 @@ class JSONReportParser:
         config: Dict = report.get("config", {})
         config_dir = self._config_dir(report)
         root_dir = str(config.get("rootDir", ""))
+        # TODO: We currently haven't supported the following sibling/parent path cases.
+        # configFile = /repo/foo/playwright.config.ts
+        # rootDir    = /repo/tests
         if config_dir and root_dir:
             return relative_subpath(root_dir, config_dir)
 
