@@ -21,17 +21,10 @@ class RawTest(CliTestCase):
         client.input_snapshot_id = input_snapshot_id
         return client
 
-    def test_needs_test_path_file_default(self):
-        client = self._make_subset_client()
-        self.assertTrue(_needs_test_path_file(client))
-
-    def test_needs_test_path_file_with_previous_sessions(self):
-        client = self._make_subset_client(is_get_tests_from_previous_sessions=True)
-        self.assertFalse(_needs_test_path_file(client))
-
-    def test_needs_test_path_file_with_input_snapshot_id(self):
-        client = self._make_subset_client(input_snapshot_id=InputSnapshotId(123))
-        self.assertFalse(_needs_test_path_file(client))
+    def test_needs_test_path_file(self):
+        self.assertTrue(_needs_test_path_file(self._make_subset_client()))
+        self.assertFalse(_needs_test_path_file(self._make_subset_client(is_get_tests_from_previous_sessions=True)))
+        self.assertFalse(_needs_test_path_file(self._make_subset_client(input_snapshot_id=InputSnapshotId(123))))
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
