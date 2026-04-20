@@ -8,11 +8,24 @@ import dateutil.parser
 import responses  # type: ignore
 from dateutil.tz import tzlocal
 
+from smart_tests.test_runners.raw import _needs_test_path_file
 from smart_tests.utils.http_client import get_base_url
+from smart_tests.utils.input_snapshot import InputSnapshotId
 from tests.cli_test_case import CliTestCase
 
 
 class RawTest(CliTestCase):
+    def _make_subset_client(self, is_get_tests_from_previous_sessions=False, input_snapshot_id=None):
+        client = mock.MagicMock()
+        client.is_get_tests_from_previous_sessions = is_get_tests_from_previous_sessions
+        client.input_snapshot_id = input_snapshot_id
+        return client
+
+    def test_needs_test_path_file(self):
+        self.assertTrue(_needs_test_path_file(self._make_subset_client()))
+        self.assertFalse(_needs_test_path_file(self._make_subset_client(is_get_tests_from_previous_sessions=True)))
+        self.assertFalse(_needs_test_path_file(self._make_subset_client(input_snapshot_id=InputSnapshotId(123))))
+
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset(self):
