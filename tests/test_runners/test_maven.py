@@ -246,7 +246,7 @@ class MavenTest(CliTestCase):
                 os.chdir(original_dir)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_scan_dryrun_results(self):
         """Test subset command with --scan-dryrun-results flag"""
         # Change to test data directory with surefire reports
@@ -269,7 +269,7 @@ class MavenTest(CliTestCase):
             os.chdir(original_dir)
 
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_subset_with_scan_dryrun_results_no_reports(self):
         """Test subset command with --scan-dryrun-results when no reports exist"""
         with tempfile.TemporaryDirectory() as temp_dir:
