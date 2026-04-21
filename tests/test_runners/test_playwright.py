@@ -67,7 +67,7 @@ class PlaywrightTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ,
-                     {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+                     {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_with_json_option_adds_prefix_from_config(self):
         report_file = str(self.test_files_dir.joinpath("report_with_prefix.json"))
 
@@ -79,7 +79,7 @@ class PlaywrightTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ,
-                     {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+                     {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     @unittest.skipIf(
         sys.platform.startswith("win"),
         "The base path fixture uses POSIX-style paths"
