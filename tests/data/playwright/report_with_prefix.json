@@ -1,0 +1,64 @@
+{
+  "config": {
+    "configFile": "/repo/playwright.config.ts",
+    "rootDir": "/repo/packages/e2e"
+  },
+  "suites": [
+    {
+      "title": "tests/a.spec.ts",
+      "specs": [],
+      "suites": [
+        {
+          "title": "smoke",
+          "specs": [
+            {
+              "title": "passes",
+              "line": 10,
+              "tests": [
+                {
+                  "results": [
+                    {
+                      "status": "passed",
+                      "duration": 12,
+                      "stdout": [],
+                      "errors": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "suites": []
+        }
+      ]
+    },
+    {
+      "title": "packages/e2e/tests/b.spec.ts",
+      "specs": [],
+      "suites": [
+        {
+          "title": "smoke",
+          "specs": [
+            {
+              "title": "already prefixed",
+              "line": 20,
+              "tests": [
+                {
+                  "results": [
+                    {
+                      "status": "passed",
+                      "duration": 15,
+                      "stdout": [],
+                      "errors": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "suites": []
+        }
+      ]
+    }
+  ]
+}

@@ -112,7 +112,7 @@ def subset(
     rest = []
     client = SmartTestsClient(app=app)
     try:
-        res = client.request("get", f"subset/{subset_id}")
+        res = client.request("get", f"subset/{subset_id}", timeout=(30, 300))
 
         if res.status_code == HTTPStatus.NOT_FOUND:
             click.secho(

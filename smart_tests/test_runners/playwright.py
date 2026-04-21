@@ -3,6 +3,7 @@
 # https://playwright.dev/
 #
 import json
+from pathlib import Path
 from typing import Annotated, Dict, List
 
 import click
@@ -13,7 +14,7 @@ import smart_tests.args4p.typer as typer
 from ..args4p.exceptions import BadCmdLineException
 from ..commands.record.case_event import CaseEvent, CaseEventGenerator
 from ..commands.record.tests import RecordTests
-from ..testpath import TestPath
+from ..testpath import TestPath, prepend_path_if_missing, relative_subpath
 from . import smart_tests
 
 TEST_CASE_DELIMITER = " › "
@@ -180,12 +181,55 @@ class JSONReportParser:
         if len(suites) == 0:
             click.echo(f"Can't find test results from {report_file}. Make sure to confirm report file.", err=True)
 
+        root_dir_relpath = self._compute_root_dir_relpath(data)
+        config_dir = self._config_dir(data)
         for s in suites:
             # The title of the root suite object contains the file name.
-            test_file = str(s.get("title", ""))
+            test_file = self._resolve_test_file(str(s.get("title", "")), root_dir_relpath, config_dir)
 
             for event in self._parse_suites(test_file, s, []):
                 yield event
+
+    def _compute_root_dir_relpath(self, report: Dict) -> str:
+        """
+        Playwright JSON stores test `file` paths relative to `config.rootDir`.
+        Our CLI wants paths relative to the Playwright config directory
+        (usually the project/repo root), so we compute:
+            relpath(root_dir, base_dir)
+        where base_dir = dirname(configFile).
+
+        Example:
+            configFile = /repo/playwright.config.ts
+            rootDir    = /repo/tests
+            relpath(...) -> "tests"
+        """
+        config: Dict = report.get("config", {})
+        config_dir = self._config_dir(report)
+        root_dir = str(config.get("rootDir", ""))
+        # TODO: We currently haven't supported the following sibling/parent path cases.
+        # configFile = /repo/foo/playwright.config.ts
+        # rootDir    = /repo/tests
+        if config_dir and root_dir:
+            return relative_subpath(root_dir, config_dir)
+
+        return ""
+
+    def _config_dir(self, report: Dict) -> str:
+        config: Dict = report.get("config", {})
+        config_file = str(config.get("configFile", ""))
+        if config_file:
+            return Path(config_file).parent.as_posix()
+
+        return ""
+
+    def _resolve_test_file(self, test_file: str, root_dir_relpath: str, config_dir: str) -> str:
+        test_file = prepend_path_if_missing(test_file, root_dir_relpath)
+        if self.client.base_path and config_dir:
+            # When --base is set, hand an absolute path to make_file_path_component()
+            # so its existing base_path relativization works as intended.
+            return Path(config_dir, test_file).absolute().as_posix()
+
+        return test_file
 
     def _parse_suites(self, test_file: str, suite: Dict[str, Dict], test_case_names: List[str] = []) -> List:
         events = []
