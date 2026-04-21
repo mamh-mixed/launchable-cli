@@ -1,0 +1,49 @@
+{
+  "events": [
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "tests/a.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "smoke \u203a passes"
+        }
+      ],
+      "duration": 0.012,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": {
+        "lineNumber": 10
+      }
+    },
+    {
+      "type": "case",
+      "testPath": [
+        {
+          "type": "file",
+          "name": "tests/b.spec.ts"
+        },
+        {
+          "type": "testcase",
+          "name": "smoke \u203a already prefixed"
+        }
+      ],
+      "duration": 0.015,
+      "status": 1,
+      "stdout": "",
+      "stderr": "",
+      "data": {
+        "lineNumber": 20
+      }
+    }
+  ],
+  "testRunner": "playwright",
+  "group": "",
+  "noBuild": false,
+  "flavors": [],
+  "testSuite": ""
+}
