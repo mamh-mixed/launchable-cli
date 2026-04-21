@@ -89,7 +89,8 @@ class _HttpClient:
             headers = {**headers, **additional_headers}
 
         dry_run_prefix = "(DRY RUN) " if self.dry_run else ""
-        Logger().audit(f"{dry_run_prefix}send request method:{method} path:{url} headers:{headers} args:{payload}")
+        sanitized_headers = _sanitize_headers(headers)
+        Logger().audit(f"{dry_run_prefix}send request method:{method} path:{url} headers:{sanitized_headers} args:{payload}")
 
         if self.dry_run and method.upper() not in ["HEAD", "GET"]:
             return DryRunResponse(status_code=200, payload={
@@ -163,6 +164,19 @@ def _build_data(payload: Union[BinaryIO, Dict] | None, compress: bool):
             return gzipgen_compress(_file_to_generator(payload))
         else:
             return payload
+
+
+def _sanitize_headers(headers: Dict) -> Dict:
+    """
+    Returns a copy of headers with sensitive values redacted for logging.
+    """
+    sanitized = headers.copy()
+    if 'Authorization' in sanitized:
+        auth_value = sanitized['Authorization']
+        if auth_value.startswith('Bearer '):
+            # Redact the token but keep the "Bearer " prefix
+            sanitized['Authorization'] = 'Bearer [REDACTED]'
+    return sanitized
 
 
 def _join_paths(*components):
