@@ -626,8 +626,11 @@ def subset(
                 subset_result = self.request_subset()
 
             if len(subset_result.subset) == 0:
-                warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
-                return
+                if len(subset_result.rest) == 0:
+                    warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
+                    return
+                else:
+                    click.echo(click.style("No tests were selected for this code change.", fg="yellow"), err=True)
 
             if split:
                 click.echo("subset/{}".format(subset_result.subset_id))
