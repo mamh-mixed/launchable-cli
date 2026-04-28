@@ -12,7 +12,7 @@ from smart_tests.version import __version__
 
 from ..app import Application
 from .authentication import authentication_headers
-from .env_keys import BASE_URL_KEY, SKIP_TIMEOUT_RETRY
+from .env_keys import BASE_URL_KEY, CALLER_KEY, SKIP_TIMEOUT_RETRY, detect_ci_provider
 from .gzipgen import compress as gzipgen_compress
 from .logger import Logger
 
@@ -133,6 +133,13 @@ class _HttpClient:
 
         if self.test_runner:
             h["User-Agent"] = h["User-Agent"] + f" TestRunner/{self.test_runner}"
+
+        caller = os.environ.get(CALLER_KEY) or "cli"
+        h["User-Agent"] += f" Caller/{caller}"
+
+        ci_provider = detect_ci_provider()
+        if ci_provider:
+            h["User-Agent"] += f" CI/{ci_provider}"
 
         return {**h, **authentication_headers()}
 

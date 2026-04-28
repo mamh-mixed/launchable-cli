@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from typing import Any, Dict, Union
 
@@ -5,6 +6,7 @@ from requests import Session
 
 from smart_tests.app import Application
 from smart_tests.utils.authentication import get_org_workspace
+from smart_tests.utils.env_keys import CALLER_KEY, detect_ci_provider
 from smart_tests.utils.http_client import _HttpClient, _join_paths
 from smart_tests.version import __version__
 
@@ -79,11 +81,15 @@ class TrackingClient:
         event_name: Union[Tracking.Event, Tracking.ErrorEvent],
         metadata: Dict[str, Any]
     ):
+        caller = os.environ.get(CALLER_KEY) or "cli"
+        ci_provider = detect_ci_provider()
         payload = {
             "command": self.command.value,
             "eventName": event_name.value,
             "cliVersion": __version__,
             "metadata": metadata,
+            "caller": caller,
+            "ciProvider": ci_provider,
         }
         path = _join_paths(
             '/intake',
