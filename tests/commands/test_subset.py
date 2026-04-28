@@ -210,8 +210,16 @@ class SubsetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_subset_with_empty_valid_subset(self):
+    def test_confidence_subset_with_empty_valid_subset_when_pts_v2_enabled(self):
         pipe = "test_aaa.py\ntest_bbb.py\ntest_ccc.py"
+        responses.replace(
+            responses.GET,
+            "{}/intake/organizations/{}/workspaces/{}/state".format(
+                get_base_url(),
+                self.organization,
+                self.workspace),
+            json={"isFailFastMode": False, "isPtsV2Enabled": True},
+            status=200)
         responses.replace(
             responses.POST,
             "{}/intake/organizations/{}/workspaces/{}/subset".format(
@@ -237,8 +245,8 @@ class SubsetTest(CliTestCase):
 
         result = self.cli(
             "subset",
-            "--target",
-            "30%",
+            "--confidence",
+            "90%",
             "--session",
             self.session,
             "file",
@@ -252,8 +260,16 @@ class SubsetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
-    def test_subset_with_empty_subset_and_rest_is_error_even_if_summary_has_candidates(self):
+    def test_confidence_subset_with_empty_subset_and_rest_is_error_even_if_summary_has_candidates(self):
         pipe = "test_aaa.py\ntest_bbb.py\ntest_ccc.py"
+        responses.replace(
+            responses.GET,
+            "{}/intake/organizations/{}/workspaces/{}/state".format(
+                get_base_url(),
+                self.organization,
+                self.workspace),
+            json={"isFailFastMode": False, "isPtsV2Enabled": True},
+            status=200)
         responses.replace(
             responses.POST,
             "{}/intake/organizations/{}/workspaces/{}/subset".format(
@@ -275,8 +291,8 @@ class SubsetTest(CliTestCase):
 
         result = self.cli(
             "subset",
-            "--target",
-            "30%",
+            "--confidence",
+            "90%",
             "--session",
             self.session,
             "file",
