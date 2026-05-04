@@ -42,7 +42,7 @@ def send_command_tracking(argv: list[str], exit_code: int):
     """Send a single COMMAND_INVOCATION event with the full command string. Fire-and-forget."""
     client = TrackingClient(_detect_command(argv))
     metadata = {
-        "exitCode": exit_code,
+        "exitCode": str(exit_code),
     }
 
     payload = client.construct_payload(

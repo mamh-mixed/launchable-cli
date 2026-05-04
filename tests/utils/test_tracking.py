@@ -204,7 +204,7 @@ class SendCommandTrackingTest(TestCase):
         self.assertEqual(payload["rawCommand"], "smart-tests record build --name foo")
         self.assertIn("cliVersion", payload)
         metadata = payload["metadata"]
-        self.assertEqual(metadata["exitCode"], 0)
+        self.assertEqual(metadata["exitCode"], "0")
         self.assertEqual(metadata["caller"], "cli")
 
     @mock.patch.dict(
@@ -261,5 +261,5 @@ class SendCommandTrackingTest(TestCase):
 
         payload = json.loads(responses.calls[0].request.body)
         self.assertEqual(payload["command"], "UNKNOWN")
-        self.assertEqual(payload["metadata"]["exitCode"], 1)
+        self.assertEqual(payload["metadata"]["exitCode"], "1")
         self.assertEqual(payload["rawCommand"], "smart-tests recrd build")
