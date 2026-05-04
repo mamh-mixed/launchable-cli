@@ -12,6 +12,7 @@ class Command(Enum):
     GATE = 'GATE'
     UPDATE_ALIAS = 'UPDATE_ALIAS'
     RECORD_DEPLOYMENT = 'RECORD_DEPLOYMENT'
+    UNKNOWN = 'UNKNOWN'
 
     # when you add a new constant here, the server also needs to get a new constant in cli_tracking.proto
 
