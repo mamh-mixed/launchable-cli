@@ -18,6 +18,7 @@ from smart_tests.commands.subset import subset
 from smart_tests.commands.update import update
 from smart_tests.commands.verify import verify
 from smart_tests.commands.view import view
+from smart_tests.utils.tracking import send_command_tracking
 
 cli = Group(name="cli", callback=Application)
 cli.add_command(record)
@@ -63,7 +64,18 @@ _load_test_runners()
 
 
 def main():
-    cli.main()
+    argv = sys.argv[:]
+    exit_code = 0
+    try:
+        cli.main()
+    except SystemExit as e:
+        exit_code = e.code if isinstance(e.code, int) else 1
+    finally:
+        try:
+            send_command_tracking(argv=argv, exit_code=exit_code)
+        except Exception:
+            pass
+    sys.exit(exit_code)
 
 
 if __name__ == '__main__':
