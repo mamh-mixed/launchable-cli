@@ -142,7 +142,7 @@ class TrackingClient:
             "eventName": event_name.value,
             "cliVersion": __version__,
             "metadata": metadata,
-            "rawCommand": raw_command or "",
+            "rawCommand": raw_command,
         }
 
         return payload
