@@ -38,4 +38,3 @@ Request subset
 cat test_list.txt | launchable subset --target 25% jasmine > subset.txt
 npx jasmine $(cat subset.txt)
 ```
-

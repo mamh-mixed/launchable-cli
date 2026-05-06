@@ -8,10 +8,10 @@ from requests import Response
 from tabulate import tabulate
 
 from smart_tests.utils.tracking import TrackingClient
+
 from .. import args4p
 from ..app import Application
 from ..args4p import typer
-
 from ..utils.commands import Command
 from ..utils.session import SessionId
 from ..utils.smart_tests_client import SmartTestsClient
