@@ -45,10 +45,12 @@ def send_command_tracking(argv: list[str], exit_code: int):
         "exitCode": str(exit_code),
     }
 
+    raw_command = " ".join(argv)[:2000]
+
     payload = client.construct_payload(
         event_name=Tracking.Event.COMMAND_INVOCATION,
         metadata=metadata,
-        raw_command=" ".join(argv),
+        raw_command=raw_command,
     )
 
     client.post_payload(payload=payload)
