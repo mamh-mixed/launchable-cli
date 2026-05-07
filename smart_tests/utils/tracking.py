@@ -20,11 +20,17 @@ _COMMAND_MAP = {
     ("record", "session"): Command.RECORD_SESSION,
     ("record", "tests"): Command.RECORD_TESTS,
     ("record", "commit"): Command.COMMIT,
+    ("record", "attachment"): Command.RECORD_ATTACHMENT,
     ("record", "deployment"): Command.RECORD_DEPLOYMENT,
     ("subset",): Command.SUBSET,
     ("detect-flakes",): Command.DETECT_FLAKE,
     ("gate",): Command.GATE,
     ("update", "alias"): Command.UPDATE_ALIAS,
+    ("inspect", "model"): Command.INSPECT_MODEL,
+    ("inspect", "subset"): Command.INSPECT_SUBSET,
+    ("stats", "test_sessions"): Command.STATS_TEST_SESSIONS,
+    ("compare", "subsets"): Command.COMPARE_SUBSETS,
+    ("get", "docs"): Command.GET_DOCS,
 }
 
 
