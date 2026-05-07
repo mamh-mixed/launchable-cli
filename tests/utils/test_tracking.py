@@ -7,7 +7,7 @@ import responses
 from smart_tests.utils.commands import Command
 from smart_tests.utils.env_keys import detect_ci_provider
 from smart_tests.utils.http_client import get_base_url
-from smart_tests.utils.tracking import Tracking, TrackingClient, _detect_command, send_command_tracking
+from smart_tests.utils.tracking import Tracking, TrackingClient, _COMMAND_MAP, _detect_command, send_command_tracking
 
 
 class DetectCommandTest(TestCase):
@@ -44,6 +44,33 @@ class DetectCommandTest(TestCase):
             _detect_command(["smart-tests", "--dry-run", "record", "build", "--name", "foo"]),
             Command.RECORD_BUILD,
         )
+
+    def test_record_attachment(self):
+        self.assertEqual(_detect_command(["smart-tests", "record", "attachment", "--session", "s1"]), Command.RECORD_ATTACHMENT)
+
+    def test_record_deployment(self):
+        self.assertEqual(_detect_command(["smart-tests", "record", "deployment", "--build", "b1"]), Command.RECORD_DEPLOYMENT)
+
+    def test_inspect_model(self):
+        self.assertEqual(_detect_command(["smart-tests", "inspect", "model"]), Command.INSPECT_MODEL)
+
+    def test_inspect_subset(self):
+        self.assertEqual(_detect_command(["smart-tests", "inspect", "subset", "--subset-id", "123"]), Command.INSPECT_SUBSET)
+
+    def test_stats_test_sessions(self):
+        self.assertEqual(_detect_command(["smart-tests", "stats", "test_sessions", "--days", "7"]), Command.STATS_TEST_SESSIONS)
+
+    def test_compare_subsets(self):
+        self.assertEqual(_detect_command(["smart-tests", "compare", "subsets"]), Command.COMPARE_SUBSETS)
+
+    def test_get_docs(self):
+        self.assertEqual(_detect_command(["smart-tests", "get", "docs"]), Command.GET_DOCS)
+
+    def test_command_map_covers_all_enum_values(self):
+        mapped_commands = set(_COMMAND_MAP.values())
+        all_commands = {c for c in Command if c != Command.UNKNOWN}
+        self.assertEqual(mapped_commands, all_commands,
+                         f"Commands missing from _COMMAND_MAP: {all_commands - mapped_commands}")
 
 
 class DetectCiProviderTest(TestCase):
