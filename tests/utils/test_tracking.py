@@ -7,7 +7,7 @@ import responses
 from smart_tests.utils.commands import Command
 from smart_tests.utils.env_keys import detect_ci_provider
 from smart_tests.utils.http_client import get_base_url
-from smart_tests.utils.tracking import Tracking, TrackingClient, _COMMAND_MAP, _detect_command, send_command_tracking
+from smart_tests.utils.tracking import _COMMAND_MAP, Tracking, TrackingClient, _detect_command, send_command_tracking
 
 
 class DetectCommandTest(TestCase):
