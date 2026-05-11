@@ -73,7 +73,7 @@ def flaky_tests(
     if year_week:
         params["year-week"] = year_week
     if weeks:
-        params["weeks"] = str(weeks)
+        params["weeks"] = weeks
     if from_date:
         params["from"] = str(from_date)
     if to_date:
@@ -81,7 +81,7 @@ def flaky_tests(
     if test_suite:
         params["test-suite"] = test_suite
     if limit:
-        params["limit"] = str(limit)
+        params["limit"] = limit
 
     try:
         res = client.request("get", "view/flaky-tests", params=params)

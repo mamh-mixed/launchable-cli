@@ -107,9 +107,9 @@ def test_results(
     if logs:
         params["include-logs"] = "true"
     if limit:
-        params["limit"] = str(limit)
+        params["limit"] = limit
     if offset:
-        params["offset"] = str(offset)
+        params["offset"] = offset
 
     try:
         res = client.request("get", "view/test-results", params=params)
