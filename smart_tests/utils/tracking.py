@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from itertools import takewhile
 from typing import Any, Dict, Union
 
 from requests import Session
@@ -36,12 +37,10 @@ _COMMAND_MAP = {
 
 def _detect_command(argv: list[str]) -> Command:
     """Best-effort detection of the Command from argv. Returns UNKNOWN for typos."""
-    # Commands are always positional tokens (not starting with '-').
-    # We match only the first positional tokens against known command patterns.
-    positional = [a for a in argv[1:] if not a.startswith("-")]
+    command_tokens = list(takewhile(lambda a: not a.startswith("-"), argv[1:]))
 
     for tokens, command in sorted(_COMMAND_MAP.items(), key=lambda x: -len(x[0])):
-        if tuple(positional[:len(tokens)]) == tokens:
+        if tuple(command_tokens[:len(tokens)]) == tokens:
             return command
     return Command.UNKNOWN
 

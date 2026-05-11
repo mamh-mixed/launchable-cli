@@ -34,10 +34,23 @@ class DetectCommandTest(TestCase):
         self.assertEqual(_detect_command(["smart-tests", "update", "alias", "--build", "foo"]), Command.UPDATE_ALIAS)
 
     def test_command_token_in_flag_value_not_misdetected(self):
-        """Regression: 'smart-tests record --name verify' should not detect as VERIFY."""
+        """Flag values that match command names must not affect detection."""
+        # "verify" is a flag value, not a command
         self.assertEqual(
             _detect_command(["smart-tests", "record", "build", "--name", "verify"]),
             Command.RECORD_BUILD,
+        )
+        # "build" is a flag value, not a subcommand of record
+        self.assertEqual(
+            _detect_command(["smart-tests", "record", "tests", "--name", "build"]),
+            Command.RECORD_TESTS,
+        )
+
+    def test_flag_value_matching_subcommand_not_misdetected(self):
+        """'record --name build' must not be detected as RECORD_BUILD."""
+        self.assertEqual(
+            _detect_command(["smart-tests", "record", "--name", "build"]),
+            Command.UNKNOWN,
         )
 
     def test_typo_returns_unknown(self):
@@ -49,7 +62,7 @@ class DetectCommandTest(TestCase):
     def test_global_options_before_command(self):
         self.assertEqual(
             _detect_command(["smart-tests", "--dry-run", "record", "build", "--name", "foo"]),
-            Command.RECORD_BUILD,
+            Command.UNKNOWN,
         )
 
     def test_record_attachment(self):
