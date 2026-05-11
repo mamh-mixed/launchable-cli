@@ -126,7 +126,7 @@ class TrackingClient:
             'cli_tracking'
         )
         try:
-            self.http_client.request('post', payload=payload, path=path)
+            self.http_client.request('post', payload=payload, path=path, timeout=(2, 2))
         except Exception:
             pass
 
