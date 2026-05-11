@@ -33,6 +33,13 @@ class DetectCommandTest(TestCase):
     def test_update_alias(self):
         self.assertEqual(_detect_command(["smart-tests", "update", "alias", "--build", "foo"]), Command.UPDATE_ALIAS)
 
+    def test_command_token_in_flag_value_not_misdetected(self):
+        """Regression: 'smart-tests record --name verify' should not detect as VERIFY."""
+        self.assertEqual(
+            _detect_command(["smart-tests", "record", "build", "--name", "verify"]),
+            Command.RECORD_BUILD,
+        )
+
     def test_typo_returns_unknown(self):
         self.assertEqual(_detect_command(["smart-tests", "recrd", "build"]), Command.UNKNOWN)
 

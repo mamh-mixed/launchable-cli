@@ -36,11 +36,13 @@ _COMMAND_MAP = {
 
 def _detect_command(argv: list[str]) -> Command:
     """Best-effort detection of the Command from argv. Returns UNKNOWN for typos."""
-    args = argv[1:]
+    # Commands are always positional tokens (not starting with '-').
+    # We match only the first positional tokens against known command patterns.
+    positional = [a for a in argv[1:] if not a.startswith("-")]
+
     for tokens, command in sorted(_COMMAND_MAP.items(), key=lambda x: -len(x[0])):
-        for i in range(len(args) - len(tokens) + 1):
-            if tuple(args[i:i + len(tokens)]) == tokens:
-                return command
+        if tuple(positional[:len(tokens)]) == tokens:
+            return command
     return Command.UNKNOWN
 
 
