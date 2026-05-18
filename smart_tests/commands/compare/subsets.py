@@ -136,7 +136,12 @@ def subsets(
         client = SmartTestsClient(app=app)
         # for type check
         assert subset_id_before is not None and subset_id_after is not None
-        _from_subset_ids(client=client, subset_id_before=subset_id_before, subset_id_after=subset_id_after)
+        rows, total, promoted, demoted, affected = _from_subset_ids(
+            client=client,
+            subset_id_before=subset_id_before,
+            subset_id_after=subset_id_after
+        )
+        _display_from_subset_ids(rows, total, promoted, demoted, affected)
         return
 
     # for type check
@@ -144,7 +149,14 @@ def subsets(
     _from_files(file_before=file_before, file_after=file_after)
 
 
-def _from_subset_ids(client: SmartTestsClient, subset_id_before: int, subset_id_after: int):
+def _from_subset_ids(
+    client: SmartTestsClient,
+    subset_id_before: int,
+    subset_id_after: int
+) -> Tuple[List[Tuple[str, Union[int, str], str, str, Union[float, str]]], int, int, int, set]:
+    """Compare two subsets, and return in format:
+        Tuple of (rows, total, promoted, demoted, affected)
+    """
     before_subset = SubsetResults.load(client, subset_id_before)
     after_subset = SubsetResults.load(client, subset_id_after)
 
@@ -186,6 +198,24 @@ def _from_subset_ids(client: SmartTestsClient, subset_id_before: int, subset_id_
         if after_subset.get_order(test_name) is None:
             rows.append(("DELETED", '-', test_name, "", ""))
 
+    return rows, total, promoted, demoted, affected
+
+
+def _display_from_subset_ids(
+    rows: List[Tuple[str, Union[int, str], str, str, Union[float, str]]],
+    total: int,
+    promoted: int,
+    demoted: int,
+    affected: set
+) -> None:
+    """Display subset comparison results.
+    Args:
+        rows: List of tuples (rank, after_order, test_name, reason, density)
+        total: Total number of tests
+        promoted: Number of promoted tests
+        demoted: Number of demoted tests
+        affected: Set of affected file paths
+    """
     summary = f"""PTS subset change summary:
 ────────────────────────────────
 -> {total} tests analyzed | {promoted} ↑ promoted | {demoted} ↓ demoted

@@ -6,6 +6,7 @@ from os.path import basename, dirname, join
 
 from smart_tests.app import Application
 from smart_tests.args4p.command import Group
+from smart_tests.commands.analyze import analyze
 from smart_tests.commands.compare import compare
 from smart_tests.commands.detect_flakes import detect_flakes
 from smart_tests.commands.gate import gate
@@ -24,6 +25,7 @@ cli.add_command(subset)
 # TODO: main.add_command(split_subset)
 cli.add_command(verify)
 cli.add_command(inspect)
+cli.add_command(analyze)
 cli.add_command(stats)
 cli.add_command(compare)
 cli.add_command(detect_flakes)

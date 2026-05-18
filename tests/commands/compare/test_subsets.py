@@ -292,7 +292,8 @@ class SubsetsTest(CliTestCase):
 
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     @responses.activate
-    def test_subsets_with_long_paths_wrapped(self):
+    @mock.patch('shutil.get_terminal_size', return_value=os.terminal_size((80, 24)))
+    def test_subsets_with_long_paths_wrapped(self, mock_terminal_size):
         """Test that long file paths in Reason column are wrapped properly."""
         long_path1 = "src/mongo/db/telemetry/telemetry_thread_base.cpp"
         long_path2 = "jstests/concurrency/fsm_workloads/timeseries/timeseries_raw_data_operations.js"
