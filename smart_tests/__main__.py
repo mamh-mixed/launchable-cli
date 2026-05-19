@@ -17,6 +17,7 @@ from smart_tests.commands.stats import stats
 from smart_tests.commands.subset import subset
 from smart_tests.commands.update import update
 from smart_tests.commands.verify import verify
+from smart_tests.commands.view import view
 
 cli = Group(name="cli", callback=Application)
 cli.add_command(record)
@@ -31,6 +32,7 @@ cli.add_command(compare)
 cli.add_command(detect_flakes)
 cli.add_command(gate)
 cli.add_command(get)
+cli.add_command(view)
 
 
 def _load_test_runners():
