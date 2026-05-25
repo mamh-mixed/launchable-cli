@@ -1,0 +1,69 @@
+{
+    "events": [
+        {
+            "type": "case",
+            "testPath": [
+                {
+                    "type": "Assembly",
+                    "name": "net8.0\\sample-app.Test.dll"
+                },
+                {
+                    "type": "TestSuite",
+                    "name": "sample_app"
+                },
+                {
+                    "type": "TestSuite",
+                    "name": "Testing"
+                },
+                {
+                    "type": "TestSuite",
+                    "name": "OriginalEntryHeaderTest"
+                },
+                {
+                    "type": "TestCase",
+                    "name": "TestPersistentBusinessObject"
+                }
+            ],
+            "duration": 0.0,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {
+                    "type": "Assembly",
+                    "name": "net8.0\\sample-app.Test.dll"
+                },
+                {
+                    "type": "TestSuite",
+                    "name": "sample_app"
+                },
+                {
+                    "type": "TestSuite",
+                    "name": "Testing"
+                },
+                {
+                    "type": "TestSuite",
+                    "name": "OriginalEntryHeaderTest"
+                },
+                {
+                    "type": "TestCase",
+                    "name": "TestSaveAndDeleteBusinessObject"
+                }
+            ],
+            "duration": 0.0,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        }
+    ],
+    "testRunner": "dotnet",
+    "group": "",
+    "noBuild": false,
+    "testSuite": "",
+    "flavors": {}
+}
