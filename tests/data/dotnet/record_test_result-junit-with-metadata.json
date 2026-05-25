@@ -5,11 +5,11 @@
             "testPath": [
                 {
                     "type": "Assembly",
-                    "name": "net8.0\\sample-app.Test.dll"
+                    "name": "sample-app.Test.dll"
                 },
                 {
                     "type": "TestSuite",
-                    "name": "sample_app"
+                    "name": "vstest:sample_app"
                 },
                 {
                     "type": "TestSuite",
@@ -35,11 +35,11 @@
             "testPath": [
                 {
                     "type": "Assembly",
-                    "name": "net8.0\\sample-app.Test.dll"
+                    "name": "sample-app.Test.dll"
                 },
                 {
                     "type": "TestSuite",
-                    "name": "sample_app"
+                    "name": "vstest:sample_app"
                 },
                 {
                     "type": "TestSuite",

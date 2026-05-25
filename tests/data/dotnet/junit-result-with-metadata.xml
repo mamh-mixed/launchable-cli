@@ -1,7 +1,7 @@
 <testsuites name="Custom" tests="2" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-05-18T10:57:47">
-  <testsuite name="&#9;net8.0%5Csample-app.Test.dll&#9;" package="&#9;net8.0%5Csample-app.Test.dll&#9;" id="0" hostname="ci" tests="2" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-05-18T10:57:47">
+  <testsuite name="&#9;sample-app.Test.dll&#9;" package="&#9;sample-app.Test.dll&#9;" id="0" hostname="ci" tests="2" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-05-18T10:57:47">
     <properties />
-    <testcase name="&#9;TestPersistentBusinessObject&#9;0&#9;0&#9;DOTNET_RUNTIME_8.0_COMPAT&#9;SQL2022" classname="&#9;sample_app.Testing.OriginalEntryHeaderTest" time="0"/>
-    <testcase name="&#9;TestSaveAndDeleteBusinessObject&#9;0&#9;0&#9;DOTNET_RUNTIME_8.0_COMPAT&#9;SQL2022" classname="&#9;sample_app.Testing.OriginalEntryHeaderTest" time="0"/>
+    <testcase name="&#9;TestPersistentBusinessObject&#9;0&#9;0&#9;DOTNET_RUNTIME_8.0_COMPAT&#9;SQL2022" classname="&#9;vstest%3Asample_app.Testing.OriginalEntryHeaderTest" time="0"/>
+    <testcase name="&#9;TestSaveAndDeleteBusinessObject&#9;0&#9;0&#9;DOTNET_RUNTIME_8.0_COMPAT&#9;SQL2022" classname="&#9;vstest%3Asample_app.Testing.OriginalEntryHeaderTest" time="0"/>
   </testsuite>
 </testsuites>
