@@ -21,11 +21,18 @@ mkdir -p "$(dirname "$SCHEMA_FILE")"
 # Fetch and save schema
 curl -s http://localhost:8080/intake/v3/api-docs > "$SCHEMA_FILE"
 
-# Validate it's valid JSON
-if ! python3 -m json.tool "$SCHEMA_FILE" > /dev/null 2>&1; then
-    echo "Error: Downloaded file is not valid JSON"
-    exit 1
-fi
+# Validate and format the JSON with proper indentation and trailing newline
+python3 << PYTHON_EOF
+import json
+
+with open("$SCHEMA_FILE", 'r') as f:
+    schema = json.load(f)
+
+# Write back with proper formatting
+with open("$SCHEMA_FILE", 'w') as f:
+    json.dump(schema, f, indent=2)
+    f.write('\n')  # Add trailing newline
+PYTHON_EOF
 
 echo "✓ Schema updated successfully: $SCHEMA_FILE"
 echo ""
