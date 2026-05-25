@@ -10,7 +10,12 @@ from smart_tests.version import __version__
 class HttpClientTest(TestCase):
     @mock.patch.dict(
         os.environ,
-        {"SMART_TESTS_ORGANIZATION": "launchableinc", "SMART_TESTS_WORKSPACE": "test"},
+        {
+            "SMART_TESTS_ORGANIZATION": "launchableinc",
+            "SMART_TESTS_WORKSPACE": "test",
+            "SMART_TESTS_TOKEN": "",
+            "LAUNCHABLE_TOKEN": "",
+        },
         clear=True,
     )
     def test_header(self):
