@@ -1,0 +1,2882 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Tests Intake API",
+    "description": "API for accessing test execution data, flaky test reports, and test results",
+    "contact": {
+      "name": "Smart Tests Team",
+      "url": "https://www.launchableinc.com"
+    },
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/intake",
+      "description": "Local development server"
+    }
+  ],
+  "security": [
+    {
+      "smartTestsToken": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Test Data View",
+      "description": "APIs for viewing test execution data and flaky test reports"
+    }
+  ],
+  "paths": {
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/aliases/{aliasName}": {
+      "put": {
+        "tags": [
+          "build-alias-controller"
+        ],
+        "operationId": "recordAlias",
+        "parameters": [
+          {
+            "name": "aliasName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSUpdateAlias"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSUpdateAliasResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/slack/interactivity": {
+      "post": {
+        "tags": [
+          "interactivity-controller"
+        ],
+        "operationId": "interactivity",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/slack/event": {
+      "post": {
+        "tags": [
+          "event-controller"
+        ],
+        "operationId": "event",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/slack/command": {
+      "post": {
+        "tags": [
+          "command-controller"
+        ],
+        "operationId": "command",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/subset": {
+      "post": {
+        "tags": [
+          "subset-controller"
+        ],
+        "operationId": "subset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSSubset"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/subset/{subsettingId}/split-by-groups": {
+      "post": {
+        "tags": [
+          "subset-controller"
+        ],
+        "operationId": "splitByGroups",
+        "parameters": [
+          {
+            "name": "subsettingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSSplitSubsetByGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/subset/{subsettingId}/slice": {
+      "post": {
+        "tags": [
+          "subset-controller"
+        ],
+        "operationId": "split",
+        "parameters": [
+          {
+            "name": "subsettingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSSplitSubset"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSSplitSubsetResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/subset-analyze/suggest-related-tests": {
+      "post": {
+        "tags": [
+          "subset-analyze-controller"
+        ],
+        "operationId": "suggestRelatedTests",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSSuggestRelatedTestsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSSuggestRelatedTestsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/events/jenkins": {
+      "post": {
+        "tags": [
+          "jenkins-insight-controller"
+        ],
+        "operationId": "jenkins",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file",
+                  "metadata"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "metadata": {
+                    "$ref": "#/components/schemas/JSCustomJenkinsEventMetadata"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSJenkinsCustomEventsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/commits/collect": {
+      "post": {
+        "tags": [
+          "commits-controller"
+        ],
+        "operationId": "collect",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/commits/collect/tree": {
+      "post": {
+        "tags": [
+          "commits-controller"
+        ],
+        "operationId": "tree",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/commits/collect/files": {
+      "post": {
+        "tags": [
+          "commits-controller"
+        ],
+        "operationId": "files",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds": {
+      "post": {
+        "tags": [
+          "build-controller"
+        ],
+        "operationId": "build",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSBuild"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSBuildResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{buildNumber}/test_sessions": {
+      "post": {
+        "tags": [
+          "test-sessions-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "buildNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSTestSession"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSTestSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{DoNotUse3}/test_sessions/{testSessionId}/test_result_file": {
+      "post": {
+        "tags": [
+          "test-report-file-upload-controller"
+        ],
+        "operationId": "upload",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{DoNotUse3}/test_sessions/{testSessionId}/events": {
+      "post": {
+        "tags": [
+          "events-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSEvents"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSEventsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{DoNotUse3}/test_sessions/{testSessionId}/attachment": {
+      "post": {
+        "tags": [
+          "test-session-attachment-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Content-Disposition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/github_app_events": {
+      "post": {
+        "tags": [
+          "github-actions-webhook-controller"
+        ],
+        "operationId": "handleWebhook",
+        "parameters": [
+          {
+            "name": "X-Hub-Signature-256",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-GitHub-Event",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cli_tracking": {
+      "post": {
+        "tags": [
+          "cli-tracking-controller"
+        ],
+        "operationId": "saveTelemetry",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSCliTracking"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{buildNumber}/test_sessions/{testSessionId}": {
+      "get": {
+        "tags": [
+          "test-sessions-controller"
+        ],
+        "operationId": "getByTestSessionId",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSTestSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "test-sessions-controller"
+        ],
+        "operationId": "patch",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSTestSessionPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSTestSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{buildNumber}/test_sessions/{testSessionId}/close": {
+      "patch": {
+        "tags": [
+          "test-sessions-controller"
+        ],
+        "operationId": "close",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSCloseSession"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSTestSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/slack/oauth": {
+      "get": {
+        "tags": [
+          "o-auth-controller"
+        ],
+        "operationId": "oauth",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": [
+          "health-controller"
+        ],
+        "operationId": "ready",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/raise_error": {
+      "get": {
+        "tags": [
+          "health-controller"
+        ],
+        "operationId": "raiseError",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/view/test-results": {
+      "get": {
+        "tags": [
+          "Test Data View"
+        ],
+        "summary": "Get test results",
+        "description": "Retrieve test execution results with filtering and pagination. Returns detailed test case execution history including status, duration, and optional logs.",
+        "operationId": "getTestResults",
+        "parameters": [
+          {
+            "name": "test-path",
+            "in": "query",
+            "description": "Test path to filter results (required)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "com.example.MyTest.testMethod"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by test result status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SUCCESS",
+                "FAILURE",
+                "SKIP",
+                "FLAKE"
+              ]
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "description": "Filter by lineage/branch name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "main"
+          },
+          {
+            "name": "test-suite",
+            "in": "query",
+            "description": "Filter by test suite name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "unit-tests"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date for range query (ISO-8601: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-05-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date for range query (ISO-8601: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-05-11"
+          },
+          {
+            "name": "include-logs",
+            "in": "query",
+            "description": "Include test execution logs in response",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum results per page (1-500)",
+            "required": false,
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip for pagination",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of test results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSTestResultsViewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters (missing test-path, invalid limit/offset, branch/test-suite not found, invalid date range)",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Missing read:workspace permission",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/view/flaky-tests": {
+      "get": {
+        "tags": [
+          "Test Data View"
+        ],
+        "summary": "Get flaky tests",
+        "description": "Retrieve flaky test data for specified time period. Returns weekly aggregated flaky test scores and metadata.",
+        "operationId": "getFlakyTests",
+        "parameters": [
+          {
+            "name": "year-week",
+            "in": "query",
+            "description": "Specific ISO year-week to fetch (format: YYYY-Www, e.g., 2026-W15)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-W15"
+          },
+          {
+            "name": "weeks",
+            "in": "query",
+            "description": "Number of weeks to include (1-12)",
+            "required": false,
+            "schema": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum flaky tests per week (1-500)",
+            "required": false,
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "test-path",
+            "in": "query",
+            "description": "Filter by specific test path",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "com.example.MyTest"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date for range query (ISO-8601: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-05-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date for range query (ISO-8601: YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-05-11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of flaky test data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSFlakyTestsViewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters (weeks out of range 1-12, limit out of range 1-500, invalid date format)",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Missing read:workspace permission",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/verification": {
+      "get": {
+        "tags": [
+          "verification-controller"
+        ],
+        "operationId": "verify",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSVerificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/test_sessions/{testSessionId}/events": {
+      "get": {
+        "tags": [
+          "events-controller"
+        ],
+        "operationId": "events",
+        "parameters": [
+          {
+            "name": "testSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JSTestCaseResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/subset/{subsettingId}": {
+      "get": {
+        "tags": [
+          "subset-controller"
+        ],
+        "operationId": "getDetails",
+        "parameters": [
+          {
+            "name": "subsettingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/subset-analyze/{subsettingId}/previous": {
+      "get": {
+        "tags": [
+          "subset-analyze-controller"
+        ],
+        "operationId": "getPreviousSubsetId",
+        "parameters": [
+          {
+            "name": "subsettingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/stats/test-sessions": {
+      "get": {
+        "tags": [
+          "stats-controller"
+        ],
+        "operationId": "testSessions",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "flavor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestSessionsStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/state": {
+      "get": {
+        "tags": [
+          "workspace-controller"
+        ],
+        "operationId": "getState",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSWorkspaceStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/slack/notification/key/list": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "notificationKeyList",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/raise_error": {
+      "get": {
+        "tags": [
+          "health-controller"
+        ],
+        "operationId": "raiseError2",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/model-metadata": {
+      "get": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "getModelMetadata",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSModelMetadata"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/gate": {
+      "get": {
+        "tags": [
+          "gate-controller"
+        ],
+        "operationId": "evaluateGate",
+        "parameters": [
+          {
+            "name": "session-id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSGateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/detect-flake": {
+      "get": {
+        "tags": [
+          "detect-flake-controller"
+        ],
+        "operationId": "getRetryRequiredTestPaths",
+        "parameters": [
+          {
+            "name": "session-id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "confidence",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            }
+          },
+          {
+            "name": "test-runner",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSFlakeDetectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/commits/latest": {
+      "get": {
+        "tags": [
+          "commits-controller"
+        ],
+        "operationId": "latest",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/commits/collect/options": {
+      "get": {
+        "tags": [
+          "commits-controller"
+        ],
+        "operationId": "options",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSCommitOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/commits/collect/files/work/{workId}": {
+      "get": {
+        "tags": [
+          "commits-controller"
+        ],
+        "operationId": "filesStatus",
+        "parameters": [
+          {
+            "name": "workId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSAsyncFileCollectionProgress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{buildNumber}": {
+      "get": {
+        "tags": [
+          "build-controller"
+        ],
+        "operationId": "getBuild",
+        "parameters": [
+          {
+            "name": "buildNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSBuildResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/{buildNumber}/test_session_names/{testSessionName}": {
+      "get": {
+        "tags": [
+          "test-sessions-controller"
+        ],
+        "operationId": "getByTestSessionName",
+        "parameters": [
+          {
+            "name": "buildNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "testSessionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSTestSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/{DoNotUse1}/workspaces/{DoNotUse2}/builds/aliases": {
+      "get": {
+        "tags": [
+          "build-alias-controller"
+        ],
+        "operationId": "listAliases",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JSBuildAlias"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/live": {
+      "get": {
+        "tags": [
+          "health-controller"
+        ],
+        "operationId": "live",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "toplevel-controller"
+        ],
+        "operationId": "hello",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/error": {
+      "get": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError_2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError_3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError_6",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError_5",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "custom-error-controller"
+        ],
+        "operationId": "handleError_4",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JSUpdateAlias": {
+        "required": [
+          "build"
+        ],
+        "type": "object",
+        "properties": {
+          "build": {
+            "type": "string"
+          }
+        }
+      },
+      "JSUpdateAliasResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "JSExternalLink": {
+        "required": [
+          "kind",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LINK_KIND_UNSPECIFIED",
+              "CUSTOM_LINK",
+              "JENKINS",
+              "GITHUB_ACTIONS",
+              "GITHUB_PULL_REQUEST",
+              "CIRCLECI",
+              "GITHUB_PULL_REQUEST_HEAD_REPOSITORY"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "JSLink": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "externalLinkKind": {
+            "type": "string",
+            "enum": [
+              "LINK_KIND_UNSPECIFIED",
+              "CUSTOM_LINK",
+              "JENKINS",
+              "GITHUB_ACTIONS",
+              "GITHUB_PULL_REQUEST",
+              "CIRCLECI",
+              "GITHUB_PULL_REQUEST_HEAD_REPOSITORY"
+            ]
+          }
+        }
+      },
+      "JSPrioritizedTestsByTestMapping": {
+        "required": [
+          "format"
+        ],
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string"
+          },
+          "mappings": {
+            "$ref": "#/components/schemas/JsonNode"
+          }
+        }
+      },
+      "JSSplitSubset": {
+        "required": [
+          "sliceCount",
+          "sliceIndex"
+        ],
+        "type": "object",
+        "properties": {
+          "sliceIndex": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sliceCount": {
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sameBins": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TestPath"
+              }
+            }
+          }
+        }
+      },
+      "JSSubset": {
+        "required": [
+          "session"
+        ],
+        "type": "object",
+        "properties": {
+          "testPaths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestPath"
+            }
+          },
+          "timeLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "session": {
+            "$ref": "#/components/schemas/JSTestSession"
+          },
+          "goal": {
+            "$ref": "#/components/schemas/OptimizationTarget"
+          },
+          "target": {
+            "maximum": 1.0,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "format": "float"
+          },
+          "ignoreNewTests": {
+            "type": "boolean"
+          },
+          "dropFlakinessThreshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "hoursToPrioritizeFailedTest": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "getTestsFromPreviousSessions": {
+            "type": "boolean"
+          },
+          "getTestsFromGuess": {
+            "type": "boolean"
+          },
+          "useServerSideOptimizationTarget": {
+            "type": "boolean"
+          },
+          "dropFailureRateThreshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "testRunner": {
+            "type": "string"
+          },
+          "changesUnderTest": {
+            "type": "string",
+            "enum": [
+              "one-commit",
+              "feature-branch",
+              "recurring"
+            ]
+          },
+          "subsettingId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "splitSubset": {
+            "$ref": "#/components/schemas/JSSplitSubset"
+          },
+          "prioritizedTestsMapping": {
+            "$ref": "#/components/schemas/JSPrioritizedTestsByTestMapping"
+          }
+        }
+      },
+      "JSTestSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "flavors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "link": {
+            "$ref": "#/components/schemas/JSLink"
+          },
+          "noBuild": {
+            "type": "boolean"
+          },
+          "lineage": {
+            "type": "string"
+          },
+          "testSuite": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isObservation": {
+            "type": "boolean"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSExternalLink"
+            }
+          }
+        }
+      },
+      "JsonNode": {
+        "type": "object"
+      },
+      "OptimizationTarget": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SUBSET_BY_PERCENTAGE",
+              "SUBSET_BY_ABSOLUTE_TIME",
+              "SUBSET_BY_CONFIDENCE",
+              "SUBSET_BY_GOALSPEC",
+              "SUBSET_BY_SIMILARITY"
+            ]
+          }
+        }
+      },
+      "TestPath": {
+        "type": "object",
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestPathComponent"
+            }
+          },
+          "parent": {
+            "$ref": "#/components/schemas/TestPath"
+          },
+          "root": {
+            "type": "boolean"
+          },
+          "failedConversion": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TestPathComponent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "pattern": "^[^\\x00-\\x1F\\x7F]+$",
+            "type": "string"
+          }
+        }
+      },
+      "JSSplitSubsetByGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "isObservation": {
+            "type": "boolean"
+          },
+          "subsettingId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "splitGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSSplitSubsetSplitGroup"
+            }
+          }
+        }
+      },
+      "JSSplitSubsetSplitGroup": {
+        "type": "object",
+        "properties": {
+          "rest": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestPath"
+            }
+          },
+          "subset": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestPath"
+            }
+          },
+          "groupName": {
+            "type": "string"
+          }
+        }
+      },
+      "JSSplitSubsetResponse": {
+        "type": "object",
+        "properties": {
+          "rest": {
+            "type": "array",
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "items": {
+              "$ref": "#/components/schemas/TestPath"
+            }
+          },
+          "isObservation": {
+            "type": "boolean"
+          },
+          "subsettingId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "testPaths": {
+            "type": "array",
+            "properties": {
+              "empty": {
+                "type": "boolean"
+              }
+            },
+            "items": {
+              "$ref": "#/components/schemas/TestPath"
+            }
+          }
+        }
+      },
+      "JSPromotedTestData": {
+        "required": [
+          "testName"
+        ],
+        "type": "object",
+        "properties": {
+          "testName": {
+            "type": "string"
+          },
+          "promotionAmount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "density": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "JSSuggestRelatedTestsRequest": {
+        "required": [
+          "changedFiles",
+          "promotedTests",
+          "selectedTests"
+        ],
+        "type": "object",
+        "properties": {
+          "changedFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectedTests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "promotedTests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSPromotedTestData"
+            }
+          }
+        }
+      },
+      "JSSuggestRelatedTestsResponse": {
+        "type": "object",
+        "properties": {
+          "relatedTests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Component": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "JSCustomJenkinsEventMetadata": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          },
+          "build": {
+            "$ref": "#/components/schemas/Run"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Component"
+            }
+          }
+        }
+      },
+      "Run": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "Build": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "JSJenkinsCustomEventsResponse": {
+        "type": "object",
+        "properties": {
+          "unhealthyTest": {
+            "$ref": "#/components/schemas/UnhealthyTest"
+          },
+          "testSession": {
+            "$ref": "#/components/schemas/TestSession"
+          },
+          "build": {
+            "$ref": "#/components/schemas/Build"
+          }
+        }
+      },
+      "TestSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "UnhealthyTest": {
+        "type": "object",
+        "properties": {
+          "flakyTestHtml": {
+            "type": "string"
+          },
+          "longestTestHtml": {
+            "type": "string"
+          }
+        }
+      },
+      "JSBuild": {
+        "required": [
+          "buildNumber",
+          "commitHashes",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "buildNumber": {
+            "type": "string"
+          },
+          "commitHashes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSBuildCommit"
+            }
+          },
+          "lineage": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSExternalLink"
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSBuildComponent"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "JSBuildCommit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "repositoryName": {
+            "type": "string"
+          },
+          "commitHash": {
+            "type": "string"
+          },
+          "pullRequestId": {
+            "type": "string"
+          },
+          "pullRequestRevision": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "deprecated": true
+          }
+        }
+      },
+      "JSBuildComponent": {
+        "required": [
+          "build",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "build": {
+            "type": "string"
+          }
+        }
+      },
+      "JSBuildResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "build": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "JSTestSessionResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "buildId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "buildNumber": {
+            "type": "string"
+          },
+          "organizationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isObservation": {
+            "type": "boolean"
+          },
+          "flavors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "JSCaseEvent": {
+        "required": [
+          "duration",
+          "status",
+          "stderr",
+          "stdout",
+          "testPath"
+        ],
+        "type": "object",
+        "properties": {
+          "testName": {
+            "type": "string",
+            "deprecated": true
+          },
+          "testPath": {
+            "$ref": "#/components/schemas/TestPath"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "number",
+            "format": "float"
+          },
+          "stdout": {
+            "type": "string"
+          },
+          "stderr": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data": {
+            "$ref": "#/components/schemas/JsonNode"
+          }
+        }
+      },
+      "JSEvents": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/JSCaseEvent"
+                }
+              ]
+            }
+          },
+          "group": {
+            "type": "string"
+          },
+          "noBuild": {
+            "type": "boolean"
+          },
+          "testRunner": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "flavors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "testSuite": {
+            "type": "string"
+          },
+          "caseEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSCaseEvent"
+            }
+          }
+        }
+      },
+      "JSEventsResponse": {
+        "type": "object",
+        "properties": {
+          "build": {
+            "$ref": "#/components/schemas/JSBuildResponse"
+          },
+          "testSession": {
+            "$ref": "#/components/schemas/JSTestSessionResponse"
+          }
+        }
+      },
+      "JSCliTracking": {
+        "required": [
+          "cliVersion",
+          "command",
+          "eventName"
+        ],
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "enum": [
+              "CLI_TRACKING_COMMAND_UNSPECIFIED",
+              "VERIFY",
+              "RECORD_TESTS",
+              "RECORD_BUILD",
+              "RECORD_SESSION",
+              "SUBSET",
+              "COMMIT",
+              "DETECT_FLAKE",
+              "GATE",
+              "UPDATE_ALIAS",
+              "RECORD_DEPLOYMENT",
+              "UNKNOWN",
+              "RECORD_ATTACHMENT",
+              "INSPECT_MODEL",
+              "INSPECT_SUBSET",
+              "STATS_TEST_SESSIONS",
+              "COMPARE_SUBSETS",
+              "GET_DOCS",
+              "UNRECOGNIZED"
+            ]
+          },
+          "eventName": {
+            "type": "string",
+            "enum": [
+              "CLI_TRACKING_EVENT_UNSPECIFIED",
+              "INTERNAL_CLI_ERROR",
+              "NETWORK_ERROR",
+              "TIMEOUT_ERROR",
+              "INTERNAL_SERVER_ERROR",
+              "UNEXPECTED_HTTP_STATUS_ERROR",
+              "WARNING_ERROR",
+              "USER_ERROR",
+              "SHALLOW_CLONE",
+              "PERFORMANCE",
+              "COMMAND_INVOCATION",
+              "UNRECOGNIZED"
+            ]
+          },
+          "cliVersion": {
+            "type": "string"
+          },
+          "rawCommand": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/JsonNode"
+          }
+        }
+      },
+      "JSTestSessionPatch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "JSCloseSession": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "JSTestResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "testPath": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalDuration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "passed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSTestResultLog"
+            }
+          },
+          "session": {
+            "$ref": "#/components/schemas/JSTestResultSession"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Test execution result with detailed status and session information"
+      },
+      "JSTestResultLog": {
+        "type": "object",
+        "properties": {
+          "stdout": {
+            "type": "string"
+          },
+          "stderr": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Test execution log entry"
+      },
+      "JSTestResultSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "buildId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "branch": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSExternalLink"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Test session information"
+      },
+      "JSTestResultsData": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSTestResult"
+            }
+          }
+        }
+      },
+      "JSTestResultsMetadata": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextOffset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JSTestResultsViewResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/JSTestResultsData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/JSTestResultsMetadata"
+          }
+        },
+        "description": "Paginated test results response with metadata"
+      },
+      "JSFlakyTestItem": {
+        "type": "object",
+        "properties": {
+          "testPath": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestPathComponent"
+            }
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "weeklyScoreDelta": {
+            "type": "number",
+            "format": "double"
+          },
+          "runtimeDuration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "weeklyRuntimeDurationDelta": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "JSFlakyTestWeek": {
+        "type": "object",
+        "properties": {
+          "weekDate": {
+            "type": "string"
+          },
+          "calculationStatus": {
+            "type": "string",
+            "enum": [
+              "CALCULATED",
+              "NOT_READY",
+              "UNEXPECTED"
+            ]
+          },
+          "calculationTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "flakyTests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSFlakyTestItem"
+            }
+          },
+          "flakyTestCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JSFlakyTestsData": {
+        "type": "object",
+        "properties": {
+          "weeks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JSFlakyTestWeek"
+            }
+          }
+        }
+      },
+      "JSFlakyTestsMetadata": {
+        "type": "object",
+        "properties": {
+          "weeksRequested": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weeksReturned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "latestWeek": {
+            "type": "string"
+          }
+        }
+      },
+      "JSFlakyTestsViewResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/JSFlakyTestsData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/JSFlakyTestsMetadata"
+          }
+        }
+      },
+      "JSVerificationResponse": {
+        "type": "object",
+        "properties": {
+          "organization": {
+            "type": "string"
+          },
+          "organizationDisplayName": {
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          },
+          "workspaceDisplayName": {
+            "type": "string"
+          }
+        }
+      },
+      "JSTestCaseResponse": {
+        "type": "object",
+        "properties": {
+          "testPath": {
+            "$ref": "#/components/schemas/TestPath"
+          },
+          "duration": {
+            "type": "number",
+            "format": "float"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FAILURE",
+              "SUCCESS",
+              "SKIP"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TestSessionsStats": {
+        "type": "object",
+        "properties": {
+          "averageDurationSeconds": {
+            "type": "number",
+            "format": "double"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JSWorkspaceStateResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "WORKSPACE_STATE_UNSPECIFIED",
+              "ACTIVE_PAYING",
+              "ACTIVE_POC",
+              "INACTIVE",
+              "MARKED_FOR_DELETION",
+              "UNTRACKED",
+              "INTERNAL",
+              "HANDS_ON_LAB",
+              "PUBLIC_DEMO",
+              "PUBLIC_OSS_PROJECT",
+              "ARCHIVED",
+              "HANDS_ON_LAB_V2",
+              "PUBLIC_HANDS_ON_LAB",
+              "PTS_V2_ACTIVE_POC",
+              "PTS_V2_ACTIVE_PAYING",
+              "UNRECOGNIZED"
+            ]
+          },
+          "isFailFastMode": {
+            "type": "boolean"
+          },
+          "isPtsV2Enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "KeyListResponse": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "JSModelMetadata": {
+        "type": "object",
+        "properties": {
+          "training_cutoff_test_session_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JSGateResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "FAILED",
+              "PASSED"
+            ]
+          },
+          "quarantinedFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actionableFailures": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JSFlakeDetectionResponse": {
+        "type": "object",
+        "properties": {
+          "testPaths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestPath"
+            }
+          },
+          "testDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestDetail"
+            }
+          }
+        }
+      },
+      "TestDetail": {
+        "type": "object",
+        "properties": {
+          "fullTestPath": {
+            "$ref": "#/components/schemas/TestPath"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NEW_TEST"
+            ]
+          }
+        }
+      },
+      "JSCommitOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "commitMessage": {
+            "type": "boolean"
+          },
+          "files": {
+            "type": "boolean"
+          }
+        }
+      },
+      "JSAsyncFileCollectionProgress": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "SUCCEEDED",
+              "FAILED",
+              "ABANDONED"
+            ]
+          },
+          "filesProcessed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JSBuildAlias": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string"
+          },
+          "buildName": {
+            "type": "string"
+          }
+        }
+      },
+      "ReasonResponse": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "smartTestsToken": {
+        "type": "apiKey",
+        "description": "Smart Tests API token for authentication",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  }
+}
