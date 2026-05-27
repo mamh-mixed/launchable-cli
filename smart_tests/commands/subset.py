@@ -676,6 +676,7 @@ class Subset(TestPathWriter):
                 Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
             )
 
+        assert self.subset_id_file is not None  # Early type guard
         with open(self.subset_id_file, 'w', encoding='utf-8') as f:
             f.write(str(subset_result.subset_id) + '\n')
 
