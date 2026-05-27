@@ -873,7 +873,7 @@ class SubsetTest(CliTestCase):
         )
 
         with tempfile.NamedTemporaryFile(delete=False) as id_file, \
-             tempfile.NamedTemporaryFile(delete=False) as rest_file:
+                tempfile.NamedTemporaryFile(delete=False) as rest_file:
             id_file_path = id_file.name
             rest_file_path = rest_file.name
 
