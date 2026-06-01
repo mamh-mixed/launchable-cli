@@ -740,7 +740,9 @@ class Subset(TestPathWriter):
         #   click.echo("subset/{}".format(subset_result.subset_id))
         if subset_result.is_brainless:
             click.echo("Your model is currently in training", err=True)
-            if self.fallback_mode != FallbackMode.RUN_ALL:
+            # brainless mode split tests on servers. so we don't have to run
+            # client side fallback.
+            if self.fallback_mode != FallbackMode.RANDOM_SAMPLE:
                 subset_result = self._fallback_result()
 
         output_subset, output_rests = subset_result.subset, subset_result.rest

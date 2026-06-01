@@ -495,6 +495,7 @@ class FallbackModeTest(CliTestCase):
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
     def test_brainless_fallback_random_sample(self):
+        # In brainless mode the server already split the tests, so random-sample keeps the server's result as-is.
         responses.replace(
             responses.POST,
             f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
