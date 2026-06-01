@@ -459,9 +459,7 @@ class FallbackModeTest(CliTestCase):
         with tempfile.NamedTemporaryFile(delete=False) as rest_file:
             result = self.cli(*self._subset_args(rest_file.name, ("--fallback-mode", "random-sample")), mix_stderr=False)
             self.assert_success(result)
-            all_tests = result.stdout.strip().split("\n") + Path(rest_file.name).read_text().strip().split("\n")
-            all_tests = [t for t in all_tests if t]
-            self.assertEqual(len(all_tests), 1)  # only one .rb test file in fixtures
+            self.assertIn("example_test.rb", result.stdout)
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
