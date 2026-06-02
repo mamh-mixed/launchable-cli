@@ -420,3 +420,103 @@ class APIErrorTest(CliTestCase):
                 if attempt > 10:
                     break
             self.assertEqual(tracking.call_count, count)
+
+
+class FallbackModeTest(CliTestCase):
+    test_files_dir = Path(__file__).parent.joinpath('../data/minitest/').resolve()
+
+    def _subset_args(self, rest_file_name, extra_args=()):
+        return (
+            "subset", "minitest",
+            "--target", "50%",
+            "--session", self.session,
+            "--rest", rest_file_name,
+            str(self.test_files_dir) + "/test/**/*.rb",
+        ) + tuple(extra_args)
+
+    # --- API error cases ---
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_api_error_fallback_stop(self):
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            status=500)
+
+        with tempfile.NamedTemporaryFile(delete=False) as rest_file:
+            result = self.cli(*self._subset_args(rest_file.name, ("--fallback-mode", "stop")), mix_stderr=False)
+            self.assertEqual(result.exit_code, 1)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_api_error_fallback_random_sample(self):
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            status=500)
+
+        with tempfile.NamedTemporaryFile(delete=False) as rest_file:
+            result = self.cli(*self._subset_args(rest_file.name, ("--fallback-mode", "random-sample")), mix_stderr=False)
+            self.assert_success(result)
+            self.assertIn("example_test.rb", result.stdout)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_api_error_fallback_run_all_default(self):
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            status=500)
+
+        with tempfile.NamedTemporaryFile(delete=False) as rest_file:
+            result = self.cli(*self._subset_args(rest_file.name), mix_stderr=False)
+            self.assert_success(result)
+            self.assertIn("example_test.rb", result.stdout)
+
+    # --- Brainless mode cases ---
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_brainless_fallback_stop(self):
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json={"testPaths": [[{"type": "file", "name": "example_test.rb"}]],
+                  "rest": [], "subsettingId": 1, "isBrainless": True, "summary": {}},
+            status=200)
+
+        with tempfile.NamedTemporaryFile(delete=False) as rest_file:
+            result = self.cli(*self._subset_args(rest_file.name, ("--fallback-mode", "stop")), mix_stderr=False)
+            self.assertEqual(result.exit_code, 1)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_brainless_fallback_random_sample(self):
+        # In brainless mode the server already split the tests, so random-sample keeps the server's result as-is.
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json={"testPaths": [[{"type": "file", "name": "example_test.rb"}]],
+                  "rest": [], "subsettingId": 1, "isBrainless": True, "summary": {}},
+            status=200)
+
+        with tempfile.NamedTemporaryFile(delete=False) as rest_file:
+            result = self.cli(*self._subset_args(rest_file.name, ("--fallback-mode", "random-sample")), mix_stderr=False)
+            self.assert_success(result)
+            self.assertIn("example_test.rb", result.stdout)
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_brainless_fallback_run_all_default(self):
+        responses.replace(
+            responses.POST,
+            f"{get_base_url()}/intake/organizations/{self.organization}/workspaces/{self.workspace}/subset",
+            json={"testPaths": [[{"type": "file", "name": "example_test.rb"}]],
+                  "rest": [], "subsettingId": 1, "isBrainless": True, "summary": {}},
+            status=200)
+
+        with tempfile.NamedTemporaryFile(delete=False) as rest_file:
+            result = self.cli(*self._subset_args(rest_file.name), mix_stderr=False)
+            self.assert_success(result)
+            self.assertIn("example_test.rb", result.stdout)

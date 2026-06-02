@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import pathlib
+import random
 import re
 import subprocess
 import sys
@@ -44,6 +45,12 @@ class SubsetUseCase(str, Enum):
     RECURRING = "recurring"
 
 
+class FallbackMode(str, Enum):
+    RUN_ALL = "run-all"
+    STOP = "stop"
+    RANDOM_SAMPLE = "random-sample"
+
+
 class SubsetResult:
     def __init__(
             self,
@@ -81,6 +88,14 @@ class SubsetResult:
             is_brainless=False,
             is_observation=False
         )
+
+    @classmethod
+    def from_random_sample(cls, test_paths: List[TestPath], target: float) -> 'SubsetResult':
+        count = max(1, round(len(test_paths) * target))
+        sampled = random.sample(test_paths, min(count, len(test_paths)))
+        sampled_set = {id(t): t for t in sampled}
+        rest = [t for t in test_paths if id(t) not in sampled_set]
+        return cls(subset=sampled, rest=rest, subset_id='', summary={}, is_brainless=False, is_observation=False)
 
 
 # Where we take TestPath, we also accept a path name as a string.
@@ -214,6 +229,14 @@ class Subset(TestPathWriter):
                 "--use-case",
                 hidden=True
             )] = None,
+            fallback_mode: Annotated[FallbackMode, typer.Option(
+                "--fallback-mode",
+                hidden=True,
+                help="Behavior when the subset API is unavailable or the model is untrained. "
+                     "'run-all' (default) runs all tests as usual; 'stop' exits with a non-zero status so CI halts; "
+                     "'random-sample' picks a random subset locally based on the count derived from --target "
+                     "(no duration estimates are available in this path).",
+            )] = FallbackMode.RUN_ALL,
             test_runner: Annotated[str | None, typer.Argument()] = None,
     ):
         super().__init__(app)
@@ -295,6 +318,7 @@ class Subset(TestPathWriter):
         self.same_bin_files = list(same_bin_files)
         self.is_get_tests_from_guess = is_get_tests_from_guess
         self.use_case = use_case
+        self.fallback_mode = fallback_mode
 
         self._validate_print_input_snapshot_option()
 
@@ -569,6 +593,22 @@ class Subset(TestPathWriter):
         if not found:
             warn_and_exit_if_fail_fast_mode("Nothing that looks like a test file in the current git repository.")
 
+    def _fallback_result(self) -> SubsetResult:
+        if self.fallback_mode == FallbackMode.STOP:
+            click.echo(
+                "Warning: Smart Tests could not retrieve a subset. Stopping build (--fallback-mode=stop).",
+                err=True,
+            )
+            sys.exit(1)
+        elif self.fallback_mode == FallbackMode.RANDOM_SAMPLE:
+            target_fraction = float(self.target) if self.target is not None else 1.0
+            click.echo(
+                f"Warning: Smart Tests could not retrieve a subset. Falling back to local random sample at {
+                    target_fraction:.0%}.", err=True, )
+            return SubsetResult.from_random_sample(self.test_paths, target_fraction)
+        else:
+            return SubsetResult.from_test_paths(self.test_paths)
+
     def request_subset(self) -> SubsetResult:
         # temporarily extend the timeout because subset API response has become slow
         # TODO: remove this line when API response return response
@@ -604,7 +644,7 @@ class Subset(TestPathWriter):
             )
             self.client.print_exception_and_recover(
                 e, "Warning: the service failed to subset. Falling back to running all tests")
-            return SubsetResult.from_test_paths(self.test_paths)
+            return self._fallback_result()
 
     def _requires_test_input(self) -> bool:
         return (
@@ -699,7 +739,7 @@ class Subset(TestPathWriter):
         if not self.session_id:
             # Session ID in --session is missing. It might be caused by
             # Launchable API errors.
-            subset_result = SubsetResult.from_test_paths(self.test_paths)
+            subset_result = self._fallback_result()
         else:
             subset_result = self.request_subset()
 
@@ -721,6 +761,13 @@ class Subset(TestPathWriter):
         # TODO(Konboi): split subset isn't provided for smart-tests initial release
         # if split:
         #   click.echo("subset/{}".format(subset_result.subset_id))
+        if subset_result.is_brainless:
+            click.echo("Your model is currently in training", err=True)
+            # brainless mode split tests on servers. so we don't have to run
+            # client side fallback.
+            if self.fallback_mode != FallbackMode.RANDOM_SAMPLE:
+                subset_result = self._fallback_result()
+
         output_subset, output_rests = subset_result.subset, subset_result.rest
 
         if subset_result.is_observation:
@@ -765,10 +812,6 @@ class Subset(TestPathWriter):
                 summary["subset"].get("duration", 0.0) + summary["rest"].get("duration", 0.0),
             ],
         ]
-
-        if subset_result.is_brainless:
-            click.echo(
-                "Your model is currently in training", err=True)
 
         click.echo(
             "Smart Tests created subset {} for build {} (test session {}) in workspace {}/{}".format(
