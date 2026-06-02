@@ -188,6 +188,12 @@ class Subset(TestPathWriter):
                 "--print-input-snapshot-id",
                 help="Print the input snapshot ID returned from the server instead of the subset results"
             )] = False,
+            subset_id_file: Annotated[str | None, typer.Option(
+                "--subset-id-file",
+                help="Write the subset ID to a file",
+                metavar="FILE",
+                hidden=True
+            )] = None,
             bin_target: Annotated[Fraction | None, typer.Option(
                 "--bin",
                 help="Split subset into bins, e.g. --bin 1/4",
@@ -284,6 +290,7 @@ class Subset(TestPathWriter):
         self.prioritized_tests_mapping_file = prioritized_tests_mapping_file
         self.input_snapshot_id = input_snapshot_id.value if input_snapshot_id else None
         self.print_input_snapshot_id = print_input_snapshot_id
+        self.subset_id_file = subset_id_file
         self.bin_target = bin_target
         self.same_bin_files = list(same_bin_files)
         self.is_get_tests_from_guess = is_get_tests_from_guess
@@ -661,6 +668,18 @@ class Subset(TestPathWriter):
 
         click.echo(subset_result.subset_id)
 
+    def _write_subset_id_to_file(self, subset_result: SubsetResult):
+        if not subset_result.subset_id:
+            print_error_and_die(
+                "Subset request did not return a subset ID. Please re-run the command.",
+                self.tracking_client,
+                Tracking.ErrorEvent.INTERNAL_CLI_ERROR,
+            )
+
+        assert self.subset_id_file is not None  # Early type guard
+        with open(self.subset_id_file, 'w', encoding='utf-8') as f:
+            f.write(str(subset_result.subset_id) + '\n')
+
     def run(self):
         """called after tests are scanned to compute the optimized order"""
 
@@ -688,11 +707,16 @@ class Subset(TestPathWriter):
             warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
             if self.print_input_snapshot_id:
                 self._print_input_snapshot_id_value(subset_result)
+            if self.subset_id_file:
+                self._write_subset_id_to_file(subset_result)
             return
 
         if self.print_input_snapshot_id:
             self._print_input_snapshot_id_value(subset_result)
             return
+
+        if self.subset_id_file:
+            self._write_subset_id_to_file(subset_result)
 
         # TODO(Konboi): split subset isn't provided for smart-tests initial release
         # if split:
