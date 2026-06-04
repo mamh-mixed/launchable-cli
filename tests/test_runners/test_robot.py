@@ -24,7 +24,7 @@ class RobotTest(CliTestCase):
 
     # for RF < 7.0 legacy format (starttime/endtime attributes)
     @responses.activate
-    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.smart_tests_token})
     def test_record_test_legacy(self):
 
         result = self.cli('record', 'tests', '--session', self.session,
