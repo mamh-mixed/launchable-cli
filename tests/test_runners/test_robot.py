@@ -22,6 +22,16 @@ class RobotTest(CliTestCase):
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
 
+    # for RF < 7.0 legacy format (starttime/endtime attributes)
+    @responses.activate
+    @mock.patch.dict(os.environ, {"LAUNCHABLE_TOKEN": CliTestCase.launchable_token})
+    def test_record_test_legacy(self):
+
+        result = self.cli('record', 'tests', '--session', self.session,
+                          'robot', str(self.test_files_dir) + "/output_legacy.xml")
+        self.assert_success(result)
+        self.assert_record_tests_payload("record_test_legacy_result.json")
+
     # for #637
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
