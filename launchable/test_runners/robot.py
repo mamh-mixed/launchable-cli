@@ -37,9 +37,12 @@ def parse_func(p: str) -> ET.ElementTree:
                         start_time_str = status_node.get('starttime', '')
                         end_time_str = status_node.get('endtime', '')
                         if start_time_str and end_time_str:
-                            start_time = datetime.strptime(start_time_str, DATETIME_FORMAT)
-                            end_time = datetime.strptime(end_time_str, DATETIME_FORMAT)
-                            duration_seconds = (end_time - start_time).total_seconds()
+                            try:
+                                start_time = datetime.strptime(start_time_str, DATETIME_FORMAT)
+                                end_time = datetime.strptime(end_time_str, DATETIME_FORMAT)
+                                duration_seconds = (end_time - start_time).total_seconds()
+                            except ValueError:
+                                duration_seconds = 0
 
                 testcase = ET.SubElement(testsuite, "testcase", {
                     "name": str(test_name),
