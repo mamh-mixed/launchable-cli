@@ -326,7 +326,7 @@ class SubsetTest(CliTestCase):
         self.assert_success(result)
         self.assertEqual(result.stdout, "")
         self.assertIn("No tests were selected for this code change.", result.stderr)
-        self.assertIn("Launchable created subset 123", result.stderr)
+        self.assertIn("Smart Tests created subset 123", result.stderr)
         self.assertNotIn("Error: no tests found matching the path.", result.stderr)
 
     @responses.activate
