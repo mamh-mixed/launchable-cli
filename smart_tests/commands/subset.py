@@ -744,12 +744,18 @@ class Subset(TestPathWriter):
             subset_result = self.request_subset()
 
         if len(subset_result.subset) == 0:
-            warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
-            if self.print_input_snapshot_id:
-                self._print_input_snapshot_id_value(subset_result)
-            if self.subset_id_file:
-                self._write_subset_id_to_file(subset_result)
-            return
+            if len(subset_result.rest) > 0 and self.client.is_pts_v2_enabled() and self.confidence is not None:
+                # Adaptive Dynamic Subset can return an empty subset when the model
+                # determines no tests in that suite are relevant to the code change.
+                click.echo(click.style("No tests were selected for this code change.", fg="yellow"), err=True)
+            else:
+                warn_and_exit_if_fail_fast_mode("Error: no tests found matching the path.")
+
+                if self.print_input_snapshot_id:
+                    self._print_input_snapshot_id_value(subset_result)
+                if self.subset_id_file:
+                    self._write_subset_id_to_file(subset_result)
+                return
 
         if self.print_input_snapshot_id:
             self._print_input_snapshot_id_value(subset_result)
