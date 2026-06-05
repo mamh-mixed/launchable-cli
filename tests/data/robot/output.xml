@@ -1,98 +1,192 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot generator="Robot 7.4.2 (Python 3.13.13 on darwin)" generated="2026-06-04T16:18:55.667057" rpa="false" schemaversion="5">
+<robot generator="Robot 7.4.2 (Python 3.13.13 on darwin)" generated="2026-06-05T16:09:07.132972" rpa="false" schemaversion="5">
 <suite id="s1" name="Robot" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot">
 <suite id="s1-s1" name="Minus" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/minus.robot">
 <test id="s1-s1-t1" name="Check method" line="6">
 <kw name="Result Is" owner="Calculator">
 <arg>-1</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688016" elapsed="0.000060"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.159445" elapsed="0.000131"/>
 </kw>
-<status status="PASS" start="2026-06-04T16:18:55.687743" elapsed="0.000411"/>
+<status status="PASS" start="2026-06-05T16:09:07.159168" elapsed="0.000485"/>
 </test>
 <test id="s1-s1-t2" name="Minus method" line="9">
 <kw name="Plus" owner="Calculator">
 <arg>1</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688330" elapsed="0.000034"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.159987" elapsed="0.000048"/>
 </kw>
 <kw name="Minus" owner="Calculator">
 <arg>1</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688410" elapsed="0.000021"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.160077" elapsed="0.000022"/>
 </kw>
 <kw name="Result Is" owner="Calculator">
 <arg>0</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688468" elapsed="0.000018"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.160127" elapsed="0.000017"/>
 </kw>
-<status status="PASS" start="2026-06-04T16:18:55.688231" elapsed="0.000296"/>
+<status status="PASS" start="2026-06-05T16:09:07.159839" elapsed="0.000343"/>
 </test>
 <test id="s1-s1-t3" name="Minus method 2" line="14">
 <kw name="Plus" owner="Calculator">
 <arg>10</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688668" elapsed="0.000020"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.160348" elapsed="0.000022"/>
 </kw>
 <kw name="Minus" owner="Calculator">
 <arg>20</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688722" elapsed="0.000017"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.160397" elapsed="0.000018"/>
 </kw>
 <kw name="Result Is" owner="Calculator">
 <arg>-10</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.688772" elapsed="0.000017"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.160441" elapsed="0.000017"/>
 </kw>
-<status status="PASS" start="2026-06-04T16:18:55.688587" elapsed="0.000240"/>
+<status status="PASS" start="2026-06-05T16:09:07.160261" elapsed="0.000229"/>
 </test>
-<status status="PASS" start="2026-06-04T16:18:55.686349" elapsed="0.002607"/>
+<status status="PASS" start="2026-06-05T16:09:07.156594" elapsed="0.004039"/>
 </suite>
 <suite id="s1-s2" name="Plus" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/plus.robot">
 <test id="s1-s2-t1" name="Check method" line="6">
 <kw name="Result Is" owner="Calculator">
 <arg>-1</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.689659" elapsed="0.000021"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161408" elapsed="0.000022"/>
 </kw>
-<status status="PASS" start="2026-06-04T16:18:55.689575" elapsed="0.000142"/>
+<status status="PASS" start="2026-06-05T16:09:07.161320" elapsed="0.000143"/>
 </test>
 <test id="s1-s2-t2" name="Plus method" line="9">
 <kw name="Plus" owner="Calculator">
 <arg>1</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.689845" elapsed="0.000020"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161589" elapsed="0.000019"/>
 </kw>
 <kw name="Plus" owner="Calculator">
 <arg>1</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.689897" elapsed="0.000017"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161634" elapsed="0.000016"/>
 </kw>
 <kw name="Result Is" owner="Calculator">
 <arg>2</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.689945" elapsed="0.000016"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161677" elapsed="0.000015"/>
 </kw>
-<status status="PASS" start="2026-06-04T16:18:55.689772" elapsed="0.000225"/>
+<status status="PASS" start="2026-06-05T16:09:07.161514" elapsed="0.000206"/>
 </test>
 <test id="s1-s2-t3" name="Plus method 2" line="14">
 <kw name="Plus" owner="Calculator">
 <arg>10</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.690120" elapsed="0.000021"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161845" elapsed="0.000019"/>
 </kw>
 <kw name="Plus" owner="Calculator">
 <arg>20</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.690175" elapsed="0.000018"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161888" elapsed="0.000016"/>
 </kw>
 <kw name="Result Is" owner="Calculator">
 <arg>30</arg>
-<status status="NOT RUN" start="2026-06-04T16:18:55.690226" elapsed="0.000016"/>
+<status status="NOT RUN" start="2026-06-05T16:09:07.161928" elapsed="0.000016"/>
 </kw>
-<status status="PASS" start="2026-06-04T16:18:55.690050" elapsed="0.000227"/>
+<status status="PASS" start="2026-06-05T16:09:07.161773" elapsed="0.000198"/>
 </test>
-<status status="PASS" start="2026-06-04T16:18:55.689089" elapsed="0.001258"/>
+<status status="PASS" start="2026-06-05T16:09:07.160774" elapsed="0.001270"/>
 </suite>
-<status status="PASS" start="2026-06-04T16:18:55.668356" elapsed="0.022122"/>
+<suite id="s1-s3" name="Tests" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/tests">
+<suite id="s1-s3-s1" name="Minus" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/tests/minus">
+<suite id="s1-s3-s1-s1" name="Minus" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/tests/minus/minus.robot">
+<test id="s1-s3-s1-s1-t1" name="Check method" line="6">
+<kw name="Result Is" owner="Calculator">
+<arg>-1</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163194" elapsed="0.000020"/>
+</kw>
+<status status="PASS" start="2026-06-05T16:09:07.163105" elapsed="0.000143"/>
+</test>
+<test id="s1-s3-s1-s1-t2" name="Minus method" line="9">
+<kw name="Plus" owner="Calculator">
+<arg>1</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163370" elapsed="0.000018"/>
+</kw>
+<kw name="Minus" owner="Calculator">
+<arg>1</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163413" elapsed="0.000016"/>
+</kw>
+<kw name="Result Is" owner="Calculator">
+<arg>0</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163452" elapsed="0.000016"/>
+</kw>
+<status status="PASS" start="2026-06-05T16:09:07.163297" elapsed="0.000201"/>
+</test>
+<test id="s1-s3-s1-s1-t3" name="Minus method 2" line="14">
+<kw name="Plus" owner="Calculator">
+<arg>10</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163618" elapsed="0.000018"/>
+</kw>
+<kw name="Minus" owner="Calculator">
+<arg>20</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163659" elapsed="0.000016"/>
+</kw>
+<kw name="Result Is" owner="Calculator">
+<arg>-10</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.163698" elapsed="0.000016"/>
+</kw>
+<status status="PASS" start="2026-06-05T16:09:07.163546" elapsed="0.000198"/>
+</test>
+<status status="PASS" start="2026-06-05T16:09:07.162742" elapsed="0.001073"/>
+</suite>
+<status status="PASS" start="2026-06-05T16:09:07.162475" elapsed="0.001500"/>
+</suite>
+<suite id="s1-s3-s2" name="Plus" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/tests/plus">
+<suite id="s1-s3-s2-s1" name="Plus" source="/Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/robot/tests/plus/plus.robot">
+<test id="s1-s3-s2-s1-t1" name="Check method" line="6">
+<kw name="Result Is" owner="Calculator">
+<arg>-1</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.164810" elapsed="0.000018"/>
+</kw>
+<status status="PASS" start="2026-06-05T16:09:07.164730" elapsed="0.000128"/>
+</test>
+<test id="s1-s3-s2-s1-t2" name="Plus method" line="9">
+<kw name="Plus" owner="Calculator">
+<arg>1</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.164974" elapsed="0.000018"/>
+</kw>
+<kw name="Plus" owner="Calculator">
+<arg>1</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.165015" elapsed="0.000016"/>
+</kw>
+<kw name="Result Is" owner="Calculator">
+<arg>2</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.165053" elapsed="0.000014"/>
+</kw>
+<status status="PASS" start="2026-06-05T16:09:07.164905" elapsed="0.000191"/>
+</test>
+<test id="s1-s3-s2-s1-t3" name="Plus method 2" line="14">
+<kw name="Plus" owner="Calculator">
+<arg>10</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.165217" elapsed="0.000018"/>
+</kw>
+<kw name="Plus" owner="Calculator">
+<arg>20</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.165258" elapsed="0.000017"/>
+</kw>
+<kw name="Result Is" owner="Calculator">
+<arg>30</arg>
+<status status="NOT RUN" start="2026-06-05T16:09:07.165296" elapsed="0.000015"/>
+</kw>
+<status status="PASS" start="2026-06-05T16:09:07.165143" elapsed="0.000196"/>
+</test>
+<status status="PASS" start="2026-06-05T16:09:07.164370" elapsed="0.001035"/>
+</suite>
+<status status="PASS" start="2026-06-05T16:09:07.164101" elapsed="0.001468"/>
+</suite>
+<status status="PASS" start="2026-06-05T16:09:07.162170" elapsed="0.003538"/>
+</suite>
+<status status="PASS" start="2026-06-05T16:09:07.134259" elapsed="0.031588"/>
 </suite>
 <statistics>
 <total>
-<stat pass="6" fail="0" skip="0">All Tests</stat>
+<stat pass="12" fail="0" skip="0">All Tests</stat>
 </total>
 <tag>
 </tag>
 <suite>
-<stat name="Robot" id="s1" pass="6" fail="0" skip="0">Robot</stat>
+<stat name="Robot" id="s1" pass="12" fail="0" skip="0">Robot</stat>
 <stat name="Minus" id="s1-s1" pass="3" fail="0" skip="0">Robot.Minus</stat>
 <stat name="Plus" id="s1-s2" pass="3" fail="0" skip="0">Robot.Plus</stat>
+<stat name="Tests" id="s1-s3" pass="6" fail="0" skip="0">Robot.Tests</stat>
+<stat name="Minus" id="s1-s3-s1" pass="3" fail="0" skip="0">Robot.Tests.Minus</stat>
+<stat name="Minus" id="s1-s3-s1-s1" pass="3" fail="0" skip="0">Robot.Tests.Minus.Minus</stat>
+<stat name="Plus" id="s1-s3-s2" pass="3" fail="0" skip="0">Robot.Tests.Plus</stat>
+<stat name="Plus" id="s1-s3-s2-s1" pass="3" fail="0" skip="0">Robot.Tests.Plus.Plus</stat>
 </suite>
 </statistics>
 <errors>
