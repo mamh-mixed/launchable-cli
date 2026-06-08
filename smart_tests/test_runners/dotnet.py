@@ -141,10 +141,10 @@ def record_tests(
     format: Annotated[str, typer.Option(
         "--format",
         help=f"Test report format. One of: {', '.join(SUPPORTED_FORMATS)}.",
-    )] = JUNIT_FORMAT,
+    )] = NUNIT_FORMAT,
 ):
     """
-    Alpha: Supports JUnit (default) and NUnit report formats.
+    Alpha: Supports NUnit (default) and JUnit report formats.
     """
     if format not in SUPPORTED_FORMATS:
         click.secho(

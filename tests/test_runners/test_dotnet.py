@@ -158,7 +158,6 @@ class DotnetTest(CliTestCase):
         result = self.cli(
             'record', 'tests', 'dotnet',
             '--session', self.session,
-            '--format', 'nunit',
             str(self.test_files_dir) + "/test-result.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
@@ -169,6 +168,7 @@ class DotnetTest(CliTestCase):
         result = self.cli(
             'record', 'tests', 'dotnet',
             '--session', self.session,
+            '--format', 'junit',
             str(self.test_files_dir) + "/junit-result.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result-junit.json")
@@ -179,6 +179,7 @@ class DotnetTest(CliTestCase):
         result = self.cli(
             'record', 'tests', 'dotnet',
             '--session', self.session,
+            '--format', 'junit',
             str(self.test_files_dir) + "/junit-result-with-metadata.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result-junit-with-metadata.json")
