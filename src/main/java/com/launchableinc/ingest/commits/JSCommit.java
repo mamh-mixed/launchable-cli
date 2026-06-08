@@ -1,5 +1,5 @@
 package com.launchableinc.ingest.commits;
-
+// this is test 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +36,8 @@ public class JSCommit {
 
   /** This object was marked as shallow and therefore its parent commits are not available. */
   private boolean shallow;
+
+  public String test;
 
   private Map<String, List<JSFileChange>> parentHashes = new HashMap<>();
 
