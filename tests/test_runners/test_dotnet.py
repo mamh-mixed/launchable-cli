@@ -154,7 +154,42 @@ class DotnetTest(CliTestCase):
 
     @responses.activate
     @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
-    def test_record_tests(self):
-        result = self.cli('record', 'tests', 'dotnet', '--session', self.session, str(self.test_files_dir) + "/test-result.xml")
+    def test_record_tests_nunit(self):
+        result = self.cli(
+            'record', 'tests', 'dotnet',
+            '--session', self.session,
+            str(self.test_files_dir) + "/test-result.xml")
         self.assert_success(result)
         self.assert_record_tests_payload("record_test_result.json")
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_record_tests_junit(self):
+        result = self.cli(
+            'record', 'tests', 'dotnet',
+            '--session', self.session,
+            '--format', 'junit',
+            str(self.test_files_dir) + "/junit-result.xml")
+        self.assert_success(result)
+        self.assert_record_tests_payload("record_test_result-junit.json")
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_record_tests_junit_with_metadata(self):
+        result = self.cli(
+            'record', 'tests', 'dotnet',
+            '--session', self.session,
+            '--format', 'junit',
+            str(self.test_files_dir) + "/junit-result-with-metadata.xml")
+        self.assert_success(result)
+        self.assert_record_tests_payload("record_test_result-junit-with-metadata.json")
+
+    @responses.activate
+    @mock.patch.dict(os.environ, {"SMART_TESTS_TOKEN": CliTestCase.smart_tests_token})
+    def test_record_tests_invalid_format(self):
+        result = self.cli(
+            'record', 'tests', 'dotnet',
+            '--session', self.session,
+            '--format', 'xunit',
+            str(self.test_files_dir) + "/junit-result.xml")
+        self.assert_exit_code(result, 1)

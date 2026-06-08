@@ -1,0 +1,29 @@
+<testsuites>
+  <testsuite name="rocket-car-dotnet.dll" tests="8" skipped="0" failures="2" errors="0" time="0.019043900000000002" timestamp="2026-05-21T01:14:36" hostname="MAC-ryabuki" id="0" package="rocket-car-dotnet.dll">
+    <properties />
+    <testcase classname="rocket_car_dotnet.AddCalculatorTest" name="TestAdd" time="0.0038400" />
+    <testcase classname="rocket_car_dotnet.AddCalculatorTest" name="TestAddFailing" time="0.0127280">
+      <failure type="failure" message="  Expected: 999&#xA;  But was:  5&#xA;">at rocket_car_dotnet.AddCalculatorTest.TestAddFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/AddCalculatorTest.cs:line 19
+
+1)    at rocket_car_dotnet.AddCalculatorTest.TestAddFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/AddCalculatorTest.cs:line 19</failure>
+    </testcase>
+    <testcase classname="rocket_car_dotnet.DivideCalculatorTest" name="TestDivide" time="0.0005070" />
+    <testcase classname="rocket_car_dotnet.DivideCalculatorTest" name="TestDivideByZero" time="0.0008860" />
+    <testcase classname="rocket_car_dotnet.DivideCalculatorTest" name="TestDivideFailing" time="0.0008630">
+      <failure type="failure" message="  Expected: 99.0d&#xA;  But was:  5.0d&#xA;">at rocket_car_dotnet.DivideCalculatorTest.TestDivideFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/DivideCalculatorTest.cs:line 25
+
+1)    at rocket_car_dotnet.DivideCalculatorTest.TestDivideFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/DivideCalculatorTest.cs:line 25</failure>
+    </testcase>
+    <testcase classname="rocket_car_dotnet.MultiplyCalculatorTest" name="TestMultiply" time="0.0000749" />
+    <testcase classname="rocket_car_dotnet.PowerCalculatorTest" name="TestPower" time="0.0000810" />
+    <testcase classname="rocket_car_dotnet.SubtractCalculatorTest" name="TestSubtract" time="0.0000640" />
+    <system-out>
+Test Framework Informational Messages:
+NUnit Adapter 4.5.0.0: Test execution started
+Running all tests in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/bin/Debug/net8.0/rocket-car-dotnet.dll
+   NUnit3TestExecutor discovered 8 of 8 NUnit test cases using Current Discovery mode, Non-Explicit run
+NUnit Adapter 4.5.0.0: Test execution complete
+</system-out>
+    <system-err></system-err>
+  </testsuite>
+</testsuites>

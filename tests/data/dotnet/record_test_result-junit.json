@@ -1,0 +1,121 @@
+{
+    "events": [
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "AddCalculatorTest"},
+                {"type": "TestCase", "name": "TestAdd"}
+            ],
+            "duration": 0.00384,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "AddCalculatorTest"},
+                {"type": "TestCase", "name": "TestAddFailing"}
+            ],
+            "duration": 0.012728,
+            "status": 0,
+            "stdout": "",
+            "stderr": "at rocket_car_dotnet.AddCalculatorTest.TestAddFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/AddCalculatorTest.cs:line 19\n\n1)    at rocket_car_dotnet.AddCalculatorTest.TestAddFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/AddCalculatorTest.cs:line 19",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "DivideCalculatorTest"},
+                {"type": "TestCase", "name": "TestDivide"}
+            ],
+            "duration": 0.000507,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "DivideCalculatorTest"},
+                {"type": "TestCase", "name": "TestDivideByZero"}
+            ],
+            "duration": 0.000886,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "DivideCalculatorTest"},
+                {"type": "TestCase", "name": "TestDivideFailing"}
+            ],
+            "duration": 0.000863,
+            "status": 0,
+            "stdout": "",
+            "stderr": "at rocket_car_dotnet.DivideCalculatorTest.TestDivideFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/DivideCalculatorTest.cs:line 25\n\n1)    at rocket_car_dotnet.DivideCalculatorTest.TestDivideFailing() in /Users/ryabuki/src/github.com/cloudbees-oss/smart-tests-integration-examples/.claude/worktrees/support-dotnet-junit/dotnet/DivideCalculatorTest.cs:line 25",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "MultiplyCalculatorTest"},
+                {"type": "TestCase", "name": "TestMultiply"}
+            ],
+            "duration": 0.0000749,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "PowerCalculatorTest"},
+                {"type": "TestCase", "name": "TestPower"}
+            ],
+            "duration": 0.000081,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        },
+        {
+            "type": "case",
+            "testPath": [
+                {"type": "Assembly", "name": "rocket-car-dotnet.dll"},
+                {"type": "TestSuite", "name": "rocket_car_dotnet"},
+                {"type": "TestSuite", "name": "SubtractCalculatorTest"},
+                {"type": "TestCase", "name": "TestSubtract"}
+            ],
+            "duration": 0.000064,
+            "status": 1,
+            "stdout": "",
+            "stderr": "",
+            "data": null
+        }
+    ],
+    "testRunner": "dotnet",
+    "group": "",
+    "noBuild": false,
+    "flavors": [],
+    "testSuite": ""
+}

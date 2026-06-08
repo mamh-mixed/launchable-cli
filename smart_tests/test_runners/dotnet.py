@@ -1,8 +1,10 @@
 import glob
 import os
 from typing import Annotated, List
+from urllib.parse import unquote
 
 import click
+from junitparser import TestCase, TestSuite  # type: ignore
 
 import smart_tests.args4p.typer as typer
 from smart_tests.commands.record.tests import RecordTests
@@ -10,6 +12,10 @@ from smart_tests.commands.subset import Subset
 from smart_tests.test_runners import smart_tests
 from smart_tests.test_runners.nunit import nunit_parse_func
 from smart_tests.testpath import TestPath
+
+NUNIT_FORMAT = "nunit"
+JUNIT_FORMAT = "junit"
+SUPPORTED_FORMATS = (JUNIT_FORMAT, NUNIT_FORMAT)
 
 
 # main subset logic
@@ -78,6 +84,53 @@ def subset(
     do_subset(client, bare)
 
 
+def _clean_field(value):
+    """
+    Trim tab and other characters that are not appropriate as part of a test path.
+    """
+    if not value:
+        return value
+    for token in value.split("\t"):
+        token = token.strip()
+        if token:
+            return unquote(token)
+    return ""
+
+
+def _junit_path_builder(file_path_normalizer):
+    """
+    Build a TestPath from a JUnit <testcase> element so the resulting structure
+    matches the one produced by the NUnit parser:
+
+        Assembly -> TestSuite -> ... -> TestSuite -> TestCase
+
+    Assembly is taken from the <testsuite> name (e.g. "rocket-car-dotnet.dll")
+    that `dotnet test --logger junit` emits.
+    """
+
+    def build(case: TestCase, suite: TestSuite, report_file: str) -> TestPath:
+        test_path: TestPath = []
+
+        assembly = _clean_field(suite._elem.attrib.get("name"))
+        if assembly:
+            test_path.append({"type": "Assembly", "name": assembly})
+
+        classname = case._elem.attrib.get("classname") or suite._elem.attrib.get("classname")
+        classname = _clean_field(classname)
+        if classname:
+            for part in classname.split("."):
+                if part:
+                    test_path.append({"type": "TestSuite", "name": part})
+
+        case_name = _clean_field(case._elem.attrib.get("name"))
+        if case_name:
+            test_path.append({"type": "TestCase", "name": case_name})
+
+        return test_path
+
+    return build
+
+
 @smart_tests.record.tests
 def record_tests(
     client: RecordTests,
@@ -85,10 +138,21 @@ def record_tests(
         multiple=True,
         help="Test report files to process"
     )],
+    format: Annotated[str, typer.Option(
+        "--format",
+        help=f"Test report format. One of: {', '.join(SUPPORTED_FORMATS)}.",
+    )] = NUNIT_FORMAT,
 ):
     """
-    Alpha: Supports only NUnit report formats.
+    Alpha: Supports NUnit (default) and JUnit report formats.
     """
+    if format not in SUPPORTED_FORMATS:
+        click.secho(
+            f"Unsupported --format value: {format}. Supported formats: {', '.join(SUPPORTED_FORMATS)}",
+            fg='red',
+            err=True)
+        raise typer.Exit(1)
+
     for file in files:
         match = False
         for t in glob.iglob(file, recursive=True):
@@ -100,7 +164,10 @@ def record_tests(
         if not match:
             click.echo(f"No matches found: {file}", err=True)
 
-    # Note: we support only Nunit test report format now.
-    # If we need to support another format e.g) JUnit, trc, then we'll add a option
-    client.parse_func = nunit_parse_func
+    if format == NUNIT_FORMAT:
+        client.parse_func = nunit_parse_func
+    else:
+        client.path_builder = _junit_path_builder(client.file_path_normalizer)
+        client.junitxml_parse_func = None
+
     client.run()
